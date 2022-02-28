@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox maxHeight="1.7976931348623157E308" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="476.0"
+      prefWidth="215.0" xmlns="http://javafx.com/javafx/11.0.2" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.jamesd.passwordmanager.Controllers.PasswordHomeController">
+   <children>
+      <ImageView fitHeight="119.0" fitWidth="215.0" pickOnBounds="true" smooth="false">
+         <image>
+            <Image url="@../icons/1password-logo-round.png" />
+         </image>
+      </ImageView>
+      <Button fx:id="addPasswordButton" onAction="#addPassword" mnemonicParsing="false" prefHeight="70.0" prefWidth="235.0" text="Add New Password" />
+      <Button fx:id="userPreferencesButton" mnemonicParsing="false" prefHeight="70.0" prefWidth="239.0" text="User Preferences" />
+      <Separator prefHeight="149.0" prefWidth="215.0" />
+      <Button fx:id="logOutButton" onAction="#logout" mnemonicParsing="false" prefHeight="70.0" prefWidth="241.0" text="Log out" />
+   </children>
+</VBox>
