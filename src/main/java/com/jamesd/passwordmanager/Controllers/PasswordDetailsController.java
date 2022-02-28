@@ -5,6 +5,7 @@ import com.jamesd.passwordmanager.Utils.EncryptDecryptPasswordsUtil;
 import com.jamesd.passwordmanager.Models.WebsitePasswordEntry;
 import com.jamesd.passwordmanager.PasswordManagerApp;
 import com.jamesd.passwordmanager.Utils.PasswordCreateUtil;
+import com.jamesd.passwordmanager.Wrappers.WebsitePasswordEntryWrapper;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXDrawer;
 import com.jfoenix.controls.JFXTextField;
@@ -20,7 +21,9 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
@@ -76,6 +79,8 @@ public class PasswordDetailsController {
     @FXML
     private JFXButton generateNewPasswordButton;
     @FXML
+    private HBox logoHbox;
+    @FXML
     private Button savePasswordButton;
     @FXML
     private Button deletePasswordButton;
@@ -84,7 +89,7 @@ public class PasswordDetailsController {
     @FXML
     private VBox menuContent;
 
-    private static WebsitePasswordEntry entry = new WebsitePasswordEntry();
+    private static WebsitePasswordEntryWrapper wrapper = new WebsitePasswordEntryWrapper();
     private boolean showPassword = true;
     private static Stage stage;
 
@@ -148,12 +153,12 @@ public class PasswordDetailsController {
         return this.menuContent;
     }
 
-    public void setPasswordEntry(WebsitePasswordEntry entry) {
-        PasswordDetailsController.entry = entry;
+    public void setPasswordEntryWrapper(WebsitePasswordEntryWrapper wrapper) {
+        PasswordDetailsController.wrapper = wrapper;
     }
 
-    public WebsitePasswordEntry getPasswordEntry() {
-        return entry;
+    public WebsitePasswordEntryWrapper getPasswordEntryWrapper() {
+        return wrapper;
     }
 
     public void togglePassword(Event event) {
@@ -168,7 +173,7 @@ public class PasswordDetailsController {
                 Text visiblePasswordIcon = GlyphsDude.createIcon(FontAwesomeIcon.EYE_SLASH);
                 CustomTextField passwordShow = new CustomTextField();
                 passwordShow.setEditable(true);
-                passwordShow.setText(getPasswordEntry().getDecryptedPassword());
+                passwordShow.setText(getPasswordEntryWrapper().getWebsitePasswordEntry().getDecryptedPassword());
                 passwordShow.setId("showPasswordText");
                 passwordShow.setRight(visiblePasswordIcon);
                 passwordShow.setOnAction(this::togglePassword);
@@ -190,7 +195,7 @@ public class PasswordDetailsController {
                 Text hiddenPasswordIcon = GlyphsDude.createIcon(FontAwesomeIcon.EYE);
                 CustomPasswordField passwordHide = new CustomPasswordField();
                 passwordHide.setEditable(true);
-                passwordHide.setText(getPasswordEntry().getDecryptedPassword());
+                passwordHide.setText(getPasswordEntryWrapper().getWebsitePasswordEntry().getDecryptedPassword());
                 passwordHide.setId("hidePasswordText");
                 passwordHide.setRight(hiddenPasswordIcon);
                 passwordHide.setOnAction(this::togglePassword);
@@ -216,13 +221,19 @@ public class PasswordDetailsController {
         if(PasswordManagerApp.getLoggedInUser() != null) {
             Text backIcon = GlyphsDude.createIcon(FontAwesomeIcon.BACKWARD);
             backButton.setGraphic(backIcon);
-            if(getPasswordEntry()!= null) {
-                getPasswordEntry().setDecryptedPassword(EncryptDecryptPasswordsUtil.decryptPassword(getPasswordEntry().getEncryptedPassword()));
-                passwordNameField.setText(getPasswordEntry().getPasswordName());
-                websiteUrlField.setText(getPasswordEntry().getSiteUrl());
-                displayUsernameField.setText(getPasswordEntry().getPasswordUsername());
+            if(getPasswordEntryWrapper()!= null) {
+                getPasswordEntryWrapper().getWebsitePasswordEntry().setDecryptedPassword
+                        (EncryptDecryptPasswordsUtil.decryptPassword
+                                (getPasswordEntryWrapper().getWebsitePasswordEntry().getEncryptedPassword()));
+                ImageView logo = new ImageView(getPasswordEntryWrapper().getFavicon().getImage());
+                logo.setFitWidth(128);
+                logo.setFitHeight(128);
+                logoHbox.getChildren().add(logo);
+                passwordNameField.setText(getPasswordEntryWrapper().getWebsitePasswordEntry().getPasswordName());
+                websiteUrlField.setText(getPasswordEntryWrapper().getWebsitePasswordEntry().getSiteUrl());
+                displayUsernameField.setText(getPasswordEntryWrapper().getWebsitePasswordEntry().getPasswordUsername());
                 Text hiddenPasswordIcon = GlyphsDude.createIcon(FontAwesomeIcon.EYE);
-                hidePasswordText.setText(getPasswordEntry().getDecryptedPassword());
+                hidePasswordText.setText(getPasswordEntryWrapper().getWebsitePasswordEntry().getDecryptedPassword());
                 hidePasswordText.setRight(hiddenPasswordIcon);
                 hidePasswordText.setCursor(Cursor.HAND);
             }
@@ -233,20 +244,20 @@ public class PasswordDetailsController {
 
     public void generateNewPassword() {
         String generatedString = PasswordCreateUtil.generatePassword();
-        WebsitePasswordEntry entry = getPasswordEntry();
+        WebsitePasswordEntryWrapper wrapper = getPasswordEntryWrapper();
         if(passwordIsHidden()) {
             CustomPasswordField password = (CustomPasswordField) passwordVbox.getChildren().get(1);
             password.setText(generatedString);
-            entry.setDecryptedPassword(password.getText());
-            entry.setDateSet(LocalDate.now().toString());
-            setPasswordEntry(entry);
+            wrapper.getWebsitePasswordEntry().setDecryptedPassword(password.getText());
+            wrapper.getWebsitePasswordEntry().setDateSet(LocalDate.now().toString());
+            setPasswordEntryWrapper(wrapper);
             passwordVbox.getChildren().set(1, password);
         } else {
             CustomTextField password = (CustomTextField) passwordVbox.getChildren().get(1);
             password.setText(generatedString);
-            entry.setDecryptedPassword(password.getText());
-            entry.setDateSet(LocalDate.now().toString());
-            setPasswordEntry(entry);
+            wrapper.getWebsitePasswordEntry().setDecryptedPassword(password.getText());
+            wrapper.getWebsitePasswordEntry().setDateSet(LocalDate.now().toString());
+            setPasswordEntryWrapper(wrapper);
             passwordVbox.getChildren().set(1, password);
         }
     }
@@ -258,7 +269,7 @@ public class PasswordDetailsController {
     }
 
     public <T> void updatePassword(T password) throws GeneralSecurityException, IOException, ClassNotFoundException {
-        WebsitePasswordEntry entry = getPasswordEntry();
+        WebsitePasswordEntry entry = getPasswordEntryWrapper().getWebsitePasswordEntry();
         if(password instanceof CustomTextField) {
             entry.setEncryptedPassword(EncryptDecryptPasswordsUtil.encryptPassword(((CustomTextField) password).getText()));
         } else if(password instanceof CustomPasswordField) {
@@ -285,7 +296,7 @@ public class PasswordDetailsController {
 
     @FXML
     private void confirmDelete() throws IOException, LoginException {
-        WebsitePasswordEntry entry = getPasswordEntry();
+        WebsitePasswordEntry entry = getPasswordEntryWrapper().getWebsitePasswordEntry();
         System.out.println(entry.getPasswordName());
         DeletePasswordController deletePasswordController = new DeletePasswordController();
         deletePasswordController.deleteSingleEntry(entry);

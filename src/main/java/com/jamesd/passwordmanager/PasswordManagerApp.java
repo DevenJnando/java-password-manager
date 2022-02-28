@@ -118,7 +118,7 @@ public class PasswordManagerApp extends Application {
                 .getResource("/com/jamesd/passwordmanager/views/password-details.fxml"));
         BorderPane borderPane = (BorderPane) passwordDetailsLoader.load();
         passwordDetailsController = passwordDetailsLoader.getController();
-        passwordDetailsController.setPasswordEntry(passwordEntry.getWebsitePasswordEntry());
+        passwordDetailsController.setPasswordEntryWrapper(passwordEntry);
         passwordDetailsController.setIcons();
         passwordDetailsController.populatePasswordLayout();
         JFXDrawer menuContent = (JFXDrawer) borderPane.getLeft();
