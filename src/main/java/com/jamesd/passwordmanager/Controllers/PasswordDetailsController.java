@@ -313,6 +313,7 @@ public class PasswordDetailsController {
         entry.setPasswordUsername(displayUsernameField.getText());
         StoredPassSQLQueries.updatePasswordInDb(entry);
         PasswordHomeController.setLoadedPasswords(null);
+        PasswordManagerApp.getPasswordHomeController().populatePasswordList();
     }
 
     public void deletePassword() throws LoginException, IOException {
