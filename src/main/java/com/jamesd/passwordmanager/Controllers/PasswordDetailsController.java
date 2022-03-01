@@ -11,6 +11,8 @@ import com.jfoenix.controls.JFXDrawer;
 import com.jfoenix.controls.JFXTextField;
 import de.jensd.fx.glyphs.GlyphsDude;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
+import javafx.animation.FadeTransition;
+import javafx.animation.SequentialTransition;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -23,12 +25,14 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import org.controlsfx.control.textfield.CustomPasswordField;
 import org.controlsfx.control.textfield.CustomTextField;
 import org.slf4j.Logger;
@@ -55,6 +59,8 @@ import java.awt.Toolkit;
 public class PasswordDetailsController {
 
     @FXML
+    private BorderPane detailsPane;
+    @FXML
     private VBox passwordVbox;
     @FXML
     private Label savedLabel;
@@ -65,9 +71,9 @@ public class PasswordDetailsController {
     @FXML
     private JFXTextField displayUsernameField;
     @FXML
-    private JFXButton backButton;
+    private CustomPasswordField hidePasswordText = new CustomPasswordField();
     @FXML
-    private CustomPasswordField hidePasswordText;
+    private CustomTextField showPasswordText = new CustomTextField();
     @FXML
     private JFXButton copyPasswordNameButton;
     @FXML
@@ -84,10 +90,6 @@ public class PasswordDetailsController {
     private Button savePasswordButton;
     @FXML
     private Button deletePasswordButton;
-    @FXML
-    private JFXDrawer menuDrawer;
-    @FXML
-    private VBox menuContent;
 
     private static WebsitePasswordEntryWrapper wrapper = new WebsitePasswordEntryWrapper();
     private boolean showPassword = true;
@@ -131,26 +133,8 @@ public class PasswordDetailsController {
         stage.showAndWait();
     }
 
-    public void onHamburgerClick() {
-        if(getMenuDrawer().isOpened()){
-            getMenuDrawer().close();
-            logger.info("Closed menu drawer.");
-        } else {
-            getMenuDrawer().open();
-            logger.info("Opened menu drawer");
-        }
-    }
-
-    public JFXDrawer getMenuDrawer() {
-        return this.menuDrawer;
-    }
-
     public static Stage getStage() {
         return stage;
-    }
-
-    public VBox getMenuContent() {
-        return this.menuContent;
     }
 
     public void setPasswordEntryWrapper(WebsitePasswordEntryWrapper wrapper) {
@@ -182,6 +166,7 @@ public class PasswordDetailsController {
                 VBox.setMargin(passwordShow, insets);
                 passwordShow.setCursor(Cursor.HAND);
                 passwordVbox.getChildren().add(passwordShow);
+                showPasswordText = passwordShow;
                 showPassword = false;
             }
         } else {
@@ -204,6 +189,7 @@ public class PasswordDetailsController {
                 VBox.setMargin(passwordHide, insets);
                 passwordHide.setCursor(Cursor.HAND);
                 passwordVbox.getChildren().add(passwordHide);
+                hidePasswordText = passwordHide;
                 showPassword = true;
             }
         }
@@ -211,17 +197,58 @@ public class PasswordDetailsController {
     }
 
     public void showSavedLabel() {
+        FadeTransition fader = createFader(savedLabel);
+        SequentialTransition blinkThenFade = new SequentialTransition(
+                savedLabel,
+                fader
+        );
         savedLabel.setText("Saved!");
         savedLabel.setTextFill(Color.GREEN);
+        blinkThenFade.play();
+    }
+
+    private FadeTransition createFader(Node node) {
+        FadeTransition fade = new FadeTransition(Duration.seconds(2), node);
+        fade.setFromValue(1);
+        fade.setToValue(0);
+        return fade;
+    }
+
+    public void disable() {
+        detailsPane.setDisable(true);
+    }
+
+    public void clear() {
+        logoHbox.getChildren().clear();
+        passwordNameField.clear();
+        websiteUrlField.clear();
+        displayUsernameField.clear();
+        hidePasswordText.clear();
+        if(showPassword) {
+            List<Node> filteredChildren = passwordVbox.getChildren().stream()
+                    .filter(o -> o.getId().equals("hidePasswordText"))
+                    .collect(Collectors.toList());
+                if(!filteredChildren.isEmpty()) {
+                    CustomPasswordField toBeCleared = (CustomPasswordField) filteredChildren.get(0);
+                    toBeCleared.clear();
+                }
+            } else {
+            List<Node> filteredChildren = passwordVbox.getChildren().stream()
+                    .filter(o -> o.getId().equals("showPasswordText"))
+                    .collect(Collectors.toList());
+            if (!filteredChildren.isEmpty()) {
+                CustomTextField toBeCleared = (CustomTextField) filteredChildren.get(0);
+                toBeCleared.clear();
+            }
+        }
     }
 
     public void populatePasswordLayout() throws LoginException, InvalidAlgorithmParameterException,
             NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, IOException,
             BadPaddingException, InvalidKeyException {
         if(PasswordManagerApp.getLoggedInUser() != null) {
-            Text backIcon = GlyphsDude.createIcon(FontAwesomeIcon.BACKWARD);
-            backButton.setGraphic(backIcon);
             if(getPasswordEntryWrapper()!= null) {
+                detailsPane.setDisable(false);
                 getPasswordEntryWrapper().getWebsitePasswordEntry().setDecryptedPassword
                         (EncryptDecryptPasswordsUtil.decryptPassword
                                 (getPasswordEntryWrapper().getWebsitePasswordEntry().getEncryptedPassword()));
@@ -236,6 +263,9 @@ public class PasswordDetailsController {
                 hidePasswordText.setText(getPasswordEntryWrapper().getWebsitePasswordEntry().getDecryptedPassword());
                 hidePasswordText.setRight(hiddenPasswordIcon);
                 hidePasswordText.setCursor(Cursor.HAND);
+                showPasswordText.setText(getPasswordEntryWrapper().getWebsitePasswordEntry().getDecryptedPassword());
+                showPasswordText.setRight(hiddenPasswordIcon);
+                showPasswordText.setCursor(Cursor.HAND);
             }
         } else {
             throw new LoginException("User is not logged in. Aborting process.");
@@ -307,10 +337,6 @@ public class PasswordDetailsController {
     @FXML
     private void cancelDelete() {
         getStage().close();
-    }
-
-    public void backToPasswordsList() throws LoginException, IOException {
-        PasswordManagerApp.loadPasswordHomeView();
     }
 
     public Boolean passwordIsHidden() {

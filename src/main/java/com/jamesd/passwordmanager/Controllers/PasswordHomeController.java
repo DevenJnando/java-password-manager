@@ -63,10 +63,6 @@ public class PasswordHomeController implements Initializable {
     @FXML
     private JFXDrawer menuDrawer = new JFXDrawer();
     @FXML
-    private JFXHamburger menuHamburger = new JFXHamburger();
-    @FXML
-    private VBox menuContent = new VBox();
-    @FXML
     private TableView<WebsitePasswordEntryWrapper> passwordTableView = new TableView();
     @FXML
     private Button addPasswordButton = new Button();
@@ -317,7 +313,7 @@ public class PasswordHomeController implements Initializable {
     }
 
     @FXML
-    private void confirmDelete() throws MalformedURLException, LoginException {
+    private void confirmDelete() throws IOException, LoginException {
         DeletePasswordController deletePasswordController = new DeletePasswordController();
         deletePasswordController.deleteMultipleEntries(passwordTableView);
     }
@@ -347,10 +343,6 @@ public class PasswordHomeController implements Initializable {
 
     public JFXDrawer getMenuDrawer() {
         return this.menuDrawer;
-    }
-
-    public VBox getMenuContent() {
-        return this.menuContent;
     }
 
     public static Stage getStage() {

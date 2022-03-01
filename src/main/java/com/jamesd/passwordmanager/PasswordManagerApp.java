@@ -15,6 +15,8 @@ import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -37,12 +39,15 @@ public class PasswordManagerApp extends Application {
     // Get logos added - DONE!!!!!!
     // Logout functionality - DONE!!!!!!
     // Delete Passwords - DONE!!!!!
+    // Improve frontend:
+    //  Merge home and details screens into a single screen - DONE!!!!!!
     // User preferences - reminder timings, change master password, two-factor settings
     // Check for insecurities or breaches
     // Consider having a more organised hierarchy e.g. users > root password folder > work passwords > Google
     // Consider allowing storage of other kinds of credential e.g. certificates, credit cards, passports, sha keys,
     // sensitive documents etc.
     // Implement query timeouts
+    // Allow dynamic login for either email or username
 
     private static Stage mainStage;
     private static BorderPane rootLayout;
@@ -51,10 +56,13 @@ public class PasswordManagerApp extends Application {
     private static PasswordHomeController passwordHomeController;
     private static PasswordDetailsController passwordDetailsController;
 
+    private static Logger logger = LoggerFactory.getLogger(PasswordManagerApp.class);
+
     @Override
     public void start(Stage stage) throws IOException {
         PropertiesUtil.initialise();
         passwordHomeController = new PasswordHomeController();
+        passwordDetailsController = new PasswordDetailsController();
         stage.setTitle("DevenJnando Password Manager");
         mainStage = stage;
 
@@ -95,37 +103,40 @@ public class PasswordManagerApp extends Application {
         Scene scene = new Scene(rootLayout);
 
         mainStage.setScene(scene);
+        mainStage.widthProperty().addListener((obj, oldValue, newValue) -> {
+            logger.info("New width value: " + newValue);
+        });
+        mainStage.heightProperty().addListener((obj, oldValue, newValue) -> {
+            logger.info("New height value: " + newValue);
+        });
+        mainStage.setMinHeight(875);
+        mainStage.setMinWidth(1085);
         mainStage.show();
     }
 
     public static void loadPasswordHomeView() throws IOException, LoginException {
         FXMLLoader passwordHomeLoader = new FXMLLoader(PasswordHomeController.class
                 .getResource("/com/jamesd/passwordmanager/views/users-passwords.fxml"));
-        BorderPane borderPane = (BorderPane) passwordHomeLoader.load();
+        FXMLLoader passwordDetailsLoader = new FXMLLoader(PasswordDetailsController.class
+                .getResource("/com/jamesd/passwordmanager/views/password-details.fxml"));
+        BorderPane homePane = passwordHomeLoader.load();
+        BorderPane detailsPane = passwordDetailsLoader.load();
         passwordHomeController = passwordHomeLoader.getController();
-        JFXDrawer menuContent = (JFXDrawer) borderPane.getLeft();
-        menuContent.setSidePane((VBox) FXMLLoader.load(PasswordHomeController.class
+        passwordDetailsController = passwordDetailsLoader.getController();
+        homePane.setLeft(FXMLLoader.load(PasswordHomeController.class
                 .getResource("/com/jamesd/passwordmanager/views/sidebar-menu.fxml")));
-        menuContent.close();
+        homePane.setCenter(detailsPane);
         rootLayout.setTop(null);
-        rootLayout.setCenter(borderPane);
+        rootLayout.setCenter(homePane);
     }
 
     public static void loadPasswordDetailsView(WebsitePasswordEntryWrapper passwordEntry) throws IOException,
             InvalidAlgorithmParameterException, LoginException, NoSuchPaddingException, IllegalBlockSizeException,
             NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
-        FXMLLoader passwordDetailsLoader = new FXMLLoader(PasswordDetailsController.class
-                .getResource("/com/jamesd/passwordmanager/views/password-details.fxml"));
-        BorderPane borderPane = (BorderPane) passwordDetailsLoader.load();
-        passwordDetailsController = passwordDetailsLoader.getController();
+        passwordDetailsController.clear();
         passwordDetailsController.setPasswordEntryWrapper(passwordEntry);
         passwordDetailsController.setIcons();
         passwordDetailsController.populatePasswordLayout();
-        JFXDrawer menuContent = (JFXDrawer) borderPane.getLeft();
-        menuContent.setSidePane((VBox) FXMLLoader.load(PasswordDetailsController.class
-                .getResource("/com/jamesd/passwordmanager/views/sidebar-menu.fxml")));
-        menuContent.close();
-        rootLayout.setCenter(borderPane);
     }
 
     public static Stage getMainStage() {

@@ -22,7 +22,7 @@ public class DeletePasswordController {
         PasswordDetailsController.getStage().close();
     }
 
-    public void deleteMultipleEntries(TableView<WebsitePasswordEntryWrapper> passwordEntryWrapperTableView) throws MalformedURLException, LoginException {
+    public void deleteMultipleEntries(TableView<WebsitePasswordEntryWrapper> passwordEntryWrapperTableView) throws IOException, LoginException {
         HashSet toBeDeleted = new HashSet<WebsitePasswordEntry>();
         passwordEntryWrapperTableView.getItems().stream().forEach(o -> {
             if(o.isChecked().getValue()) {
@@ -35,6 +35,6 @@ public class DeletePasswordController {
         });
         passwordEntryWrapperTableView.getItems().removeAll(toBeDeleted);
         PasswordHomeController.getStage().close();
-        PasswordManagerApp.getPasswordHomeController().populatePasswordList();
+        PasswordManagerApp.loadPasswordHomeView();
     }
 }
