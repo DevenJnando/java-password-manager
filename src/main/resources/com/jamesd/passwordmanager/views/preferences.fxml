@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<BorderPane minHeight="875" minWidth="1085" prefHeight="510.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jamesd.passwordmanager.Controllers.PreferencesController">
+   <top>
+      <HBox>
+         <HBox.margin>
+            <Insets top="10" />
+         </HBox.margin>
+      </HBox>
+   </top>
+   <center>
+      <VBox>
+         <VBox.margin>
+            <Insets right="10" />
+         </VBox.margin>
+         <children>
+            <Label prefHeight="67.0" prefWidth="306.0" text="Password Update Reminders">
+               <font>
+                  <Font name="System Bold" size="18.0" />
+               </font>
+            </Label>
+            <HBox prefHeight="139.0" prefWidth="600.0">
+               <children>
+                  <Label text="Update me every:">
+                     <HBox.margin>
+                        <Insets top="15.0" />
+                     </HBox.margin>
+                  </Label>
+                  <ChoiceBox fx:id="reminderChoiceBox" prefWidth="150.0">
+                     <HBox.margin>
+                        <Insets left="10.0" top="10.0" />
+                     </HBox.margin>
+                  </ChoiceBox>
+                  <JFXButton mnemonicParsing="false" onAction="#saveReminderSettings" ripplerFill="#00ff1a" text="Save">
+                     <HBox.margin>
+                        <Insets left="100.0" top="10.0" />
+                     </HBox.margin>
+                  </JFXButton>
+                  <Label fx:id="saveReminderLabel" text=" ">
+                     <HBox.margin>
+                        <Insets left="30.0" top="15.0" />
+                     </HBox.margin>
+                  </Label>
+               </children>
+            </HBox>
+            <Separator prefHeight="1.0" prefWidth="600.0" />
+            <Label prefHeight="52.0" prefWidth="278.0" text="Two Factor Settings">
+               <VBox.margin>
+                  <Insets top="20.0" />
+               </VBox.margin>
+               <font>
+                  <Font name="System Bold" size="18.0" />
+               </font>
+            </Label>
+            <HBox prefHeight="62.0" prefWidth="600.0">
+               <children>
+                  <Button mnemonicParsing="false" prefHeight="24.0" prefWidth="144.0" text="WIP">
+                     <HBox.margin>
+                        <Insets top="20.0" />
+                     </HBox.margin>
+                  </Button>
+                  <Label fx:id="saveTwoFactorLabel" text=" ">
+                     <HBox.margin>
+                        <Insets left="100.0" top="25.0" />
+                     </HBox.margin>
+                  </Label>
+               </children>
+            </HBox>
+            <Separator prefWidth="200.0">
+               <VBox.margin>
+                  <Insets top="50.0" />
+               </VBox.margin>
+            </Separator>
+            <Label prefHeight="77.0" prefWidth="308.0" text="Change Master Password">
+               <font>
+                  <Font name="System Bold" size="18.0" />
+               </font>
+            </Label>
+            <HBox prefHeight="100.0" prefWidth="200.0">
+               <children>
+                  <Button mnemonicParsing="false" onAction="#updateMasterPassword" text="Update Master Password">
+                     <HBox.margin>
+                        <Insets top="20.0" />
+                     </HBox.margin>
+                  </Button>
+                  <Label fx:id="saveUpdatePasswordLabel" text=" ">
+                     <HBox.margin>
+                        <Insets left="200.0" top="25.0" />
+                     </HBox.margin>
+                  </Label>
+               </children>
+            </HBox>
+         </children>
+      </VBox>
+   </center>
+</BorderPane>

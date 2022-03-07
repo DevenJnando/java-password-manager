@@ -23,4 +23,5 @@ module com.jamesd.passwordmanager {
     exports com.jamesd.passwordmanager;
     exports com.jamesd.passwordmanager.Controllers;
     exports com.jamesd.passwordmanager.Models;
+    exports com.jamesd.passwordmanager.Wrappers;
 }

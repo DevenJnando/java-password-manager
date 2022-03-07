@@ -3,6 +3,7 @@ package com.jamesd.passwordmanager;
 import com.jamesd.passwordmanager.Controllers.LoginController;
 import com.jamesd.passwordmanager.Controllers.PasswordDetailsController;
 import com.jamesd.passwordmanager.Controllers.PasswordHomeController;
+import com.jamesd.passwordmanager.Controllers.PreferencesController;
 import com.jamesd.passwordmanager.DAO.MasterSQLQueries;
 import com.jamesd.passwordmanager.DAO.PropertiesUtil;
 import com.jamesd.passwordmanager.DAO.StoredPassSQLQueries;
@@ -55,6 +56,7 @@ public class PasswordManagerApp extends Application {
 
     private static PasswordHomeController passwordHomeController;
     private static PasswordDetailsController passwordDetailsController;
+    private static PreferencesController preferencesController;
 
     private static Logger logger = LoggerFactory.getLogger(PasswordManagerApp.class);
 
@@ -63,6 +65,7 @@ public class PasswordManagerApp extends Application {
         PropertiesUtil.initialise();
         passwordHomeController = new PasswordHomeController();
         passwordDetailsController = new PasswordDetailsController();
+        preferencesController = new PreferencesController();
         stage.setTitle("DevenJnando Password Manager");
         mainStage = stage;
 
@@ -114,7 +117,7 @@ public class PasswordManagerApp extends Application {
         mainStage.show();
     }
 
-    public static void loadPasswordHomeView() throws IOException, LoginException {
+    public static void loadPasswordHomeView() throws IOException {
         FXMLLoader passwordHomeLoader = new FXMLLoader(PasswordHomeController.class
                 .getResource("/com/jamesd/passwordmanager/views/users-passwords.fxml"));
         FXMLLoader passwordDetailsLoader = new FXMLLoader(PasswordDetailsController.class
@@ -139,6 +142,17 @@ public class PasswordManagerApp extends Application {
         passwordDetailsController.populatePasswordLayout();
     }
 
+    public static void loadPreferencesView() throws IOException{
+        FXMLLoader preferencesLoader = new FXMLLoader(PreferencesController.class
+                .getResource("/com/jamesd/passwordmanager/views/preferences.fxml"));
+        BorderPane preferencesPane = preferencesLoader.load();
+        preferencesController = preferencesLoader.getController();
+        preferencesPane.setLeft(FXMLLoader.load(PreferencesController.class
+                .getResource("/com/jamesd/passwordmanager/views/sidebar-menu.fxml")));
+        rootLayout.setTop(null);
+        rootLayout.setCenter(preferencesPane);
+    }
+
     public static Stage getMainStage() {
         return mainStage;
     }
@@ -155,6 +169,14 @@ public class PasswordManagerApp extends Application {
     }
 
     public static PasswordHomeController getPasswordHomeController() { return passwordHomeController; }
+
+    public static PasswordDetailsController getPasswordDetailsController() {
+        return passwordDetailsController;
+    }
+
+    public static PreferencesController getPreferencesController() {
+        return preferencesController;
+    }
 
     public static void main(String[] args) {
         launch();

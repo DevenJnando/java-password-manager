@@ -5,6 +5,7 @@ import com.jamesd.passwordmanager.Utils.EncryptDecryptPasswordsUtil;
 import com.jamesd.passwordmanager.Models.WebsitePasswordEntry;
 import com.jamesd.passwordmanager.PasswordManagerApp;
 import com.jamesd.passwordmanager.Utils.PasswordCreateUtil;
+import com.jamesd.passwordmanager.Utils.TransitionUtil;
 import com.jamesd.passwordmanager.Wrappers.WebsitePasswordEntryWrapper;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXDrawer;
@@ -43,6 +44,7 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.security.auth.login.LoginException;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
@@ -56,12 +58,12 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Clipboard;
 import java.awt.Toolkit;
 
-public class PasswordDetailsController {
+public class PasswordDetailsController extends PasswordController{
 
     @FXML
-    private BorderPane detailsPane;
+    VBox passwordVbox = new VBox();
     @FXML
-    private VBox passwordVbox;
+    private BorderPane detailsPane;
     @FXML
     private Label savedLabel;
     @FXML
@@ -92,8 +94,8 @@ public class PasswordDetailsController {
     private Button deletePasswordButton;
 
     private static WebsitePasswordEntryWrapper wrapper = new WebsitePasswordEntryWrapper();
-    private boolean showPassword = true;
     private static Stage stage;
+    private Toggler toggler = new Toggler("hidePasswordText", "showPasswordText");
 
     private static Logger logger = LoggerFactory.getLogger(PasswordDetailsController.class);
 
@@ -145,73 +147,49 @@ public class PasswordDetailsController {
         return wrapper;
     }
 
-    public void togglePassword(Event event) {
-        if(showPassword) {
-            List<Node> filteredChildren = passwordVbox.getChildren().stream()
-                    .filter(o -> o.getId().equals("hidePasswordText"))
-                    .collect(Collectors.toList());
-            if(!filteredChildren.isEmpty()) {
-                CustomPasswordField toBeRemoved = (CustomPasswordField) filteredChildren.get(0);
-                passwordVbox.getChildren().remove(toBeRemoved);
+    public void togglePassword(Event event){
+        try {
+            Class<?> customTextFieldClass = Class.forName("org.controlsfx.control.textfield.CustomTextField");
+            Class<?> customPasswordFieldClass = Class.forName("org.controlsfx.control.textfield.CustomPasswordField");
+            Object passwordState = toggler.togglePassword(passwordVbox, getPasswordEntryWrapper());
+            if(customTextFieldClass.isInstance(passwordState)) {
+                CustomTextField passwordShow = (CustomTextField) passwordState;
                 Insets insets = new Insets(10, 0, 0, 0);
-                Text visiblePasswordIcon = GlyphsDude.createIcon(FontAwesomeIcon.EYE_SLASH);
-                CustomTextField passwordShow = new CustomTextField();
-                passwordShow.setEditable(true);
-                passwordShow.setText(getPasswordEntryWrapper().getWebsitePasswordEntry().getDecryptedPassword());
-                passwordShow.setId("showPasswordText");
-                passwordShow.setRight(visiblePasswordIcon);
-                passwordShow.setOnAction(this::togglePassword);
-                passwordShow.setOnMouseClicked(this::togglePassword);
-                passwordShow.setOnMousePressed(this::togglePassword);
+                passwordShow.getRight().setOnMouseClicked(this::togglePassword);
+                passwordShow.getRight().setOnMousePressed(this::togglePassword);
                 VBox.setMargin(passwordShow, insets);
-                passwordShow.setCursor(Cursor.HAND);
-                passwordVbox.getChildren().add(passwordShow);
+                passwordVbox.getChildren().set(1, passwordShow);
                 showPasswordText = passwordShow;
-                showPassword = false;
-            }
-        } else {
-            List<Node> filteredChildren = passwordVbox.getChildren().stream()
-                    .filter(o -> o.getId().equals("showPasswordText"))
-                    .collect(Collectors.toList());
-            if(!filteredChildren.isEmpty()) {
-                CustomTextField toBeRemoved = (CustomTextField) filteredChildren.get(0);
-                passwordVbox.getChildren().remove(toBeRemoved);
+            } else if(customPasswordFieldClass.isInstance(passwordState)) {
+                CustomPasswordField passwordHide = (CustomPasswordField) passwordState;
                 Insets insets = new Insets(10, 0, 0, 0);
-                Text hiddenPasswordIcon = GlyphsDude.createIcon(FontAwesomeIcon.EYE);
-                CustomPasswordField passwordHide = new CustomPasswordField();
-                passwordHide.setEditable(true);
-                passwordHide.setText(getPasswordEntryWrapper().getWebsitePasswordEntry().getDecryptedPassword());
-                passwordHide.setId("hidePasswordText");
-                passwordHide.setRight(hiddenPasswordIcon);
-                passwordHide.setOnAction(this::togglePassword);
-                passwordHide.setOnMouseClicked(this::togglePassword);
-                passwordHide.setOnMousePressed(this::togglePassword);
+                passwordHide.getRight().setOnMouseClicked(this::togglePassword);
+                passwordHide.getRight().setOnMousePressed(this::togglePassword);
                 VBox.setMargin(passwordHide, insets);
-                passwordHide.setCursor(Cursor.HAND);
-                passwordVbox.getChildren().add(passwordHide);
+                passwordVbox.getChildren().set(1, passwordHide);
                 hidePasswordText = passwordHide;
-                showPassword = true;
+            } else {
+                throw new ClassCastException("Cannot cast object of type " + passwordState.getClass() + " to type " +
+                        CustomTextField.class + " or type " + CustomPasswordField.class);
             }
+        } catch(NoSuchMethodException
+                | InvocationTargetException
+                | IllegalAccessException
+                | ClassNotFoundException e) {
+            e.printStackTrace();
+            logger.error("Toggler failed...");
         }
-
     }
 
     public void showSavedLabel() {
-        FadeTransition fader = createFader(savedLabel);
-        SequentialTransition blinkThenFade = new SequentialTransition(
+        FadeTransition fader = TransitionUtil.createFader(savedLabel);
+        SequentialTransition fade = new SequentialTransition(
                 savedLabel,
                 fader
         );
         savedLabel.setText("Saved!");
         savedLabel.setTextFill(Color.GREEN);
-        blinkThenFade.play();
-    }
-
-    private FadeTransition createFader(Node node) {
-        FadeTransition fade = new FadeTransition(Duration.seconds(2), node);
-        fade.setFromValue(1);
-        fade.setToValue(0);
-        return fade;
+        fade.play();
     }
 
     public void disable() {
@@ -224,7 +202,7 @@ public class PasswordDetailsController {
         websiteUrlField.clear();
         displayUsernameField.clear();
         hidePasswordText.clear();
-        if(showPassword) {
+        if(toggler.getShowPassword()) {
             List<Node> filteredChildren = passwordVbox.getChildren().stream()
                     .filter(o -> o.getId().equals("hidePasswordText"))
                     .collect(Collectors.toList());
@@ -260,12 +238,17 @@ public class PasswordDetailsController {
                 websiteUrlField.setText(getPasswordEntryWrapper().getWebsitePasswordEntry().getSiteUrl());
                 displayUsernameField.setText(getPasswordEntryWrapper().getWebsitePasswordEntry().getPasswordUsername());
                 Text hiddenPasswordIcon = GlyphsDude.createIcon(FontAwesomeIcon.EYE);
+                Text shownPasswordIcon = GlyphsDude.createIcon(FontAwesomeIcon.EYE_SLASH);
                 hidePasswordText.setText(getPasswordEntryWrapper().getWebsitePasswordEntry().getDecryptedPassword());
                 hidePasswordText.setRight(hiddenPasswordIcon);
-                hidePasswordText.setCursor(Cursor.HAND);
+                hidePasswordText.getRight().setCursor(Cursor.HAND);
                 showPasswordText.setText(getPasswordEntryWrapper().getWebsitePasswordEntry().getDecryptedPassword());
-                showPasswordText.setRight(hiddenPasswordIcon);
-                showPasswordText.setCursor(Cursor.HAND);
+                showPasswordText.setRight(shownPasswordIcon);
+                showPasswordText.getRight().setCursor(Cursor.HAND);
+                hidePasswordText.getRight().setOnMouseClicked(this::togglePassword);
+                hidePasswordText.getRight().setOnMousePressed(this::togglePassword);
+                showPasswordText.getRight().setOnMouseClicked(this::togglePassword);
+                showPasswordText.getRight().setOnMousePressed(this::togglePassword);
             }
         } else {
             throw new LoginException("User is not logged in. Aborting process.");

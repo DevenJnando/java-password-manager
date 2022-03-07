@@ -20,6 +20,7 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.fxml.LoadException;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -61,11 +62,7 @@ public class PasswordHomeController implements Initializable {
     public static Logger logger = LoggerFactory.getLogger(PasswordHomeController.class);
 
     @FXML
-    private JFXDrawer menuDrawer = new JFXDrawer();
-    @FXML
     private TableView<WebsitePasswordEntryWrapper> passwordTableView = new TableView();
-    @FXML
-    private Button addPasswordButton = new Button();
     @FXML
     private JFXButton deletePasswordsButton = new JFXButton();
 
@@ -91,16 +88,6 @@ public class PasswordHomeController implements Initializable {
     public void setDeleteButtonIcon() {
         Text delete = GlyphsDude.createIcon(FontAwesomeIcon.TRASH, "3.0em");
         deletePasswordsButton.setGraphic(delete);
-    }
-
-    public void onHamburgerClick() {
-        if(getMenuDrawer().isOpened()){
-            getMenuDrawer().close();
-            logger.info("Closed menu drawer.");
-        } else {
-            getMenuDrawer().open();
-            logger.info("Opened menu drawer");
-        }
     }
 
     private long daysSinceLastUpdate(String passwordEntryDateSet) {
@@ -197,7 +184,7 @@ public class PasswordHomeController implements Initializable {
             new BufferedInputStream(faviconUrl.openStream());
             return true;
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("No logo found for provided url: " + url);
             return false;
         }
     }
@@ -299,7 +286,27 @@ public class PasswordHomeController implements Initializable {
         }
     }
 
+    @FXML
+    private void backToHome() throws LoginException, IOException {
+        if(PasswordManagerApp.getLoggedInUser() != null) {
+            PasswordManagerApp.loadPasswordHomeView();
+            logger.info("Reloaded home page from another context.");
+        } else {
+            throw new LoginException("User is not logged in. Aborting process.");
+        }
+    }
 
+    @FXML
+    private void preferences() throws LoginException, IOException {
+        if(PasswordManagerApp.getLoggedInUser() != null) {
+            PasswordManagerApp.loadPreferencesView();
+            logger.info("Switched context to PreferencesController.");
+        } else {
+            throw new LoginException("User is not logged in. Aborting process");
+        }
+    }
+
+    @FXML
     public void deletePasswords() throws LoginException, IOException {
         if(PasswordManagerApp.getLoggedInUser() != null) {
             List passwordsToBeDeleted = loadedPasswords.stream().filter(o -> o.isChecked().getValue()).collect(Collectors.toList());
@@ -323,6 +330,7 @@ public class PasswordHomeController implements Initializable {
         getStage().close();
     }
 
+    @FXML
     public void logout() throws LoginException, IOException {
         if(PasswordManagerApp.getLoggedInUser() != null) {
             loadLogoutModal();
@@ -332,6 +340,7 @@ public class PasswordHomeController implements Initializable {
         }
     }
 
+    @FXML
     public void addPassword() throws LoginException, IOException {
         if(PasswordManagerApp.getLoggedInUser() != null) {
             loadAddPasswordModal();
@@ -341,16 +350,8 @@ public class PasswordHomeController implements Initializable {
         }
     }
 
-    public JFXDrawer getMenuDrawer() {
-        return this.menuDrawer;
-    }
-
     public static Stage getStage() {
         return stage;
-    }
-
-    public static ObservableList<WebsitePasswordEntryWrapper> getLoadedPasswords() {
-        return loadedPasswords;
     }
 
     public static void setLoadedPasswords(ObservableList<WebsitePasswordEntryWrapper> loadedPasswords) {

@@ -4,8 +4,8 @@
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox maxHeight="1.7976931348623157E308" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="476.0"
-      prefWidth="215.0" xmlns="http://javafx.com/javafx/11.0.2" xmlns:fx="http://javafx.com/fxml/1"
+<VBox maxHeight="1.7976931348623157E308" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="476.0" prefWidth="215.0"
+      xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.jamesd.passwordmanager.Controllers.PasswordHomeController">
    <children>
       <ImageView fitHeight="119.0" fitWidth="215.0" pickOnBounds="true" smooth="false">
@@ -13,9 +13,10 @@
             <Image url="@../icons/1password-logo-round.png" />
          </image>
       </ImageView>
-      <Button fx:id="addPasswordButton" onAction="#addPassword" mnemonicParsing="false" prefHeight="70.0" prefWidth="235.0" text="Add New Password" />
-      <Button fx:id="userPreferencesButton" mnemonicParsing="false" prefHeight="70.0" prefWidth="239.0" text="User Preferences" />
+      <Button fx:id="homeButton" mnemonicParsing="false" onAction="#backToHome" prefHeight="70.0" prefWidth="225.0" text="Home" />
+      <Button fx:id="addPasswordButton" mnemonicParsing="false" onAction="#addPassword" prefHeight="70.0" prefWidth="235.0" text="Add New Password" />
+      <Button fx:id="userPreferencesButton" mnemonicParsing="false" onAction="#preferences" prefHeight="70.0" prefWidth="239.0" text="User Preferences" />
       <Separator prefHeight="149.0" prefWidth="215.0" />
-      <Button fx:id="logOutButton" onAction="#logout" mnemonicParsing="false" prefHeight="70.0" prefWidth="241.0" text="Log out" />
+      <Button fx:id="logOutButton" mnemonicParsing="false" onAction="#logout" prefHeight="70.0" prefWidth="241.0" text="Log out" />
    </children>
 </VBox>

@@ -1,7 +1,5 @@
 package com.jamesd.passwordmanager.Models;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 public class User {
@@ -10,12 +8,14 @@ public class User {
     private String username;
     private String email;
     private String encryptedPass;
+    private String reminderTimePeriod;
 
     public User() {
         this.id = UUID.randomUUID().toString();
         this.username = "DemoUser";
         this.email = "totally@notreal.net";
         this.encryptedPass = "encrypted_password";
+        this.reminderTimePeriod = "1 month";
     }
 
     public User(String username, String email, String encryptedPass) {
@@ -23,13 +23,15 @@ public class User {
         this.username = username;
         this.email = email;
         this.encryptedPass = encryptedPass;
+        this.reminderTimePeriod = "6 months";
     }
 
-    public User(String id, String username, String email, String encryptedPass) {
+    public User(String id, String username, String email, String encryptedPass, String reminderTimePeriod) {
         this.id = id;
         this.username = username;
         this.email = email;
         this.encryptedPass = encryptedPass;
+        this.reminderTimePeriod = reminderTimePeriod;
     }
 
     public String getId() { return this.id; }
@@ -58,5 +60,13 @@ public class User {
 
     public void setEncryptedPassword(String encryptedPassword) {
         this.encryptedPass = encryptedPassword;
+    }
+
+    public String getReminderTimePeriod() {
+        return reminderTimePeriod;
+    }
+
+    public void setReminderTimePeriod(String reminderTimePeriod) {
+        this.reminderTimePeriod = reminderTimePeriod;
     }
 }

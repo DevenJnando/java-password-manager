@@ -2,6 +2,10 @@ package com.jamesd.passwordmanager.Utils;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import javafx.scene.control.Label;
+import javafx.scene.control.TextFormatter;
+import javafx.scene.paint.Color;
 import org.apache.commons.lang3.StringUtils;
 
 public abstract class PasswordCreateUtil {
@@ -153,5 +157,48 @@ public abstract class PasswordCreateUtil {
 
         Integer totalStrength = upperCaseStrength + lowerCaseStrength + numericalStrength + specialCharStrength;
         return totalStrength;
+    }
+
+    private static boolean isBetween (int x, int bottom, int top) {
+        return bottom <= x && x <= top;
+    }
+
+    public static Boolean checkPasswordStrength(String enteredPassword, Label passwordLabel, String initalText) {
+        Boolean passwordIsAcceptable = false;
+        Integer strength = passwordStrength(enteredPassword);
+        if (isBetween(strength, 0, 4)) {
+            passwordLabel.setText(initalText + " (Too weak!)");
+            passwordLabel.setTextFill(Color.DARKRED);
+            passwordIsAcceptable = false;
+        } else if (isBetween(strength, 4, 8)) {
+            passwordLabel.setText(initalText + "  (Weak...)");
+            passwordLabel.setTextFill(Color.RED);
+            passwordIsAcceptable = true;
+        } else if (isBetween(strength, 8, 12)) {
+            passwordLabel.setText(initalText + "  (Medium)");
+            passwordLabel.setTextFill(Color.ORANGE);
+            passwordIsAcceptable = true;
+        } else if (isBetween(strength, 12, 15)) {
+            passwordLabel.setText(initalText + "  (Strong)");
+            passwordLabel.setTextFill(Color.GREEN);
+            passwordIsAcceptable = true;
+        } else if (strength == 16) {
+            passwordLabel.setText(initalText + "  (Very strong)");
+            passwordLabel.setTextFill(Color.DARKGREEN);
+            passwordIsAcceptable = true;
+        }
+        return passwordIsAcceptable;
+    }
+
+    public static TextFormatter<String> createTextFormatter(Integer length) {
+        TextFormatter<String> textFormatter = new TextFormatter<>(change -> {
+            String newText = change.getControlNewText();
+            if(newText.length() > length) {
+                return null;
+            } else {
+                return change;
+            }
+        });
+        return textFormatter;
     }
 }
