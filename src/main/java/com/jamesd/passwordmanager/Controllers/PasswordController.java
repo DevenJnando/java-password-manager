@@ -9,5 +9,6 @@ public abstract class PasswordController {
     }
 
     protected abstract void setIcons();
+    protected abstract void setTextFormatters();
     protected abstract void togglePassword(Event event);
 }

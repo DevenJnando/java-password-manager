@@ -80,26 +80,26 @@ public class MasterPasswordController extends UpdatePasswordController implement
         hiddenOldMasterPassword.getRight().setOnMouseClicked(this::togglePassword);
         hiddenOldMasterPassword.getRight().setOnMousePressed(this::togglePassword);
 
-        hiddenNewPasswordField.setRight(hiddenNewPasswordIcon);
-        hiddenNewPasswordField.getRight().setCursor(Cursor.HAND);
-        hiddenNewPasswordField.getRight().setOnMouseClicked(this::togglePassword);
-        hiddenNewPasswordField.getRight().setOnMousePressed(this::togglePassword);
+        hiddenPasswordField.setRight(hiddenNewPasswordIcon);
+        hiddenPasswordField.getRight().setCursor(Cursor.HAND);
+        hiddenPasswordField.getRight().setOnMouseClicked(this::togglePassword);
+        hiddenPasswordField.getRight().setOnMousePressed(this::togglePassword);
 
-        hiddenConfirmNewPasswordField.setRight(hiddenConfirmPasswordIcon);
-        hiddenConfirmNewPasswordField.getRight().setCursor(Cursor.HAND);
-        hiddenConfirmNewPasswordField.getRight().setOnMouseClicked(this::togglePassword);
-        hiddenConfirmNewPasswordField.getRight().setOnMousePressed(this::togglePassword);
+        hiddenConfirmPasswordField.setRight(hiddenConfirmPasswordIcon);
+        hiddenConfirmPasswordField.getRight().setCursor(Cursor.HAND);
+        hiddenConfirmPasswordField.getRight().setOnMouseClicked(this::togglePassword);
+        hiddenConfirmPasswordField.getRight().setOnMousePressed(this::togglePassword);
 
         visibleOldMasterPassword.setRight(visibleOldPasswordIcon);
         visibleOldMasterPassword.getRight().setCursor(Cursor.HAND);
-        visibleNewPasswordField.setRight(visibleNewPasswordIcon);
-        visibleNewPasswordField.getRight().setOnMouseClicked(this::togglePassword);
-        visibleNewPasswordField.getRight().setOnMousePressed(this::togglePassword);
+        visiblePasswordField.setRight(visibleNewPasswordIcon);
+        visiblePasswordField.getRight().setOnMouseClicked(this::togglePassword);
+        visiblePasswordField.getRight().setOnMousePressed(this::togglePassword);
 
-        visibleConfirmNewPasswordField.setRight(visibleConfirmPasswordIcon);
-        visibleConfirmNewPasswordField.getRight().setCursor(Cursor.HAND);
-        visibleConfirmNewPasswordField.getRight().setOnMouseClicked(this::togglePassword);
-        visibleConfirmNewPasswordField.getRight().setOnMousePressed(this::togglePassword);
+        visibleConfirmPasswordField.setRight(visibleConfirmPasswordIcon);
+        visibleConfirmPasswordField.getRight().setCursor(Cursor.HAND);
+        visibleConfirmPasswordField.getRight().setOnMouseClicked(this::togglePassword);
+        visibleConfirmPasswordField.getRight().setOnMousePressed(this::togglePassword);
 
     }
 
@@ -112,11 +112,11 @@ public class MasterPasswordController extends UpdatePasswordController implement
         TextFormatter<String> passwordFormatter5 = PasswordCreateUtil.createTextFormatter(24);
         TextFormatter<String> passwordFormatter6 = PasswordCreateUtil.createTextFormatter(24);
         hiddenOldMasterPassword.setTextFormatter(passwordFormatter1);
-        hiddenNewPasswordField.setTextFormatter(passwordFormatter2);
-        hiddenConfirmNewPasswordField.setTextFormatter(passwordFormatter3);
+        hiddenPasswordField.setTextFormatter(passwordFormatter2);
+        hiddenConfirmPasswordField.setTextFormatter(passwordFormatter3);
         visibleOldMasterPassword.setTextFormatter(passwordFormatter4);
-        visibleNewPasswordField.setTextFormatter(passwordFormatter5);
-        visibleConfirmNewPasswordField.setTextFormatter(passwordFormatter6);
+        visiblePasswordField.setTextFormatter(passwordFormatter5);
+        visibleConfirmPasswordField.setTextFormatter(passwordFormatter6);
     }
 
     protected void checkAndResetLabels() {
@@ -142,8 +142,8 @@ public class MasterPasswordController extends UpdatePasswordController implement
             erroneousFields = true;
             logger.error("Old password incorrect.");
         }
-        if (!hiddenNewPasswordField.getText().equals(hiddenConfirmNewPasswordField.getText())
-                || !visibleNewPasswordField.getText().equals(visibleConfirmNewPasswordField.getText())) {
+        if (!hiddenPasswordField.getText().equals(hiddenConfirmPasswordField.getText())
+                || !visiblePasswordField.getText().equals(visibleConfirmPasswordField.getText())) {
             setErrorLabel(PASSWORD_MISMATCH_ID, PASSWORD_MISMATCH_ERROR_MSG, passwordVbox);
             setMismatchedPasswordsFlag(true);
             erroneousFields = true;
@@ -155,10 +155,10 @@ public class MasterPasswordController extends UpdatePasswordController implement
     @Override
     public void updatePassword() throws IOException {
         String hashedPassword = "";
-        if(confirmNewPasswordToggler.getShowPassword()) {
-            hashedPassword = HashMasterPasswordUtil.hashPassword(visibleConfirmNewPasswordField.getText());
+        if(confirmPasswordToggler.getShowPassword()) {
+            hashedPassword = HashMasterPasswordUtil.hashPassword(visibleConfirmPasswordField.getText());
         } else {
-            hashedPassword = HashMasterPasswordUtil.hashPassword(hiddenConfirmNewPasswordField.getText());
+            hashedPassword = HashMasterPasswordUtil.hashPassword(hiddenConfirmPasswordField.getText());
         }
         User user = PasswordManagerApp.getLoggedInUser();
         user.setEncryptedPassword(hashedPassword);
@@ -178,8 +178,8 @@ public class MasterPasswordController extends UpdatePasswordController implement
             if (hasErroneousFields()) {
                 logger.info("Erroneous fields are present. Fix them!");
             }
-            else if((hiddenNewPasswordField.getText().equals(hiddenConfirmNewPasswordField.getText()))
-                    || visibleNewPasswordField.getText().equals(visibleConfirmNewPasswordField.getText())){
+            else if((hiddenPasswordField.getText().equals(hiddenConfirmPasswordField.getText()))
+                    || visiblePasswordField.getText().equals(visibleConfirmPasswordField.getText())){
 
                 if(getPasswordIsAcceptableFlag()) {
                     updatePassword();
@@ -200,8 +200,8 @@ public class MasterPasswordController extends UpdatePasswordController implement
             Class<?> customTextFieldClass = Class.forName("org.controlsfx.control.textfield.CustomTextField");
             Class<?> customPasswordFieldClass = Class.forName("org.controlsfx.control.textfield.CustomPasswordField");
             Object oldPasswordState = oldPasswordToggler.togglePassword(passwordVbox);
-            Object newPasswordState = newPasswordToggler.togglePassword(passwordVbox);
-            Object confirmPasswordState = confirmNewPasswordToggler.togglePassword(passwordVbox);
+            Object newPasswordState = passwordToggler.togglePassword(passwordVbox);
+            Object confirmPasswordState = confirmPasswordToggler.togglePassword(passwordVbox);
             if (customTextFieldClass.isInstance(oldPasswordState)
                     && customTextFieldClass.isInstance(newPasswordState)
                     && customTextFieldClass.isInstance(confirmPasswordState)) {
@@ -213,14 +213,14 @@ public class MasterPasswordController extends UpdatePasswordController implement
                 VBox.setMargin(newPasswordShow, insets);
                 VBox.setMargin(confirmPasswordShow, insets);
                 visibleOldMasterPassword = oldPasswordShow;
-                visibleNewPasswordField = newPasswordShow;
-                visibleConfirmNewPasswordField = confirmPasswordShow;
+                visiblePasswordField = newPasswordShow;
+                visibleConfirmPasswordField = confirmPasswordShow;
                 setTextFormatters();
                 setIcons();
                 attachStrengthListener("New Master Password: ");
                 passwordVbox.getChildren().set(1, visibleOldMasterPassword);
-                passwordVbox.getChildren().set(3, visibleNewPasswordField);
-                passwordVbox.getChildren().set(5, visibleConfirmNewPasswordField);
+                passwordVbox.getChildren().set(3, visiblePasswordField);
+                passwordVbox.getChildren().set(5, visibleConfirmPasswordField);
             } else if(customPasswordFieldClass.isInstance(oldPasswordState)
                     && customPasswordFieldClass.isInstance(newPasswordState)
                     && customPasswordFieldClass.isInstance(confirmPasswordState)) {
@@ -232,14 +232,14 @@ public class MasterPasswordController extends UpdatePasswordController implement
                 VBox.setMargin(newPasswordHide, insets);
                 VBox.setMargin(confirmPasswordHide, insets);
                 hiddenOldMasterPassword = oldPasswordHide;
-                hiddenNewPasswordField = newPasswordHide;
-                hiddenConfirmNewPasswordField = confirmPasswordHide;
+                hiddenPasswordField = newPasswordHide;
+                hiddenConfirmPasswordField = confirmPasswordHide;
                 setTextFormatters();
                 setIcons();
                 attachStrengthListener("New Master Password: ");
                 passwordVbox.getChildren().set(1, hiddenOldMasterPassword);
-                passwordVbox.getChildren().set(3, hiddenNewPasswordField);
-                passwordVbox.getChildren().set(5, hiddenConfirmNewPasswordField);
+                passwordVbox.getChildren().set(3, hiddenPasswordField);
+                passwordVbox.getChildren().set(5, hiddenConfirmPasswordField);
             }
         } catch (ClassNotFoundException
                 | InvocationTargetException

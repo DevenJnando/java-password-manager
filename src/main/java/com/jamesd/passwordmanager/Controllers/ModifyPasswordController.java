@@ -15,15 +15,15 @@ import java.util.stream.Collectors;
 public abstract class ModifyPasswordController extends PasswordController {
 
     @FXML
-    CustomPasswordField hiddenNewPasswordField = new CustomPasswordField();
+    CustomPasswordField hiddenPasswordField = new CustomPasswordField();
     @FXML
-    CustomPasswordField hiddenConfirmNewPasswordField = new CustomPasswordField();
+    CustomPasswordField hiddenConfirmPasswordField = new CustomPasswordField();
     @FXML
     Label passwordLabel = new Label();
     @FXML
-    CustomTextField visibleNewPasswordField = new CustomTextField();
+    CustomTextField visiblePasswordField = new CustomTextField();
     @FXML
-    CustomTextField visibleConfirmNewPasswordField = new CustomTextField();
+    CustomTextField visibleConfirmPasswordField = new CustomTextField();
 
     protected final String PASSWORD_TOO_WEAK_ID = "passwordTooWeakLabel";
     protected final String PASSWORD_MISMATCH_ID = "passwordsNotMatchLabel";
@@ -32,16 +32,14 @@ public abstract class ModifyPasswordController extends PasswordController {
 
     protected Boolean passwordIsAcceptable = false;
     protected boolean mismatchedPasswordsFlag = false;
-    protected Toggler newPasswordToggler = new Toggler("hiddenNewPasswordField", "visibleNewPasswordField");
-    protected Toggler confirmNewPasswordToggler = new Toggler("hiddenConfirmNewPasswordField", "visibleConfirmNewPasswordField");
+    protected Toggler passwordToggler = new Toggler("hiddenPasswordField", "visiblePasswordField");
+    protected Toggler confirmPasswordToggler = new Toggler("hiddenConfirmPasswordField", "visibleConfirmPasswordField");
 
     protected static Logger logger = LoggerFactory.getLogger(ModifyPasswordController.class);
 
     public ModifyPasswordController() {
         super();
     }
-
-    protected abstract void setTextFormatters();
 
     protected abstract void checkAndResetLabels();
 
@@ -68,10 +66,10 @@ public abstract class ModifyPasswordController extends PasswordController {
     }
 
     protected void attachStrengthListener(String labelMessage) {
-        hiddenNewPasswordField.textProperty().addListener((obs, oldValue, newValue) -> {
+        hiddenPasswordField.textProperty().addListener((obs, oldValue, newValue) -> {
             passwordIsAcceptable = strengthChecker(newValue, passwordLabel, labelMessage);
         });
-        visibleNewPasswordField.textProperty().addListener((obs, oldValue, newValue) -> {
+        visiblePasswordField.textProperty().addListener((obs, oldValue, newValue) -> {
             passwordIsAcceptable = strengthChecker(newValue, passwordLabel, labelMessage);
         });
     }
@@ -79,12 +77,12 @@ public abstract class ModifyPasswordController extends PasswordController {
     @FXML
     protected void generateNewPassword() {
         String generatedString = PasswordCreateUtil.generatePassword();
-        if(confirmNewPasswordToggler.getShowPassword()){
-            visibleNewPasswordField.setText(generatedString);
-            visibleConfirmNewPasswordField.setText(generatedString);
+        if(passwordToggler.getShowPassword()){
+            visiblePasswordField.setText(generatedString);
+            visibleConfirmPasswordField.setText(generatedString);
         } else {
-            hiddenNewPasswordField.setText(generatedString);
-            hiddenConfirmNewPasswordField.setText(generatedString);
+            hiddenPasswordField.setText(generatedString);
+            hiddenConfirmPasswordField.setText(generatedString);
         }
     }
 

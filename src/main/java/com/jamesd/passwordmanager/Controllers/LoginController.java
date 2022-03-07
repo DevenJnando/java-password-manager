@@ -5,12 +5,15 @@ import com.jamesd.passwordmanager.Authentication.RegisterUser;
 import com.jamesd.passwordmanager.DAO.MasterSQLQueries;
 import com.jamesd.passwordmanager.PasswordManagerApp;
 import com.jamesd.passwordmanager.Utils.HashMasterPasswordUtil;
+import com.jamesd.passwordmanager.Utils.PasswordCreateUtil;
 import com.jfoenix.controls.JFXPasswordField;
 import com.jfoenix.controls.JFXTextField;
 import de.jensd.fx.glyphs.GlyphsDude;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
+import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
@@ -28,26 +31,39 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.security.auth.login.LoginException;
 import java.io.IOException;
+import java.net.URL;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.sql.SQLException;
+import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
-public class LoginController {
+public class LoginController extends PasswordController implements Initializable {
 
     @FXML
     private TabPane loginRegisterTabPane;
-
     @FXML
-    private JFXTextField usernameRegisterField;
+    private JFXTextField usernameRegisterField = new JFXTextField();
     @FXML
-    private JFXTextField emailRegisterField;
+    private JFXTextField emailRegisterField = new JFXTextField();
     @FXML
-    private JFXPasswordField passwordRegisterField;
+    private JFXPasswordField passwordRegisterField = new JFXPasswordField();
     @FXML
-    private JFXPasswordField confirmPasswordRegisterField;
+    private JFXPasswordField confirmPasswordRegisterField = new JFXPasswordField();
+    @FXML
+    private Label loginTabUsernameEmail = new Label();
+    @FXML
+    private Label loginTabPassword = new Label();
+    @FXML
+    private Label registerUsername = new Label();
+    @FXML
+    private Label registerEmail = new Label();
+    @FXML
+    private Label registerPassword = new Label();
+    @FXML
+    private Label registerConfirmPassword = new Label();
     @FXML
     private Label usernameRegisterError;
     @FXML
@@ -58,9 +74,9 @@ public class LoginController {
     private Label confirmPasswordRegisterError;
 
     @FXML
-    private JFXTextField usernameEmailLoginField;
+    private JFXTextField usernameEmailLoginField = new JFXTextField();
     @FXML
-    private JFXPasswordField passwordLoginField;
+    private JFXPasswordField passwordLoginField = new JFXPasswordField();
     @FXML
     private Label loginStatusLabel;
     @FXML
@@ -73,7 +89,13 @@ public class LoginController {
 
     }
 
-    private void loadUserAddedModal() throws IOException, LoginException {
+    @Override
+    public void initialize(URL url, ResourceBundle resourceBundle) {
+        setIcons();
+        setTextFormatters();
+    }
+
+    private void loadUserAddedModal() throws IOException {
         Stage userRegisteredStage = new Stage();
         AnchorPane userRegisteredPane = FXMLLoader
                 .load(LoginController.class.getResource("/com/jamesd/passwordmanager/views/user-registered.fxml"));
@@ -87,7 +109,7 @@ public class LoginController {
         loginRegisterTabPane.getSelectionModel().select(loginRegisterTabPane.getTabs().get(0));
     }
 
-    public void onRegisterClick() throws LoginException, IOException {
+    public void onRegisterClick() throws IOException {
         RegisterUser registerUser = new RegisterUser(this);
         if(registerUser.validateFields()) {
             String encryptedMasterPass = HashMasterPasswordUtil.hashPassword(passwordRegisterField.getText());
@@ -123,71 +145,45 @@ public class LoginController {
         LoginController.getStage().close();
     }
 
-    public void setRegisterIcons() {
-        TabPane pane = (TabPane) PasswordManagerApp.getRootLayout().getCenter();
-        StackPane stackPane = (StackPane) pane.getTabs()
-                .stream()
-                .filter(o -> o.getId().equals("registerTab"))
-                .collect(Collectors.toList()).get(0)
-                .getContent();
-        VBox vbox = (VBox) stackPane.getChildren()
-                .stream()
-                .filter(o -> o.getId().equals("registerVbox"))
-                .collect(Collectors.toList()).get(0);
-        Label usernameLabel = (Label) vbox.getChildren()
-                .stream()
-                .filter(o -> o.getId().equals("registerUsername"))
-                .collect(Collectors.toList()).get(0);
-        Label emailLabel = (Label) vbox.getChildren()
-                .stream()
-                .filter(o -> o.getId().equals("registerEmail"))
-                .collect(Collectors.toList()).get(0);
-        Label passwordField = (Label) vbox.getChildren()
-                .stream()
-                .filter(o -> o.getId().equals("registerPassword"))
-                .collect(Collectors.toList()).get(0);
-        Label confirmPasswordField = (Label) vbox.getChildren()
-                .stream()
-                .filter(o -> o.getId().equals("registerConfirmPassword"))
-                .collect(Collectors.toList()).get(0);
-        Text user = GlyphsDude.createIcon(FontAwesomeIcon.USER, "1.5em");
+    public void setIcons() {
+        Text user1 = GlyphsDude.createIcon(FontAwesomeIcon.USER, "1.5em");
+        Text user2 = GlyphsDude.createIcon(FontAwesomeIcon.USER, "1.5em");
         Text email = GlyphsDude.createIcon(FontAwesomeIcon.ENVELOPE, "1.5em");
         Text lock1 = GlyphsDude.createIcon(FontAwesomeIcon.LOCK, "1.5em");
         Text lock2 = GlyphsDude.createIcon(FontAwesomeIcon.LOCK, "1.5em");
-
-        usernameLabel.setGraphic(user);
-        emailLabel.setGraphic(email);
-        passwordField.setGraphic(lock1);
-        confirmPasswordField.setGraphic(lock2);
-    }
-
-    public void setLoginIcons() {
-        TabPane pane = (TabPane) PasswordManagerApp.getRootLayout().getCenter();
-        StackPane stackPane = (StackPane) pane.getTabs()
-                .stream()
-                .filter(o -> o.getId().equals("loginTab"))
-                .collect(Collectors.toList()).get(0)
-                .getContent();
-        VBox vbox = (VBox) stackPane.getChildren()
-                .stream()
-                .filter(o -> o.getId().equals("loginVbox"))
-                .collect(Collectors.toList()).get(0);
-        Label usernameEmailLabel = (Label) vbox.getChildren()
-                .stream()
-                .filter(o -> o.getId().equals("loginTabUsernameEmail"))
-                .collect(Collectors.toList()).get(0);
-        Label passwordField = (Label) vbox.getChildren()
-                .stream()
-                .filter(o -> o.getId().equals("loginTabPassword"))
-                .collect(Collectors.toList()).get(0);
-        Text user = GlyphsDude.createIcon(FontAwesomeIcon.USER, "1.5em");
-        Text lock = GlyphsDude.createIcon(FontAwesomeIcon.LOCK, "1.5em");
+        Text lock3 = GlyphsDude.createIcon(FontAwesomeIcon.LOCK, "1.5em");
         
-        usernameEmailLabel.setGraphic(user);
-        passwordField.setGraphic(lock);
+        loginTabUsernameEmail.setGraphic(user1);
+        loginTabPassword.setGraphic(lock1);
+        registerUsername.setGraphic(user2);
+        registerEmail.setGraphic(email);
+        registerPassword.setGraphic(lock2);
+        registerConfirmPassword.setGraphic(lock3);
     }
 
-    public void redirectToPasswordsHome() throws IOException, LoginException {
+    @Override
+    public void setTextFormatters() {
+        TextFormatter<String> textFormatter1 = PasswordCreateUtil.createTextFormatter(32);
+        TextFormatter<String> textFormatter2 = PasswordCreateUtil.createTextFormatter(64);
+        TextFormatter<String> textFormatter3 = PasswordCreateUtil.createTextFormatter(64);
+        TextFormatter<String> passwordFormatter1 = PasswordCreateUtil.createTextFormatter(24);
+        TextFormatter<String> passwordFormatter2 = PasswordCreateUtil.createTextFormatter(24);
+        TextFormatter<String> passwordFormatter3 = PasswordCreateUtil.createTextFormatter(24);
+        usernameRegisterField.setTextFormatter(textFormatter1);
+        emailRegisterField.setTextFormatter(textFormatter2);
+        passwordRegisterField.setTextFormatter(passwordFormatter1);
+        confirmPasswordRegisterField.setTextFormatter(passwordFormatter2);
+
+        usernameEmailLoginField.setTextFormatter(textFormatter3);
+        passwordLoginField.setTextFormatter(passwordFormatter3);
+    }
+
+    @Override
+    protected void togglePassword(Event event) {
+        logger.info("Method not currently used.");
+    }
+
+    public void redirectToPasswordsHome() throws IOException {
         PasswordManagerApp.loadPasswordHomeView();
     }
 
@@ -298,5 +294,4 @@ public class LoginController {
     public void setLoginRegisterTabPane(TabPane loginRegisterTabPane) {
         this.loginRegisterTabPane = loginRegisterTabPane;
     }
-
 }

@@ -42,7 +42,8 @@ public class PasswordManagerApp extends Application {
     // Delete Passwords - DONE!!!!!
     // Improve frontend:
     //  Merge home and details screens into a single screen - DONE!!!!!!
-    // User preferences - reminder timings, change master password, two-factor settings
+    // Abstract add/modification of passwords for more generic code - IN PROGRESS...
+    // User preferences - reminder timings, change master password, two-factor settings - IN PROGRESS...
     // Check for insecurities or breaches
     // Consider having a more organised hierarchy e.g. users > root password folder > work passwords > Google
     // Consider allowing storage of other kinds of credential e.g. certificates, credit cards, passports, sha keys,
@@ -98,9 +99,6 @@ public class PasswordManagerApp extends Application {
         loader.setLocation(PasswordManagerApp.class
                 .getResource("/com/jamesd/passwordmanager/views/login-register-view.fxml"));
         rootLayout = (BorderPane) loader.load();
-        LoginController loginController = loader.getController();
-        loginController.setLoginIcons();
-        loginController.setRegisterIcons();
 
         // Show the scene containing the root layout.
         Scene scene = new Scene(rootLayout);

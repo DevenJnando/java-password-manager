@@ -1,11 +1,7 @@
 package com.jamesd.passwordmanager.Controllers;
 
 import com.jamesd.passwordmanager.Wrappers.WebsitePasswordEntryWrapper;
-import de.jensd.fx.glyphs.GlyphsDude;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
-import javafx.scene.Cursor;
 import javafx.scene.Node;
-import javafx.scene.text.Text;
 import org.controlsfx.control.textfield.CustomPasswordField;
 import org.controlsfx.control.textfield.CustomTextField;
 import org.slf4j.Logger;

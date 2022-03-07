@@ -72,22 +72,22 @@ public class AddPasswordController extends NewPasswordController implements Init
         Text eye2 = GlyphsDude.createIcon(FontAwesomeIcon.EYE);
         Text eyeSlash1 = GlyphsDude.createIcon(FontAwesomeIcon.EYE_SLASH);
         Text eyeSlash2 = GlyphsDude.createIcon(FontAwesomeIcon.EYE_SLASH);
-        visibleNewPasswordField.setRight(eyeSlash1);
-        visibleNewPasswordField.getRight().setCursor(Cursor.HAND);
-        visibleConfirmNewPasswordField.setRight(eyeSlash2);
-        visibleConfirmNewPasswordField.getRight().setCursor(Cursor.HAND);
-        hiddenNewPasswordField.setRight(eye1);
-        hiddenNewPasswordField.getRight().setCursor(Cursor.HAND);
-        hiddenConfirmNewPasswordField.setRight(eye2);
-        hiddenConfirmNewPasswordField.getRight().setCursor(Cursor.HAND);
-        visibleNewPasswordField.getRight().setOnMouseClicked(this::togglePassword);
-        visibleNewPasswordField.getRight().setOnMousePressed(this::togglePassword);
-        visibleConfirmNewPasswordField.getRight().setOnMouseClicked(this::togglePassword);
-        visibleConfirmNewPasswordField.getRight().setOnMousePressed(this::togglePassword);
-        hiddenNewPasswordField.getRight().setOnMouseClicked(this::togglePassword);
-        hiddenNewPasswordField.getRight().setOnMousePressed(this::togglePassword);
-        hiddenConfirmNewPasswordField.getRight().setOnMouseClicked(this::togglePassword);
-        hiddenConfirmNewPasswordField.getRight().setOnMousePressed(this::togglePassword);
+        visiblePasswordField.setRight(eyeSlash1);
+        visiblePasswordField.getRight().setCursor(Cursor.HAND);
+        visibleConfirmPasswordField.setRight(eyeSlash2);
+        visibleConfirmPasswordField.getRight().setCursor(Cursor.HAND);
+        hiddenPasswordField.setRight(eye1);
+        hiddenPasswordField.getRight().setCursor(Cursor.HAND);
+        hiddenConfirmPasswordField.setRight(eye2);
+        hiddenConfirmPasswordField.getRight().setCursor(Cursor.HAND);
+        visiblePasswordField.getRight().setOnMouseClicked(this::togglePassword);
+        visiblePasswordField.getRight().setOnMousePressed(this::togglePassword);
+        visibleConfirmPasswordField.getRight().setOnMouseClicked(this::togglePassword);
+        visibleConfirmPasswordField.getRight().setOnMousePressed(this::togglePassword);
+        hiddenPasswordField.getRight().setOnMouseClicked(this::togglePassword);
+        hiddenPasswordField.getRight().setOnMousePressed(this::togglePassword);
+        hiddenConfirmPasswordField.getRight().setOnMouseClicked(this::togglePassword);
+        hiddenConfirmPasswordField.getRight().setOnMousePressed(this::togglePassword);
     }
 
     @Override
@@ -100,10 +100,10 @@ public class AddPasswordController extends NewPasswordController implements Init
         TextFormatter<String> passwordFormatter4 = PasswordCreateUtil.createTextFormatter(24);
         siteUsername.setTextFormatter(textFormatter1);
         urlField.setTextFormatter(textFormatter2);
-        hiddenNewPasswordField.setTextFormatter(passwordFormatter1);
-        hiddenConfirmNewPasswordField.setTextFormatter(passwordFormatter2);
-        visibleNewPasswordField.setTextFormatter(passwordFormatter3);
-        visibleConfirmNewPasswordField.setTextFormatter(passwordFormatter4);
+        hiddenPasswordField.setTextFormatter(passwordFormatter1);
+        hiddenConfirmPasswordField.setTextFormatter(passwordFormatter2);
+        visiblePasswordField.setTextFormatter(passwordFormatter3);
+        visibleConfirmPasswordField.setTextFormatter(passwordFormatter4);
     }
 
     @Override
@@ -111,30 +111,30 @@ public class AddPasswordController extends NewPasswordController implements Init
         try {
             Class<?> customTextFieldClass = Class.forName("org.controlsfx.control.textfield.CustomTextField");
             Class<?> customPasswordFieldClass = Class.forName("org.controlsfx.control.textfield.CustomPasswordField");
-            Object passwordState = newPasswordToggler.togglePassword(passwordVbox);
-            Object confirmPasswordState = confirmNewPasswordToggler.togglePassword(passwordVbox);
+            Object passwordState = passwordToggler.togglePassword(passwordVbox);
+            Object confirmPasswordState = confirmPasswordToggler.togglePassword(passwordVbox);
             if(customTextFieldClass.isInstance(passwordState)
                     && customTextFieldClass.isInstance(confirmPasswordState)) {
                 CustomTextField passwordShow = (CustomTextField) passwordState;
                 CustomTextField confirmPasswordShow = (CustomTextField) confirmPasswordState;
-                visibleNewPasswordField = passwordShow;
-                visibleConfirmNewPasswordField = confirmPasswordShow;
+                visiblePasswordField = passwordShow;
+                visibleConfirmPasswordField = confirmPasswordShow;
                 setTextFormatters();
                 setIcons();
                 attachStrengthListener("Enter Password: ");
-                passwordVbox.getChildren().set(7, visibleNewPasswordField);
-                passwordVbox.getChildren().set(9, visibleConfirmNewPasswordField);
+                passwordVbox.getChildren().set(7, visiblePasswordField);
+                passwordVbox.getChildren().set(9, visibleConfirmPasswordField);
             } else if(customPasswordFieldClass.isInstance(passwordState)
                     && customPasswordFieldClass.isInstance(confirmPasswordState)) {
                 CustomPasswordField passwordHide = (CustomPasswordField) passwordState;
                 CustomPasswordField confirmPasswordHide = (CustomPasswordField) confirmPasswordState;
-                hiddenNewPasswordField = passwordHide;
-                hiddenConfirmNewPasswordField = confirmPasswordHide;
+                hiddenPasswordField = passwordHide;
+                hiddenConfirmPasswordField = confirmPasswordHide;
                 setTextFormatters();
                 setIcons();
                 attachStrengthListener("Enter Password: ");
-                passwordVbox.getChildren().set(7, hiddenNewPasswordField);
-                passwordVbox.getChildren().set(9, hiddenConfirmNewPasswordField);
+                passwordVbox.getChildren().set(7, hiddenPasswordField);
+                passwordVbox.getChildren().set(9, hiddenConfirmPasswordField);
             } else {
                 throw new ClassCastException("Cannot cast object of type " + passwordState.getClass() + " to type " +
                         CustomTextField.class + " or type " + CustomPasswordField.class);
@@ -207,8 +207,8 @@ public class AddPasswordController extends NewPasswordController implements Init
             setMissingUsernameFlag(true);
             erroneousFields = true;
             logger.error("Username is missing.");
-        } if (!hiddenNewPasswordField.getText().equals(hiddenConfirmNewPasswordField.getText())
-        || !visibleNewPasswordField.getText().equals(visibleConfirmNewPasswordField.getText())) {
+        } if (!hiddenPasswordField.getText().equals(hiddenConfirmPasswordField.getText())
+        || !visiblePasswordField.getText().equals(visibleConfirmPasswordField.getText())) {
             setErrorLabel(PASSWORD_MISMATCH_ID, PASSWORD_MISMATCH_ERROR_MSG, passwordVbox);
             setMismatchedPasswordsFlag(true);
             erroneousFields = true;
@@ -228,8 +228,8 @@ public class AddPasswordController extends NewPasswordController implements Init
             else if(!passwordName.getText().isEmpty()
             && !urlField.getText().isEmpty()
             && !siteUsername.getText().isEmpty()
-            && (hiddenNewPasswordField.getText().equals(hiddenConfirmNewPasswordField.getText()))
-            || visibleNewPasswordField.getText().equals(visibleConfirmNewPasswordField.getText())){
+            && (hiddenPasswordField.getText().equals(hiddenConfirmPasswordField.getText()))
+            || visiblePasswordField.getText().equals(visibleConfirmPasswordField.getText())){
 
                 if(getPasswordIsAcceptableFlag()) {
                     addNewPassword();
@@ -248,10 +248,10 @@ public class AddPasswordController extends NewPasswordController implements Init
     public void addNewPassword() throws GeneralSecurityException, UnsupportedEncodingException {
         String currentDate = LocalDate.now().toString();
         String hashedPassword = "";
-        if(confirmNewPasswordToggler.getShowPassword()) {
-           hashedPassword = EncryptDecryptPasswordsUtil.encryptPassword(visibleConfirmNewPasswordField.getText());
+        if(confirmPasswordToggler.getShowPassword()) {
+           hashedPassword = EncryptDecryptPasswordsUtil.encryptPassword(visibleConfirmPasswordField.getText());
         } else {
-            hashedPassword = EncryptDecryptPasswordsUtil.encryptPassword(hiddenConfirmNewPasswordField.getText());
+            hashedPassword = EncryptDecryptPasswordsUtil.encryptPassword(hiddenConfirmPasswordField.getText());
         }
         StoredPassSQLQueries.addNewPasswordToDb(passwordName.getText(),
                 urlField.getText(),

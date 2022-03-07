@@ -8,7 +8,6 @@ import com.jamesd.passwordmanager.Utils.PasswordCreateUtil;
 import com.jamesd.passwordmanager.Utils.TransitionUtil;
 import com.jamesd.passwordmanager.Wrappers.WebsitePasswordEntryWrapper;
 import com.jfoenix.controls.JFXButton;
-import com.jfoenix.controls.JFXDrawer;
 import com.jfoenix.controls.JFXTextField;
 import de.jensd.fx.glyphs.GlyphsDude;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
@@ -24,6 +23,7 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextFormatter;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
@@ -33,7 +33,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.util.Duration;
 import org.controlsfx.control.textfield.CustomPasswordField;
 import org.controlsfx.control.textfield.CustomTextField;
 import org.slf4j.Logger;
@@ -58,47 +57,67 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Clipboard;
 import java.awt.Toolkit;
 
-public class PasswordDetailsController extends PasswordController{
+public class PasswordDetailsController extends ModifyPasswordController implements Initializable{
 
     @FXML
     VBox passwordVbox = new VBox();
     @FXML
     private BorderPane detailsPane;
     @FXML
-    private Label savedLabel;
+    private Label savedLabel = new Label();
     @FXML
-    private JFXTextField passwordNameField;
+    private JFXTextField passwordNameField = new JFXTextField();
     @FXML
-    private JFXTextField websiteUrlField;
+    private JFXTextField websiteUrlField = new JFXTextField();
     @FXML
-    private JFXTextField displayUsernameField;
+    private JFXTextField displayUsernameField = new JFXTextField();
     @FXML
-    private CustomPasswordField hidePasswordText = new CustomPasswordField();
+    private JFXButton copyPasswordNameButton = new JFXButton();
     @FXML
-    private CustomTextField showPasswordText = new CustomTextField();
+    private JFXButton copyWebsiteUrlButton = new JFXButton();
     @FXML
-    private JFXButton copyPasswordNameButton;
+    private JFXButton copyUsernameButton = new JFXButton();
     @FXML
-    private JFXButton copyWebsiteUrlButton;
+    private JFXButton copyPasswordButton = new JFXButton();
     @FXML
-    private JFXButton copyUsernameButton;
+    private JFXButton generateNewPasswordButton = new JFXButton();
     @FXML
-    private JFXButton copyPasswordButton;
+    private HBox logoHbox = new HBox();
     @FXML
-    private JFXButton generateNewPasswordButton;
+    private Button savePasswordButton = new Button();
     @FXML
-    private HBox logoHbox;
-    @FXML
-    private Button savePasswordButton;
-    @FXML
-    private Button deletePasswordButton;
+    private Button deletePasswordButton = new Button();
 
     private static WebsitePasswordEntryWrapper wrapper = new WebsitePasswordEntryWrapper();
     private static Stage stage;
-    private Toggler toggler = new Toggler("hidePasswordText", "showPasswordText");
 
     private static Logger logger = LoggerFactory.getLogger(PasswordDetailsController.class);
 
+    public PasswordDetailsController() {
+
+    }
+
+    @Override
+    public void initialize(URL url, ResourceBundle resourceBundle) {
+        setTextFormatters();
+        setIcons();
+        visiblePasswordField.setEditable(false);
+        hiddenPasswordField.setEditable(false);
+    }
+
+    @Override
+    public void setTextFormatters() {
+        TextFormatter<String> textFormatter1 = PasswordCreateUtil.createTextFormatter(32);
+        TextFormatter<String> textFormatter2 = PasswordCreateUtil.createTextFormatter(32);
+        TextFormatter<String> passwordFormatter1 = PasswordCreateUtil.createTextFormatter(24);
+        TextFormatter<String> passwordFormatter3 = PasswordCreateUtil.createTextFormatter(24);
+        displayUsernameField.setTextFormatter(textFormatter1);
+        websiteUrlField.setTextFormatter(textFormatter2);
+        hiddenPasswordField.setTextFormatter(passwordFormatter1);
+        visiblePasswordField.setTextFormatter(passwordFormatter3);
+    }
+
+    @Override
     public void setIcons() {
         Text copy1 = GlyphsDude.createIcon(FontAwesomeIcon.COPY, "1.5em");
         Text copy2 = GlyphsDude.createIcon(FontAwesomeIcon.COPY, "1.5em");
@@ -119,6 +138,19 @@ public class PasswordDetailsController extends PasswordController{
         savePasswordButton.setCursor(Cursor.HAND);
         deletePasswordButton.setGraphic(delete);
         deletePasswordButton.setCursor(Cursor.HAND);
+    }
+
+    private void setPasswordIcons() {
+        Text hiddenPasswordIcon = GlyphsDude.createIcon(FontAwesomeIcon.EYE);
+        Text shownPasswordIcon = GlyphsDude.createIcon(FontAwesomeIcon.EYE_SLASH);
+        hiddenPasswordField.setRight(hiddenPasswordIcon);
+        hiddenPasswordField.getRight().setCursor(Cursor.HAND);
+        visiblePasswordField.setRight(shownPasswordIcon);
+        visiblePasswordField.getRight().setCursor(Cursor.HAND);
+        visiblePasswordField.getRight().setOnMouseClicked(this::togglePassword);
+        visiblePasswordField.getRight().setOnMousePressed(this::togglePassword);
+        hiddenPasswordField.getRight().setOnMouseClicked(this::togglePassword);
+        hiddenPasswordField.getRight().setOnMousePressed(this::togglePassword);
     }
 
     private void loadDeletePasswordModal() throws IOException{
@@ -151,23 +183,25 @@ public class PasswordDetailsController extends PasswordController{
         try {
             Class<?> customTextFieldClass = Class.forName("org.controlsfx.control.textfield.CustomTextField");
             Class<?> customPasswordFieldClass = Class.forName("org.controlsfx.control.textfield.CustomPasswordField");
-            Object passwordState = toggler.togglePassword(passwordVbox, getPasswordEntryWrapper());
+            Object passwordState = passwordToggler.togglePassword(passwordVbox, getPasswordEntryWrapper());
             if(customTextFieldClass.isInstance(passwordState)) {
                 CustomTextField passwordShow = (CustomTextField) passwordState;
                 Insets insets = new Insets(10, 0, 0, 0);
-                passwordShow.getRight().setOnMouseClicked(this::togglePassword);
-                passwordShow.getRight().setOnMousePressed(this::togglePassword);
                 VBox.setMargin(passwordShow, insets);
-                passwordVbox.getChildren().set(1, passwordShow);
-                showPasswordText = passwordShow;
+                passwordShow.setEditable(false);
+                visiblePasswordField = passwordShow;
+                setPasswordIcons();
+                setTextFormatters();
+                passwordVbox.getChildren().set(1, visiblePasswordField);
             } else if(customPasswordFieldClass.isInstance(passwordState)) {
                 CustomPasswordField passwordHide = (CustomPasswordField) passwordState;
                 Insets insets = new Insets(10, 0, 0, 0);
-                passwordHide.getRight().setOnMouseClicked(this::togglePassword);
-                passwordHide.getRight().setOnMousePressed(this::togglePassword);
                 VBox.setMargin(passwordHide, insets);
-                passwordVbox.getChildren().set(1, passwordHide);
-                hidePasswordText = passwordHide;
+                passwordHide.setEditable(false);
+                hiddenPasswordField = passwordHide;
+                setPasswordIcons();
+                setTextFormatters();
+                passwordVbox.getChildren().set(1, hiddenPasswordField);
             } else {
                 throw new ClassCastException("Cannot cast object of type " + passwordState.getClass() + " to type " +
                         CustomTextField.class + " or type " + CustomPasswordField.class);
@@ -201,23 +235,11 @@ public class PasswordDetailsController extends PasswordController{
         passwordNameField.clear();
         websiteUrlField.clear();
         displayUsernameField.clear();
-        hidePasswordText.clear();
-        if(toggler.getShowPassword()) {
-            List<Node> filteredChildren = passwordVbox.getChildren().stream()
-                    .filter(o -> o.getId().equals("hidePasswordText"))
-                    .collect(Collectors.toList());
-                if(!filteredChildren.isEmpty()) {
-                    CustomPasswordField toBeCleared = (CustomPasswordField) filteredChildren.get(0);
-                    toBeCleared.clear();
-                }
+        hiddenPasswordField.clear();
+        if(passwordToggler.getShowPassword()) {
+            visiblePasswordField.clear();
             } else {
-            List<Node> filteredChildren = passwordVbox.getChildren().stream()
-                    .filter(o -> o.getId().equals("showPasswordText"))
-                    .collect(Collectors.toList());
-            if (!filteredChildren.isEmpty()) {
-                CustomTextField toBeCleared = (CustomTextField) filteredChildren.get(0);
-                toBeCleared.clear();
-            }
+            hiddenPasswordField.clear();
         }
     }
 
@@ -225,6 +247,8 @@ public class PasswordDetailsController extends PasswordController{
             NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, IOException,
             BadPaddingException, InvalidKeyException {
         if(PasswordManagerApp.getLoggedInUser() != null) {
+            setPasswordIcons();
+            setTextFormatters();
             if(getPasswordEntryWrapper()!= null) {
                 detailsPane.setDisable(false);
                 getPasswordEntryWrapper().getWebsitePasswordEntry().setDecryptedPassword
@@ -237,42 +261,43 @@ public class PasswordDetailsController extends PasswordController{
                 passwordNameField.setText(getPasswordEntryWrapper().getWebsitePasswordEntry().getPasswordName());
                 websiteUrlField.setText(getPasswordEntryWrapper().getWebsitePasswordEntry().getSiteUrl());
                 displayUsernameField.setText(getPasswordEntryWrapper().getWebsitePasswordEntry().getPasswordUsername());
-                Text hiddenPasswordIcon = GlyphsDude.createIcon(FontAwesomeIcon.EYE);
-                Text shownPasswordIcon = GlyphsDude.createIcon(FontAwesomeIcon.EYE_SLASH);
-                hidePasswordText.setText(getPasswordEntryWrapper().getWebsitePasswordEntry().getDecryptedPassword());
-                hidePasswordText.setRight(hiddenPasswordIcon);
-                hidePasswordText.getRight().setCursor(Cursor.HAND);
-                showPasswordText.setText(getPasswordEntryWrapper().getWebsitePasswordEntry().getDecryptedPassword());
-                showPasswordText.setRight(shownPasswordIcon);
-                showPasswordText.getRight().setCursor(Cursor.HAND);
-                hidePasswordText.getRight().setOnMouseClicked(this::togglePassword);
-                hidePasswordText.getRight().setOnMousePressed(this::togglePassword);
-                showPasswordText.getRight().setOnMouseClicked(this::togglePassword);
-                showPasswordText.getRight().setOnMousePressed(this::togglePassword);
+                hiddenPasswordField.setText(getPasswordEntryWrapper().getWebsitePasswordEntry().getDecryptedPassword());
+                visiblePasswordField.setText(getPasswordEntryWrapper().getWebsitePasswordEntry().getDecryptedPassword());
             }
         } else {
             throw new LoginException("User is not logged in. Aborting process.");
         }
     }
 
-    public void generateNewPassword() {
-        String generatedString = PasswordCreateUtil.generatePassword();
+    @Override
+    protected void checkAndResetLabels() {
+        logger.info("Method not currently used.");
+    }
+
+    @Override
+    protected Boolean hasErroneousFields() {
+        logger.info("Method not currently used.");
+        return null;
+    }
+
+    public void generateNewPasswordAndUpdate() {
+        visiblePasswordField.setEditable(true);
+        hiddenPasswordField.setEditable(true);
+        generateNewPassword();
         WebsitePasswordEntryWrapper wrapper = getPasswordEntryWrapper();
-        if(passwordIsHidden()) {
-            CustomPasswordField password = (CustomPasswordField) passwordVbox.getChildren().get(1);
-            password.setText(generatedString);
-            wrapper.getWebsitePasswordEntry().setDecryptedPassword(password.getText());
+        if(passwordToggler.getShowPassword()) {
+            wrapper.getWebsitePasswordEntry().setDecryptedPassword(visiblePasswordField.getText());
             wrapper.getWebsitePasswordEntry().setDateSet(LocalDate.now().toString());
             setPasswordEntryWrapper(wrapper);
-            passwordVbox.getChildren().set(1, password);
+            passwordVbox.getChildren().set(1, visiblePasswordField);
         } else {
-            CustomTextField password = (CustomTextField) passwordVbox.getChildren().get(1);
-            password.setText(generatedString);
-            wrapper.getWebsitePasswordEntry().setDecryptedPassword(password.getText());
+            wrapper.getWebsitePasswordEntry().setDecryptedPassword(hiddenPasswordField.getText());
             wrapper.getWebsitePasswordEntry().setDateSet(LocalDate.now().toString());
             setPasswordEntryWrapper(wrapper);
-            passwordVbox.getChildren().set(1, password);
+            passwordVbox.getChildren().set(1, hiddenPasswordField);
         }
+        visiblePasswordField.setEditable(false);
+        hiddenPasswordField.setEditable(false);
     }
 
     public void updatePassword() throws GeneralSecurityException, IOException, ClassNotFoundException, InterruptedException {
@@ -294,6 +319,7 @@ public class PasswordDetailsController extends PasswordController{
         entry.setSiteUrl(websiteUrlField.getText());
         entry.setMasterUsername(PasswordManagerApp.getLoggedInUser().getUsername());
         entry.setPasswordUsername(displayUsernameField.getText());
+        entry.setDecryptedPassword(null);
         StoredPassSQLQueries.updatePasswordInDb(entry);
         PasswordHomeController.setLoadedPasswords(null);
         PasswordManagerApp.getPasswordHomeController().populatePasswordList();
@@ -323,17 +349,6 @@ public class PasswordDetailsController extends PasswordController{
         getStage().close();
     }
 
-    public Boolean passwordIsHidden() {
-        Boolean hidden = false;
-        List<Node> filteredChildren = passwordVbox.getChildren().stream()
-                .filter(o -> o.getId().equals("showPasswordText"))
-                .collect(Collectors.toList());
-        if(filteredChildren.isEmpty()) {
-            hidden = true;
-        }
-        return hidden;
-    }
-
     public void copyPasswordNameButton() {
         copyToClipboard(passwordNameField.getText());
     }
@@ -347,11 +362,11 @@ public class PasswordDetailsController extends PasswordController{
     }
 
     public void copyPasswordToClipboard() {
-        if(passwordIsHidden()) {
-            CustomPasswordField password = (CustomPasswordField) passwordVbox.getChildren().get(1);
+        if(passwordToggler.getShowPassword()) {
+            CustomTextField password = (CustomTextField) passwordVbox.getChildren().get(1);
             copyToClipboard(password.getText());
         } else {
-            CustomTextField password = (CustomTextField) passwordVbox.getChildren().get(1);
+            CustomPasswordField password = (CustomPasswordField) passwordVbox.getChildren().get(1);
             copyToClipboard(password.getText());
         }
     }
