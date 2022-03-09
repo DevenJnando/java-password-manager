@@ -28,9 +28,9 @@ import java.security.GeneralSecurityException;
 import java.time.LocalDate;
 import java.util.ResourceBundle;
 
-public class AddPasswordController extends NewPasswordController implements Initializable {
+public class AddWebsitePasswordController extends NewPasswordController implements Initializable {
 
-    public static Logger logger = LoggerFactory.getLogger(AddPasswordController.class);
+    public static Logger logger = LoggerFactory.getLogger(AddWebsitePasswordController.class);
 
     @FXML
     VBox passwordVbox = new VBox();
@@ -55,7 +55,7 @@ public class AddPasswordController extends NewPasswordController implements Init
     private final String SITE_USERNAME_ERROR_MSG = "Please enter the username/email address for this website.";
 
 
-    public AddPasswordController() {
+    public AddWebsitePasswordController() {
 
     }
 
@@ -218,7 +218,7 @@ public class AddPasswordController extends NewPasswordController implements Init
     }
 
     @Override
-    public void confirmAndAddNewPassword() throws GeneralSecurityException, UnsupportedEncodingException {
+    public void confirmAndAddNewPassword() throws GeneralSecurityException, UnsupportedEncodingException, ClassNotFoundException {
         if (PasswordManagerApp.getLoggedInUser() != null) {
             checkAndResetLabels();
 
@@ -245,7 +245,7 @@ public class AddPasswordController extends NewPasswordController implements Init
     }
 
     @Override
-    public void addNewPassword() throws GeneralSecurityException, UnsupportedEncodingException {
+    public void addNewPassword() throws GeneralSecurityException, UnsupportedEncodingException, ClassNotFoundException {
         String currentDate = LocalDate.now().toString();
         String hashedPassword = "";
         if(confirmPasswordToggler.getShowPassword()) {
@@ -253,7 +253,8 @@ public class AddPasswordController extends NewPasswordController implements Init
         } else {
             hashedPassword = EncryptDecryptPasswordsUtil.encryptPassword(hiddenConfirmPasswordField.getText());
         }
-        StoredPassSQLQueries.addNewPasswordToDb(passwordName.getText(),
+        StoredPassSQLQueries.addNewPasswordToDb(PasswordHomeController.getBaseAddPasswordController().getSelectedFolder(),
+                passwordName.getText(),
                 urlField.getText(),
                 PasswordManagerApp.getLoggedInUser().getUsername(),
                 siteUsername.getText(),
@@ -261,7 +262,7 @@ public class AddPasswordController extends NewPasswordController implements Init
                 hashedPassword);
         setMissingUrlFlag(false);
         setMismatchedPasswordsFlag(false);
-        PasswordHomeController.setLoadedPasswords(null);
+        //PasswordHomeController.setLoadedPasswords(null);
         PasswordHomeController.getStage().close();
     }
 }

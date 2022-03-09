@@ -1,4 +1,4 @@
-package com.jamesd.passwordmanager.Models;
+package com.jamesd.passwordmanager.Models.Passwords;
 
 import java.util.UUID;
 
@@ -16,7 +16,7 @@ public abstract class PasswordEntry {
         this.encryptedPassword = null;
     }
 
-    public PasswordEntry( String encryptedPassword) {
+    public PasswordEntry(String encryptedPassword) {
         this.id = UUID.randomUUID().toString();
         this.passwordName = null;
         this.encryptedPassword = encryptedPassword;

@@ -40,7 +40,7 @@ import java.sql.SQLException;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
-public class LoginController extends PasswordController implements Initializable {
+public class LoginController implements Initializable {
 
     @FXML
     private TabPane loginRegisterTabPane;
@@ -161,7 +161,6 @@ public class LoginController extends PasswordController implements Initializable
         registerConfirmPassword.setGraphic(lock3);
     }
 
-    @Override
     public void setTextFormatters() {
         TextFormatter<String> textFormatter1 = PasswordCreateUtil.createTextFormatter(32);
         TextFormatter<String> textFormatter2 = PasswordCreateUtil.createTextFormatter(64);
@@ -176,11 +175,6 @@ public class LoginController extends PasswordController implements Initializable
 
         usernameEmailLoginField.setTextFormatter(textFormatter3);
         passwordLoginField.setTextFormatter(passwordFormatter3);
-    }
-
-    @Override
-    protected void togglePassword(Event event) {
-        logger.info("Method not currently used.");
     }
 
     public void redirectToPasswordsHome() throws IOException {

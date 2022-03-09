@@ -19,9 +19,15 @@ module com.jamesd.passwordmanager {
     opens com.jamesd.passwordmanager to javafx.fxml;
     opens com.jamesd.passwordmanager.Controllers to javafx.fxml;
     opens com.jamesd.passwordmanager.Wrappers to javafx.base;
-    opens com.jamesd.passwordmanager.Models to com.fasterxml.jackson.databind;
     exports com.jamesd.passwordmanager;
     exports com.jamesd.passwordmanager.Controllers;
-    exports com.jamesd.passwordmanager.Models;
     exports com.jamesd.passwordmanager.Wrappers;
+    exports com.jamesd.passwordmanager.Models.HierarchyModels;
+    opens com.jamesd.passwordmanager.Models.HierarchyModels to com.fasterxml.jackson.databind;
+    exports com.jamesd.passwordmanager.Models.Users;
+    opens com.jamesd.passwordmanager.Models.Users to com.fasterxml.jackson.databind;
+    exports com.jamesd.passwordmanager.Models.Passwords;
+    opens com.jamesd.passwordmanager.Models.Passwords to com.fasterxml.jackson.databind;
+    exports com.jamesd.passwordmanager.Tables;
+    opens com.jamesd.passwordmanager.Tables to javafx.fxml;
 }

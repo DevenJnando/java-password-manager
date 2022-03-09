@@ -1,20 +1,17 @@
 package com.jamesd.passwordmanager;
 
-import com.jamesd.passwordmanager.Controllers.LoginController;
 import com.jamesd.passwordmanager.Controllers.PasswordDetailsController;
 import com.jamesd.passwordmanager.Controllers.PasswordHomeController;
 import com.jamesd.passwordmanager.Controllers.PreferencesController;
 import com.jamesd.passwordmanager.DAO.MasterSQLQueries;
 import com.jamesd.passwordmanager.DAO.PropertiesUtil;
 import com.jamesd.passwordmanager.DAO.StoredPassSQLQueries;
-import com.jamesd.passwordmanager.Models.User;
+import com.jamesd.passwordmanager.Models.Users.User;
 import com.jamesd.passwordmanager.Wrappers.WebsitePasswordEntryWrapper;
-import com.jfoenix.controls.JFXDrawer;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,7 +59,7 @@ public class PasswordManagerApp extends Application {
     private static Logger logger = LoggerFactory.getLogger(PasswordManagerApp.class);
 
     @Override
-    public void start(Stage stage) throws IOException {
+    public void start(Stage stage) throws IOException, ClassNotFoundException {
         PropertiesUtil.initialise();
         passwordHomeController = new PasswordHomeController();
         passwordDetailsController = new PasswordDetailsController();

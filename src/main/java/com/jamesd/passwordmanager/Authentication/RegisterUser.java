@@ -2,7 +2,7 @@ package com.jamesd.passwordmanager.Authentication;
 
 import com.jamesd.passwordmanager.Controllers.LoginController;
 import com.jamesd.passwordmanager.DAO.MasterSQLQueries;
-import com.jamesd.passwordmanager.Models.User;
+import com.jamesd.passwordmanager.Models.Users.User;
 import javafx.scene.paint.Color;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

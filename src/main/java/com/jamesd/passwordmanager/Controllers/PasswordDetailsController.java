@@ -2,7 +2,7 @@ package com.jamesd.passwordmanager.Controllers;
 
 import com.jamesd.passwordmanager.DAO.StoredPassSQLQueries;
 import com.jamesd.passwordmanager.Utils.EncryptDecryptPasswordsUtil;
-import com.jamesd.passwordmanager.Models.WebsitePasswordEntry;
+import com.jamesd.passwordmanager.Models.Passwords.WebsitePasswordEntry;
 import com.jamesd.passwordmanager.PasswordManagerApp;
 import com.jamesd.passwordmanager.Utils.PasswordCreateUtil;
 import com.jamesd.passwordmanager.Utils.TransitionUtil;
@@ -50,9 +50,7 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.ResourceBundle;
-import java.util.stream.Collectors;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Clipboard;
 import java.awt.Toolkit;
@@ -321,8 +319,8 @@ public class PasswordDetailsController extends ModifyPasswordController implemen
         entry.setPasswordUsername(displayUsernameField.getText());
         entry.setDecryptedPassword(null);
         StoredPassSQLQueries.updatePasswordInDb(entry);
-        PasswordHomeController.setLoadedPasswords(null);
-        PasswordManagerApp.getPasswordHomeController().populatePasswordList();
+        //PasswordHomeController.setLoadedPasswords(null);
+        //PasswordManagerApp.getPasswordHomeController().populatePasswordList();
     }
 
     public void deletePassword() throws LoginException, IOException {
@@ -340,7 +338,7 @@ public class PasswordDetailsController extends ModifyPasswordController implemen
         System.out.println(entry.getPasswordName());
         DeletePasswordController deletePasswordController = new DeletePasswordController();
         deletePasswordController.deleteSingleEntry(entry);
-        PasswordHomeController.setLoadedPasswords(null);
+        //PasswordHomeController.setLoadedPasswords(null);
         PasswordManagerApp.loadPasswordHomeView();
     }
 

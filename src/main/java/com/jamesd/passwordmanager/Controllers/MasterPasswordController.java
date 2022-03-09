@@ -1,7 +1,7 @@
 package com.jamesd.passwordmanager.Controllers;
 
 import com.jamesd.passwordmanager.DAO.MasterSQLQueries;
-import com.jamesd.passwordmanager.Models.User;
+import com.jamesd.passwordmanager.Models.Users.User;
 import com.jamesd.passwordmanager.PasswordManagerApp;
 import com.jamesd.passwordmanager.Utils.HashMasterPasswordUtil;
 import com.jamesd.passwordmanager.Utils.PasswordCreateUtil;

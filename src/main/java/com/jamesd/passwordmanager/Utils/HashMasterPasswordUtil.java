@@ -1,7 +1,7 @@
 package com.jamesd.passwordmanager.Utils;
 
 import com.jamesd.passwordmanager.DAO.MasterSQLQueries;
-import com.jamesd.passwordmanager.Models.User;
+import com.jamesd.passwordmanager.Models.Users.User;
 import org.mindrot.jbcrypt.BCrypt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
