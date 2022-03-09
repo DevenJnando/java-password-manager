@@ -1,4 +1,4 @@
-package com.jamesd.passwordmanager.Models;
+package com.jamesd.passwordmanager.Models.Users;
 
 import java.util.UUID;
 

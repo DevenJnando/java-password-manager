@@ -1,44 +1,31 @@
 package com.jamesd.passwordmanager.Controllers;
 
-import com.jamesd.passwordmanager.DAO.MasterSQLQueries;
 import com.jamesd.passwordmanager.DAO.StoredPassSQLQueries;
-import com.jamesd.passwordmanager.Models.User;
-import com.jamesd.passwordmanager.Models.WebsitePasswordEntry;
+import com.jamesd.passwordmanager.Models.HierarchyModels.PasswordEntryFolder;
+import com.jamesd.passwordmanager.Models.Users.User;
 import com.jamesd.passwordmanager.PasswordManagerApp;
+import com.jamesd.passwordmanager.Tables.WebsitePasswordTable;
 import com.jamesd.passwordmanager.Wrappers.WebsitePasswordEntryWrapper;
 import com.jfoenix.controls.JFXButton;
-import com.jfoenix.controls.JFXDrawer;
-import com.jfoenix.controls.JFXHamburger;
 import de.jensd.fx.glyphs.GlyphsDude;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.ReadOnlyObjectWrapper;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.fxml.LoadException;
-import javafx.scene.Cursor;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.CheckBoxTableCell;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.util.Callback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 import javax.security.auth.login.LoginException;
 
 import javafx.scene.image.ImageView;
@@ -46,13 +33,6 @@ import javafx.scene.image.ImageView;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
@@ -62,12 +42,31 @@ public class PasswordHomeController implements Initializable {
     public static Logger logger = LoggerFactory.getLogger(PasswordHomeController.class);
 
     @FXML
+    private VBox sidebar = new VBox();
+    @FXML
+    private VBox passwordTableVbox = new VBox();
+    @FXML
+    private ImageView logo = new ImageView();
+    @FXML
+    private TitledPane folderMenuTitlePane = new TitledPane();
+    @FXML
+    private TreeView<String> folderNavigationTreeView = new TreeView<>();
+    @FXML
     private TableView<WebsitePasswordEntryWrapper> passwordTableView = new TableView();
+    @FXML
+    private Button homeButton = new Button();
+    @FXML
+    private Button addPasswordButton = new Button();
+    @FXML
+    private Button userPreferencesButton = new Button();
+    @FXML
+    private Button logoutButton = new Button();
     @FXML
     private JFXButton deletePasswordsButton = new JFXButton();
 
     private static Stage stage;
-    private static ObservableList<WebsitePasswordEntryWrapper> loadedPasswords;
+    private static List<PasswordEntryFolder> passwordEntryFolders;
+    public static BaseAddPasswordController baseAddPasswordController = new BaseAddPasswordController();
 
     public PasswordHomeController() {
 
@@ -75,14 +74,114 @@ public class PasswordHomeController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        setDeleteButtonIcon();
         try {
-            populatePasswordList();
-        } catch (LoginException e) {
-            e.printStackTrace();
-        } catch (MalformedURLException e) {
+            setImageView();
+        } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
+        setButtons();
+        setTitlePane();
+        setDeleteButtonIcon();
+        sidebar.getChildren().add(logo);
+        sidebar.getChildren().add(homeButton);
+        sidebar.getChildren().add(folderMenuTitlePane);
+
+        sidebar.getChildren().add(addPasswordButton);
+        sidebar.getChildren().add(userPreferencesButton);
+        sidebar.getChildren().add(logoutButton);
+
+        Label passwordFolderNavigationLabel = new Label("Load Passwords:");
+        passwordFolderNavigationLabel.setFont(Font.font("System", FontWeight.BOLD, 18));
+        sidebar.getChildren().add(passwordFolderNavigationLabel);
+        try {
+            populatePasswordFolders();
+        } catch (LoginException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        sidebar.getChildren().add(folderNavigationTreeView);
+    }
+
+    public void setTitlePane() {
+        VBox passwordFolderSettingsVbox = new VBox();
+        JFXButton addNewPasswordFolderButton = new JFXButton("Add Folder");
+        addNewPasswordFolderButton.setOnAction(e -> {
+            try {
+                addNewPasswordFolder();
+            } catch (LoginException | IOException ex) {
+                ex.printStackTrace();
+            }
+        });
+        JFXButton removePasswordFolderButton = new JFXButton("Remove Folder");
+        addNewPasswordFolderButton.setPrefHeight(25);
+        addNewPasswordFolderButton.setPrefWidth(200);
+        removePasswordFolderButton.setPrefHeight(25);
+        removePasswordFolderButton.setPrefWidth(200);
+        passwordFolderSettingsVbox.getChildren().add(addNewPasswordFolderButton);
+        passwordFolderSettingsVbox.getChildren().add(removePasswordFolderButton);
+        TitledPane passwordFolderSettingsTitlePane = new TitledPane("Password Folder Settings", passwordFolderSettingsVbox);
+        passwordFolderSettingsTitlePane.setExpanded(false);
+        folderMenuTitlePane = passwordFolderSettingsTitlePane;
+    }
+
+    public VBox getPasswordTableVbox() {
+        return this.passwordTableVbox;
+    }
+
+    public void setImageView() throws FileNotFoundException {
+        Image image = new Image(new FileInputStream("src/main/resources/com/jamesd/passwordmanager/icons/1password-logo-round.png"));
+        ImageView logo = new ImageView(image);
+        logo.setFitHeight(119);
+        logo.setFitWidth(215);
+        logo.setPickOnBounds(true);
+        logo.setSmooth(false);
+        this.logo = logo;
+    }
+
+    public void setButtons() {
+        Button homeButton = new Button("Home");
+        Button addPasswordButton = new Button("Add New Entry");
+        Button userPreferencesButton = new Button("User Preferences");
+        Button logoutButton = new Button("Logout");
+        homeButton.setPrefHeight(35);
+        homeButton.setPrefWidth(215);
+        addPasswordButton.setPrefHeight(35);
+        addPasswordButton.setPrefWidth(215);
+        userPreferencesButton.setPrefHeight(35);
+        userPreferencesButton.setPrefWidth(215);
+        logoutButton.setPrefHeight(35);
+        logoutButton.setPrefWidth(215);
+        homeButton.setOnAction(e -> {
+            try {
+                backToHome();
+            } catch (LoginException | IOException ex) {
+                ex.printStackTrace();
+            }
+        });
+        addPasswordButton.setOnAction(e -> {
+            try {
+                addPassword();
+            } catch (LoginException | IOException ex) {
+                ex.printStackTrace();
+            }
+        });
+        userPreferencesButton.setOnAction(e -> {
+            try {
+                preferences();
+            } catch (LoginException | IOException ex) {
+                ex.printStackTrace();
+            }
+        });
+        logoutButton.setOnAction(e -> {
+            try {
+                logout();
+            } catch (LoginException | IOException ex) {
+                ex.printStackTrace();
+            }
+        });
+        this.homeButton = homeButton;
+        this.addPasswordButton = addPasswordButton;
+        this.userPreferencesButton = userPreferencesButton;
+        this.logoutButton = logoutButton;
     }
 
     public void setDeleteButtonIcon() {
@@ -90,40 +189,37 @@ public class PasswordHomeController implements Initializable {
         deletePasswordsButton.setGraphic(delete);
     }
 
-    private long daysSinceLastUpdate(String passwordEntryDateSet) {
-        LocalDate currentDate = LocalDate.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        LocalDate dateSet = LocalDate.parse(passwordEntryDateSet, formatter);
-        long daysSinceLastUpdate = dateSet.until(currentDate, ChronoUnit.DAYS);
-        return daysSinceLastUpdate;
+    private void loadAddPasswordFolderModal() throws IOException {
+        Stage addPasswordFolderStage = new Stage();
+        FXMLLoader addPasswordFolderLoader = new FXMLLoader(AddFolderController.class.getResource("/com/jamesd/passwordmanager/views/add-folder-modal.fxml"));
+        AnchorPane addPasswordFolderPane = addPasswordFolderLoader.load();
+        Scene addPasswordFolderScene = new Scene(addPasswordFolderPane);
+        addPasswordFolderStage.setScene(addPasswordFolderScene);
+        addPasswordFolderStage.setTitle("Add New Folder");
+        addPasswordFolderStage.initOwner(PasswordManagerApp.getMainStage());
+        addPasswordFolderStage.initModality(Modality.APPLICATION_MODAL);
+        stage = addPasswordFolderStage;
+        stage.showAndWait();
     }
 
-    private Boolean passwordNeedsUpdated(String passwordEntryDateSet) {
-        Boolean needsUpdated = false;
-        long daysSinceLastUpdate = daysSinceLastUpdate(passwordEntryDateSet);
-        if(daysSinceLastUpdate > 182) {
-            needsUpdated = true;
-        }
-        return needsUpdated;
+    private void loadDeletePasswordFolderModal() throws IOException {
+        Stage addPasswordFolderStage = new Stage();
+        FXMLLoader addPasswordFolderLoader = new FXMLLoader(AddFolderController.class.getResource("/com/jamesd/passwordmanager/views/delete-folder-modal.fxml"));
+        AnchorPane addPasswordFolderPane = addPasswordFolderLoader.load();
+        Scene addPasswordFolderScene = new Scene(addPasswordFolderPane);
+        addPasswordFolderStage.setScene(addPasswordFolderScene);
+        addPasswordFolderStage.setTitle("Delete Folder");
+        addPasswordFolderStage.initOwner(PasswordManagerApp.getMainStage());
+        addPasswordFolderStage.initModality(Modality.APPLICATION_MODAL);
+        stage = addPasswordFolderStage;
+        stage.showAndWait();
     }
 
-    private void checkIfPasswordNeedsUpdated(List<WebsitePasswordEntry> passwordEntries) {
-        for(WebsitePasswordEntry entry : passwordEntries) {
-            if(passwordNeedsUpdated(entry.getDateSet())) {
-                long daysOutOfDate = daysSinceLastUpdate(entry.getDateSet());
-
-                String outOfDateMessage = daysOutOfDate > 1
-                        ? "Password is " + daysOutOfDate + " days out of date!"
-                        : "Password is " + daysOutOfDate + " day out of date!";
-                entry.setNeedsUpdatedMessage(outOfDateMessage);
-            }
-        }
-    }
-
-    private void loadAddPasswordModal() throws IOException, LoginException {
+    private void loadAddPasswordModal() throws IOException {
         Stage addPasswordStage = new Stage();
-        FXMLLoader addPasswordLoader = new FXMLLoader(AddPasswordController.class.getResource("/com/jamesd/passwordmanager/views/add-password-modal.fxml"));
+        FXMLLoader addPasswordLoader = new FXMLLoader(BaseAddPasswordController.class.getResource("/com/jamesd/passwordmanager/views/base-add-password-modal.fxml"));
         AnchorPane addPasswordPane = addPasswordLoader.load();
+        setBaseAddPasswordController(addPasswordLoader.getController());
         Scene addPasswordScene = new Scene(addPasswordPane);
         addPasswordStage.setScene(addPasswordScene);
         addPasswordStage.setTitle("Add New Password");
@@ -131,8 +227,8 @@ public class PasswordHomeController implements Initializable {
         addPasswordStage.initModality(Modality.APPLICATION_MODAL);
         stage = addPasswordStage;
         stage.showAndWait();
-        PasswordManagerApp.getPasswordHomeController().populatePasswordList();
-        PasswordManagerApp.getPasswordHomeController().passwordTableView.refresh();
+        //PasswordManagerApp.getPasswordHomeController().populatePasswordList();
+        //PasswordManagerApp.getPasswordHomeController().passwordTableView.refresh();
     }
 
     private void loadDeletePasswordModal() throws IOException{
@@ -161,126 +257,91 @@ public class PasswordHomeController implements Initializable {
         stage.showAndWait();
     }
 
-    public List<WebsitePasswordEntryWrapper> wrapPasswords(List<WebsitePasswordEntry> passwordEntries) throws MalformedURLException {
-        List<WebsitePasswordEntryWrapper> passwordsWithFavicons = new ArrayList();
-        for(WebsitePasswordEntry entry : passwordEntries) {
-            String faviconUrl = entry.getSiteUrl();
-            ImageView favicon = new ImageView();
-            String urlToUse = faviconUrl.contains("www.") ? faviconUrl.split("www\\.")[1] : faviconUrl;
-            urlToUse = urlToUse.contains("/") ? urlToUse.split("/")[0] : urlToUse;
-            if(getUrlFavicon("https", urlToUse)) {
-                String filename = urlToUse.split("\\.")[0];
-                favicon = createFavicon(new URL("https", "logo.clearbit.com", "/" + urlToUse), filename);
-            }
-            WebsitePasswordEntryWrapper wrapper = new WebsitePasswordEntryWrapper(entry, favicon);
-            passwordsWithFavicons.add(wrapper);
-        }
-        return passwordsWithFavicons;
-    }
-
-    public Boolean getUrlFavicon(String protocol, String url) {
-        try {
-            URL faviconUrl = new URL(protocol, "logo.clearbit.com", "/" + url);
-            new BufferedInputStream(faviconUrl.openStream());
-            return true;
-        } catch (IOException e) {
-            logger.error("No logo found for provided url: " + url);
-            return false;
-        }
-    }
-
-    public ImageView createFavicon(URL faviconUrl, String filename) {
-        try {
-            BufferedInputStream inputStream = new BufferedInputStream(faviconUrl.openStream());
-            File outputFile = new File("src/main/resources/com/jamesd/passwordmanager/icons/favicons/" + filename + ".png");
-            FileOutputStream outputStream = new FileOutputStream(outputFile);
-            byte data[] = new byte[1024];
-            int byteContent;
-            while ((byteContent = inputStream.read(data, 0, 1024)) != -1) {
-                outputStream.write(data, 0, byteContent);
-            }
-            outputStream.flush();
-            outputStream.close();
-            Image image = new Image(new FileInputStream("src/main/resources/com/jamesd/passwordmanager/icons/favicons/" + filename + ".png"));
-            ImageView favicon = new ImageView(image);
-            favicon.setFitHeight(32);
-            favicon.setFitWidth(32);
-            return favicon;
-        } catch(IOException e) {
-            ImageView favicon = new ImageView();
-            e.printStackTrace();
-            return favicon;
-        }
-    }
-
-    private void loadColumns() {
-        TableColumn<WebsitePasswordEntryWrapper, Boolean> checkMark = new TableColumn("Checkbox");
-        TableColumn<WebsitePasswordEntryWrapper, String> faviconCol = new TableColumn("");
-        TableColumn<WebsitePasswordEntryWrapper, String> passwordNameCol = new TableColumn("Password Name");
-        TableColumn<WebsitePasswordEntryWrapper, String> siteUrlCol = new TableColumn("Website URL");
-        TableColumn<WebsitePasswordEntryWrapper, String> passwordUsernameCol = new TableColumn("Username");
-        TableColumn<WebsitePasswordEntryWrapper, String> dateSetCol = new TableColumn("Last Updated On");
-        TableColumn<WebsitePasswordEntryWrapper, String> updateMessageCol = new TableColumn("");
-        faviconCol.setCellValueFactory(new PropertyValueFactory<>("favicon"));
-        checkMark.setCellFactory(cell -> new CheckBoxTableCell<>());
-        checkMark.setCellValueFactory(o -> {
-            BooleanProperty checked = o.getValue().isChecked();
-            checked.addListener((observable, oldValue, newValue) -> {
-                o.getValue().setChecked(newValue);
-            });
-            return checked;
-        });
-        passwordNameCol.setCellValueFactory(o -> new ReadOnlyObjectWrapper(o.getValue().getWebsitePasswordEntry().getPasswordName()));
-        siteUrlCol.setCellValueFactory(o -> new ReadOnlyObjectWrapper(o.getValue().getWebsitePasswordEntry().getSiteUrl()));
-        passwordUsernameCol.setCellValueFactory(o -> new ReadOnlyObjectWrapper(o.getValue().getWebsitePasswordEntry().getPasswordUsername()));
-        dateSetCol.setCellValueFactory(o -> new ReadOnlyObjectWrapper(o.getValue().getWebsitePasswordEntry().getDateSet()));
-        updateMessageCol.setCellValueFactory(o -> new ReadOnlyObjectWrapper(o.getValue().getWebsitePasswordEntry().getNeedsUpdatedMessage()));
-        passwordTableView.getColumns().setAll(checkMark, faviconCol, passwordNameCol, siteUrlCol, passwordUsernameCol, dateSetCol, updateMessageCol);
-    }
-
-    public void populatePasswordList() throws LoginException, MalformedURLException {
+    public void populatePasswordFolders() throws LoginException, ClassNotFoundException {
         if(PasswordManagerApp.getLoggedInUser() != null) {
-            if(loadedPasswords != null) {
-                loadColumns();
-                passwordTableView.setItems(loadedPasswords);
-            } else {
-                User user = PasswordManagerApp.getLoggedInUser();
-                MasterSQLQueries.close();
-                List<WebsitePasswordEntry> passwordList = StoredPassSQLQueries.queryPasswordsContainerByUsername(user.getUsername());
-                checkIfPasswordNeedsUpdated(passwordList);
-                List<WebsitePasswordEntryWrapper> wrappedPasswords = wrapPasswords(passwordList);
-                ObservableList<WebsitePasswordEntryWrapper> oPasswordList = FXCollections.observableList(wrappedPasswords);
-                loadColumns();
-                loadedPasswords = oPasswordList;
-                passwordTableView.setItems(loadedPasswords);
+            Class<?> websitePasswordEntryClass = Class.forName("com.jamesd.passwordmanager.Models.Passwords.WebsitePasswordEntry");
+            TreeItem<String> folderNavigationRoot = new TreeItem<>("Root Folder");
+            User user = PasswordManagerApp.getLoggedInUser();
+            List<PasswordEntryFolder> passwordEntryFolders = StoredPassSQLQueries.queryPasswordFolderContainerByUsername(user.getUsername());
+            PasswordHomeController.passwordEntryFolders = passwordEntryFolders;
+            for(PasswordEntryFolder folder : passwordEntryFolders) {
+                TreeItem<String> folderLeaf = new TreeItem<>(folder.getPasswordFolder(), GlyphsDude.createIcon(FontAwesomeIcon.FOLDER, "1.5em"));
+                Boolean set = false;
+                for (TreeItem<String> folderNode : folderNavigationRoot.getChildren()) {
+                    if(folderNode.getValue().contentEquals(folder.getPasswordType())) {
+                        folderNode.getChildren().add(folderLeaf);
+                        set = true;
+                        break;
+                    }
+                }
+                if(!set) {
+                    String folderType = "";
+                    Text icon = null;
+                    Class<?> classOfEntry = PasswordEntryFolder.EntryFactory.determineEntryType(folder);
+                    if(websitePasswordEntryClass.equals(classOfEntry)) {
+                        folderType = "Website Passwords";
+                        icon = GlyphsDude.createIcon(FontAwesomeIcon.INTERNET_EXPLORER, "1.5em");
+                    }
+                    TreeItem<String> folderNode = new TreeItem<>(folderType, icon);
+                    folderNavigationRoot.getChildren().add(folderNode);
+                    folderNode.getChildren().add(folderLeaf);
+                }
             }
-            passwordTableView.setCursor(Cursor.HAND);
-            passwordTableView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
-            passwordTableView.getSelectionModel().setCellSelectionEnabled(true);
-            passwordTableView.setEditable(true);
-            passwordTableView.getSelectionModel().selectedItemProperty().addListener((observableValue, passwordEntry, t1) -> {
-                try {
-                    TablePosition position = passwordTableView.getSelectionModel().getSelectedCells().get(0);
-                    TableColumn selectedColumn = position.getTableColumn();
-                    if (!selectedColumn.getText().equals("Checkbox")) {
-                        try {
-                            PasswordManagerApp.loadPasswordDetailsView(t1);
-                        } catch (IOException
-                                | InvalidAlgorithmParameterException
-                                | LoginException
-                                | NoSuchPaddingException
-                                | IllegalBlockSizeException
-                                | NoSuchAlgorithmException
-                                | BadPaddingException
-                                | InvalidKeyException e) {
-                            e.printStackTrace();
+            TreeView<String> navView = new TreeView<>(folderNavigationRoot);
+            navView.getSelectionModel().selectedItemProperty().addListener((obs, oldValue, newValue) -> {
+                if(newValue.isLeaf()) {
+                    for(PasswordEntryFolder folder : passwordEntryFolders) {
+                        Class<?> classOfEntry = PasswordEntryFolder.EntryFactory.determineEntryType(folder);
+                        if(folder.getPasswordFolder().equals(newValue.getValue())) {
+                            if(websitePasswordEntryClass.equals(classOfEntry)) {
+                                populateWebsiteEntryPasswords(folder);
+                            }
                         }
                     }
-                } catch (IndexOutOfBoundsException e) {
-                    logger.error("Password table not loaded. Cannot create listener.");
                 }
             });
-            logger.info("Successfully populated password list.");
+            navView.setPrefWidth(215);
+            navView.setPrefHeight(265);
+            folderNavigationTreeView = navView;
+        } else {
+            throw new LoginException("User is not logged in. Aborting process.");
+        }
+    }
+
+    private void populateWebsiteEntryPasswords(PasswordEntryFolder folder) {
+        WebsitePasswordTable websitePasswordTable = new WebsitePasswordTable();
+        try {
+            List<Node> tableViewList = PasswordManagerApp.getPasswordHomeController().getPasswordTableVbox().getChildren()
+                    .stream()
+                    .filter(o -> o.getId()
+                            .equals("websiteEntryTableView"))
+                    .collect(Collectors.toList());
+            TableView<WebsitePasswordEntryWrapper> websitePasswordEntryTableView =
+                    websitePasswordTable.createTableView(folder);
+            websitePasswordEntryTableView.setId("websiteEntryTableView");
+            websitePasswordEntryTableView.setMinHeight(210.0);
+            websitePasswordEntryTableView.setPrefHeight(210.0);
+            websitePasswordEntryTableView.setPrefWidth(1085.0);
+            websitePasswordEntryTableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+            if(!tableViewList.isEmpty()) {
+                passwordTableView = websitePasswordEntryTableView;
+                PasswordManagerApp.getPasswordHomeController().getPasswordTableVbox().getChildren().set(1, passwordTableView);
+            } else {
+                passwordTableView = websitePasswordEntryTableView;
+                PasswordManagerApp.getPasswordHomeController().getPasswordTableVbox().getChildren().add(passwordTableView);
+            }
+        } catch (MalformedURLException
+                | LoginException
+                | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void addNewPasswordFolder() throws LoginException, IOException {
+        if(PasswordManagerApp.getLoggedInUser() != null) {
+            loadAddPasswordFolderModal();
+            logger.info("Switched context to AddFolderController");
         } else {
             throw new LoginException("User is not logged in. Aborting process.");
         }
@@ -308,8 +369,22 @@ public class PasswordHomeController implements Initializable {
 
     @FXML
     public void deletePasswords() throws LoginException, IOException {
+        /*
         if(PasswordManagerApp.getLoggedInUser() != null) {
-            List passwordsToBeDeleted = loadedPasswords.stream().filter(o -> o.isChecked().getValue()).collect(Collectors.toList());
+            List<Object> passwordsToBeDeleted = List.of();
+            for(Object o : loadedPasswords){
+                try {
+                    Class websitePasswordEntryWrapperClass = Class.forName("com.jamesd.passwordmanager.Models.Passwords.WebsitePasswordEntryWrapper");
+                    if(websitePasswordEntryWrapperClass.equals(o)) {
+                        WebsitePasswordEntryWrapper websitePasswordEntryWrapper = (WebsitePasswordEntryWrapper) o;
+                        if(websitePasswordEntryWrapper.isChecked().getValue()) {
+                            passwordsToBeDeleted.add(websitePasswordEntryWrapper);
+                        }
+                    }
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+            }
             if(!passwordsToBeDeleted.isEmpty()) {
                 loadDeletePasswordModal();
                 logger.info("Loaded delete passwords modal.");
@@ -317,6 +392,7 @@ public class PasswordHomeController implements Initializable {
         } else {
             throw new LoginException("User is not logged in. Aborting process.");
         }
+         */
     }
 
     @FXML
@@ -354,7 +430,19 @@ public class PasswordHomeController implements Initializable {
         return stage;
     }
 
-    public static void setLoadedPasswords(ObservableList<WebsitePasswordEntryWrapper> loadedPasswords) {
-        PasswordHomeController.loadedPasswords = loadedPasswords;
+    public static List<PasswordEntryFolder> getPasswordEntryFolders() {
+        return passwordEntryFolders;
+    }
+
+    public static void setPasswordEntryFolders(List<PasswordEntryFolder> passwordEntryFolders) {
+        PasswordHomeController.passwordEntryFolders = passwordEntryFolders;
+    }
+
+    public static BaseAddPasswordController getBaseAddPasswordController() {
+        return baseAddPasswordController;
+    }
+
+    public static void setBaseAddPasswordController(BaseAddPasswordController baseAddPasswordController) {
+        PasswordHomeController.baseAddPasswordController = baseAddPasswordController;
     }
 }

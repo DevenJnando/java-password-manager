@@ -1,7 +1,7 @@
 package com.jamesd.passwordmanager.DAO;
 
-import com.jamesd.passwordmanager.Models.StoredPassDbKey;
-import com.jamesd.passwordmanager.Models.User;
+import com.jamesd.passwordmanager.Models.Passwords.StoredPassDbKey;
+import com.jamesd.passwordmanager.Models.Users.User;
 import com.azure.cosmos.CosmosClient;
 
 import com.azure.cosmos.CosmosContainer;

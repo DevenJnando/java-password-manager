@@ -11,7 +11,7 @@ public abstract class NewPasswordController extends ModifyPasswordController {
         super();
     }
 
-    protected abstract void addNewPassword() throws GeneralSecurityException, UnsupportedEncodingException;
+    protected abstract void addNewPassword() throws GeneralSecurityException, UnsupportedEncodingException, ClassNotFoundException;
 
-    protected abstract void confirmAndAddNewPassword() throws GeneralSecurityException, UnsupportedEncodingException;
+    protected abstract void confirmAndAddNewPassword() throws GeneralSecurityException, UnsupportedEncodingException, ClassNotFoundException;
 }

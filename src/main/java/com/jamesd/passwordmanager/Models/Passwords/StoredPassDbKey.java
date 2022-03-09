@@ -1,4 +1,4 @@
-package com.jamesd.passwordmanager.Models;
+package com.jamesd.passwordmanager.Models.Passwords;
 
 import com.jamesd.passwordmanager.Utils.EncryptDecryptPasswordsUtil;
 

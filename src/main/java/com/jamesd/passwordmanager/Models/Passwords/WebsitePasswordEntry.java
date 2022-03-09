@@ -1,4 +1,4 @@
-package com.jamesd.passwordmanager.Models;
+package com.jamesd.passwordmanager.Models.Passwords;
 
 public class WebsitePasswordEntry extends PasswordEntry {
 
@@ -11,6 +11,14 @@ public class WebsitePasswordEntry extends PasswordEntry {
     public WebsitePasswordEntry() {
         super();
         this.needsUpdatedMessage = "";
+    }
+
+    public WebsitePasswordEntry(String id, String passwordName, String siteUrl, String masterUsername, String passwordUsername, String dateSet, String encryptedPassword) {
+        super(id, passwordName, encryptedPassword);
+        this.siteUrl = siteUrl;
+        this.masterUsername = masterUsername;
+        this.passwordUsername = passwordUsername;
+        this.dateSet = dateSet;
     }
 
     public WebsitePasswordEntry(String passwordName, String siteUrl, String masterUsername, String passwordUsername, String dateSet, String encryptedPassword) {

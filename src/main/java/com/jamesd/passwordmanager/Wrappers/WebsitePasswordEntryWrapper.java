@@ -1,6 +1,6 @@
 package com.jamesd.passwordmanager.Wrappers;
 
-import com.jamesd.passwordmanager.Models.WebsitePasswordEntry;
+import com.jamesd.passwordmanager.Models.Passwords.WebsitePasswordEntry;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.scene.image.ImageView;

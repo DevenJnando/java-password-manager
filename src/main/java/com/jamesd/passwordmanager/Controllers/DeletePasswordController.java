@@ -1,14 +1,13 @@
 package com.jamesd.passwordmanager.Controllers;
 
 import com.jamesd.passwordmanager.DAO.StoredPassSQLQueries;
-import com.jamesd.passwordmanager.Models.WebsitePasswordEntry;
+import com.jamesd.passwordmanager.Models.Passwords.WebsitePasswordEntry;
 import com.jamesd.passwordmanager.PasswordManagerApp;
 import com.jamesd.passwordmanager.Wrappers.WebsitePasswordEntryWrapper;
 import javafx.scene.control.TableView;
 
 import javax.security.auth.login.LoginException;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.HashSet;
 
 public class DeletePasswordController {
