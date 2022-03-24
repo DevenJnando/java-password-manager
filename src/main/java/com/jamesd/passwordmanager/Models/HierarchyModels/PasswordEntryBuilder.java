@@ -1,5 +1,6 @@
 package com.jamesd.passwordmanager.Models.HierarchyModels;
 
+import com.jamesd.passwordmanager.Models.Passwords.DatabasePasswordEntry;
 import com.jamesd.passwordmanager.Models.Passwords.WebsitePasswordEntry;
 
 public class PasswordEntryBuilder {
@@ -74,6 +75,80 @@ public class PasswordEntryBuilder {
     }
 
     public static class DatabasePasswordEntryBuilder {
+
+        private String id;
+        private String passwordName;
+        private String encryptedPassword;
+        private String hostName;
+        private String databaseName;
+        private String masterUsername;
+        private String databaseUsername;
+        private String dateSet;
+
+        public static DatabasePasswordEntryBuilder newInstance() {
+            return new DatabasePasswordEntryBuilder();
+        }
+
+        public DatabasePasswordEntryBuilder withId(String id) {
+            this.id = id;
+            return this;
+        }
+
+        public DatabasePasswordEntryBuilder withPasswordName(String passwordName) {
+            this.passwordName = passwordName;
+            return this;
+        }
+
+        public DatabasePasswordEntryBuilder withEncryptedPassword(String encryptedPassword) {
+            this.encryptedPassword = encryptedPassword;
+            return this;
+        }
+
+        public DatabasePasswordEntryBuilder withHostName(String hostName) {
+            this.hostName = hostName;
+            return this;
+        }
+
+        public DatabasePasswordEntryBuilder withDatabaseName(String databaseName) {
+            this.databaseName = databaseName;
+            return this;
+        }
+
+        public DatabasePasswordEntryBuilder withMasterUsername(String masterUsername) {
+            this.masterUsername = masterUsername;
+            return this;
+        }
+
+        public DatabasePasswordEntryBuilder withDatabaseUsername(String databaseUsername) {
+            this.databaseUsername = databaseUsername;
+            return this;
+        }
+
+        public DatabasePasswordEntryBuilder withDateSet(String dateSet) {
+            this.dateSet = dateSet;
+            return this;
+        }
+
+        public DatabasePasswordEntry build() {
+            if(id != null) {
+                return new DatabasePasswordEntry(this.id,
+                        this.passwordName,
+                        this.hostName,
+                        this.databaseName,
+                        this.masterUsername,
+                        this.databaseUsername,
+                        this.dateSet,
+                        this.encryptedPassword);
+            } else {
+                return new DatabasePasswordEntry(this.passwordName,
+                        this.hostName,
+                        this.databaseName,
+                        this.masterUsername,
+                        this.databaseUsername,
+                        this.dateSet,
+                        this.encryptedPassword);
+            }
+        }
 
     }
 

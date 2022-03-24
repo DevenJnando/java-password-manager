@@ -1,5 +1,6 @@
 package com.jamesd.passwordmanager.Controllers;
 
+import com.jamesd.passwordmanager.Wrappers.DatabasePasswordEntryWrapper;
 import com.jamesd.passwordmanager.Wrappers.WebsitePasswordEntryWrapper;
 import javafx.scene.Node;
 import org.controlsfx.control.textfield.CustomPasswordField;
@@ -90,7 +91,7 @@ public class Toggler {
         return null;
     }
 
-    public Object togglePassword(Node node, WebsitePasswordEntryWrapper wrapper)
+    public <T> Object togglePassword(Node node, T wrapper)
             throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         Class<?> cls = obtainClassType(node);
         if(cls != null) {
@@ -102,7 +103,13 @@ public class Toggler {
                 if (!filteredChildren.isEmpty()) {
                     CustomPasswordField passwordHide = new CustomPasswordField();
                     passwordHide.setEditable(true);
-                    passwordHide.setText(wrapper.getWebsitePasswordEntry().getDecryptedPassword());
+                    if(wrapper instanceof WebsitePasswordEntryWrapper) {
+                        WebsitePasswordEntryWrapper websiteWrapper = (WebsitePasswordEntryWrapper) wrapper;
+                        passwordHide.setText(websiteWrapper.getWebsitePasswordEntry().getDecryptedPassword());
+                    } if(wrapper instanceof DatabasePasswordEntryWrapper) {
+                        DatabasePasswordEntryWrapper databaseWrapper = (DatabasePasswordEntryWrapper) wrapper;
+                        passwordHide.setText(databaseWrapper.getDatabasePasswordEntry().getDecryptedPassword());
+                    }
                     passwordHide.setId(hidePasswordTextFieldId);
                     showPassword = false;
                     return passwordHide;
@@ -114,7 +121,13 @@ public class Toggler {
                 if (!filteredChildren.isEmpty()) {
                     CustomTextField passwordShow = new CustomTextField();
                     passwordShow.setEditable(true);
-                    passwordShow.setText(wrapper.getWebsitePasswordEntry().getDecryptedPassword());
+                    if(wrapper instanceof WebsitePasswordEntryWrapper) {
+                        WebsitePasswordEntryWrapper websiteWrapper = (WebsitePasswordEntryWrapper) wrapper;
+                        passwordShow.setText(websiteWrapper.getWebsitePasswordEntry().getDecryptedPassword());
+                    } if(wrapper instanceof DatabasePasswordEntryWrapper) {
+                        DatabasePasswordEntryWrapper databaseWrapper = (DatabasePasswordEntryWrapper) wrapper;
+                        passwordShow.setText(databaseWrapper.getDatabasePasswordEntry().getDecryptedPassword());
+                    }
                     passwordShow.setId(showPasswordTextFieldId);
                     showPassword = true;
                     return passwordShow;

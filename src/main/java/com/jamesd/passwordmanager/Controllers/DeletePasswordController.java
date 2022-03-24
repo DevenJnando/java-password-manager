@@ -1,13 +1,13 @@
 package com.jamesd.passwordmanager.Controllers;
 
 import com.jamesd.passwordmanager.DAO.StoredPassSQLQueries;
-import com.jamesd.passwordmanager.Models.Passwords.WebsitePasswordEntry;
+import com.jamesd.passwordmanager.Models.HierarchyModels.PasswordEntryFolder;
 import com.jamesd.passwordmanager.PasswordManagerApp;
+import com.jamesd.passwordmanager.Wrappers.DatabasePasswordEntryWrapper;
 import com.jamesd.passwordmanager.Wrappers.WebsitePasswordEntryWrapper;
 import javafx.scene.control.TableView;
 
 import javax.security.auth.login.LoginException;
-import java.io.IOException;
 import java.util.HashSet;
 
 public class DeletePasswordController {
@@ -16,24 +16,39 @@ public class DeletePasswordController {
 
     }
 
-    public void deleteSingleEntry(WebsitePasswordEntry entry) throws LoginException, IOException {
-        StoredPassSQLQueries.deletePasswordInDb(entry);
-        PasswordDetailsController.getStage().close();
+    public void deleteSingleEntry(Object entry, PasswordEntryFolder parentFolder)
+            throws ClassNotFoundException {
+        StoredPassSQLQueries.deletePasswordInDb(entry, parentFolder);
+        WebPasswordDetailsController.getStage().close();
     }
 
-    public void deleteMultipleEntries(TableView<WebsitePasswordEntryWrapper> passwordEntryWrapperTableView) throws IOException, LoginException {
-        HashSet toBeDeleted = new HashSet<WebsitePasswordEntry>();
-        passwordEntryWrapperTableView.getItems().stream().forEach(o -> {
-            if(o.isChecked().getValue()) {
-                toBeDeleted.add(o);
+    public void deleteMultipleEntries(TableView<Object> tableView, PasswordEntryFolder selectedFolder)
+            throws ClassNotFoundException, LoginException {
+        Class<?> websitePasswordEntryWrapperClass = Class.forName("com.jamesd.passwordmanager.Wrappers.WebsitePasswordEntryWrapper");
+        Class<?> databasePasswordEntryWrapperClass = Class.forName("com.jamesd.passwordmanager.Wrappers.DatabasePasswordEntryWrapper");
+        HashSet<Object> toBeDeleted = new HashSet<>();
+        for(Object o : tableView.getItems()) {
+            if(websitePasswordEntryWrapperClass.isInstance(o)) {
+                WebsitePasswordEntryWrapper websitePasswordEntryWrapper = (WebsitePasswordEntryWrapper) o;
+                if(websitePasswordEntryWrapper.isChecked().getValue()) {
+                    toBeDeleted.add(websitePasswordEntryWrapper);
+                }
+            } if(databasePasswordEntryWrapperClass.isInstance(o)) {
+                DatabasePasswordEntryWrapper databasePasswordEntryWrapper = (DatabasePasswordEntryWrapper) o;
+                if(databasePasswordEntryWrapper.isChecked().getValue()) {
+                    toBeDeleted.add(databasePasswordEntryWrapper);
+                }
             }
-        });
-        toBeDeleted.stream().forEach(o -> {
-            WebsitePasswordEntryWrapper wrapper = (WebsitePasswordEntryWrapper) o;
-            StoredPassSQLQueries.deletePasswordInDb(wrapper.getWebsitePasswordEntry());
-        });
-        passwordEntryWrapperTableView.getItems().removeAll(toBeDeleted);
+        }
+        for(Object o : toBeDeleted) {
+            if(websitePasswordEntryWrapperClass.isInstance(o)) {
+                WebsitePasswordEntryWrapper wrapper = (WebsitePasswordEntryWrapper) o;
+                StoredPassSQLQueries.deletePasswordInDb(wrapper.getWebsitePasswordEntry(), selectedFolder);
+            } if(databasePasswordEntryWrapperClass.isInstance(o)) {
+                DatabasePasswordEntryWrapper wrapper = (DatabasePasswordEntryWrapper) o;
+                StoredPassSQLQueries.deletePasswordInDb(wrapper.getDatabasePasswordEntry(), selectedFolder);
+            }
+        }
         PasswordHomeController.getStage().close();
-        PasswordManagerApp.loadPasswordHomeView();
     }
 }

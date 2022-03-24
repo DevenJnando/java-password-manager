@@ -3,14 +3,14 @@ package com.jamesd.passwordmanager.Controllers;
 import com.jamesd.passwordmanager.Utils.PasswordCreateUtil;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
-import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import org.controlsfx.control.textfield.CustomPasswordField;
 import org.controlsfx.control.textfield.CustomTextField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.stream.Collectors;
+import java.awt.*;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 
 public abstract class ModifyPasswordController extends PasswordController {
 
@@ -68,6 +68,13 @@ public abstract class ModifyPasswordController extends PasswordController {
         visiblePasswordField.textProperty().addListener((obs, oldValue, newValue) -> {
             passwordIsAcceptable = strengthChecker(newValue, passwordLabel, labelMessage);
         });
+    }
+
+
+    protected void copyToClipboard(String textToBeCopied) {
+        StringSelection selection = new StringSelection(textToBeCopied);
+        Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+        clipboard.setContents(selection, null);
     }
 
     @FXML

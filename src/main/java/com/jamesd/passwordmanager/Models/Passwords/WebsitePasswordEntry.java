@@ -5,36 +5,27 @@ public class WebsitePasswordEntry extends PasswordEntry {
     private String siteUrl;
     private String masterUsername;
     private String passwordUsername;
-    private String dateSet;
-    private String needsUpdatedMessage;
 
     public WebsitePasswordEntry() {
         super();
-        this.needsUpdatedMessage = "";
     }
 
     public WebsitePasswordEntry(String id, String passwordName, String siteUrl, String masterUsername, String passwordUsername, String dateSet, String encryptedPassword) {
-        super(id, passwordName, encryptedPassword);
+        super(id, passwordName, encryptedPassword, dateSet);
         this.siteUrl = siteUrl;
         this.masterUsername = masterUsername;
         this.passwordUsername = passwordUsername;
-        this.dateSet = dateSet;
     }
 
     public WebsitePasswordEntry(String passwordName, String siteUrl, String masterUsername, String passwordUsername, String dateSet, String encryptedPassword) {
-        super(passwordName, encryptedPassword);
+        super(passwordName, encryptedPassword, dateSet);
         this.siteUrl = siteUrl;
         this.masterUsername = masterUsername;
         this.passwordUsername = passwordUsername;
-        this.dateSet = dateSet;
     }
 
     public String getSiteUrl() {
-        return this.siteUrl;
-    }
-
-    public String getDateSet() {
-        return this.dateSet;
+        return siteUrl;
     }
 
     public String getMasterUsername() {
@@ -45,16 +36,8 @@ public class WebsitePasswordEntry extends PasswordEntry {
         return passwordUsername;
     }
 
-    public String getNeedsUpdatedMessage() {
-        return needsUpdatedMessage;
-    }
-
     public void setSiteUrl(String siteUrl) {
         this.siteUrl = siteUrl;
-    }
-
-    public void setDateSet(String dateSet) {
-        this.dateSet = dateSet;
     }
 
     public void setMasterUsername(String masterUsername) {
@@ -63,9 +46,5 @@ public class WebsitePasswordEntry extends PasswordEntry {
 
     public void setPasswordUsername(String passwordUsername) {
         this.passwordUsername = passwordUsername;
-    }
-
-    public void setNeedsUpdatedMessage(String needsUpdatedMessage) {
-        this.needsUpdatedMessage = needsUpdatedMessage;
     }
 }

@@ -2,9 +2,11 @@ package com.jamesd.passwordmanager.Controllers;
 
 import com.jamesd.passwordmanager.DAO.StoredPassSQLQueries;
 import com.jamesd.passwordmanager.Models.HierarchyModels.PasswordEntryFolder;
-import com.jamesd.passwordmanager.Models.Users.User;
 import com.jamesd.passwordmanager.PasswordManagerApp;
+import com.jamesd.passwordmanager.Tables.DatabasePasswordTable;
 import com.jamesd.passwordmanager.Tables.WebsitePasswordTable;
+import com.jamesd.passwordmanager.Utils.TreeViewIteratorUtil;
+import com.jamesd.passwordmanager.Wrappers.DatabasePasswordEntryWrapper;
 import com.jamesd.passwordmanager.Wrappers.WebsitePasswordEntryWrapper;
 import com.jfoenix.controls.JFXButton;
 import de.jensd.fx.glyphs.GlyphsDude;
@@ -33,6 +35,7 @@ import javafx.scene.image.ImageView;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
@@ -52,8 +55,6 @@ public class PasswordHomeController implements Initializable {
     @FXML
     private TreeView<String> folderNavigationTreeView = new TreeView<>();
     @FXML
-    private TableView<WebsitePasswordEntryWrapper> passwordTableView = new TableView();
-    @FXML
     private Button homeButton = new Button();
     @FXML
     private Button addPasswordButton = new Button();
@@ -65,8 +66,9 @@ public class PasswordHomeController implements Initializable {
     private JFXButton deletePasswordsButton = new JFXButton();
 
     private static Stage stage;
-    private static List<PasswordEntryFolder> passwordEntryFolders;
-    public static BaseAddPasswordController baseAddPasswordController = new BaseAddPasswordController();
+    private List<PasswordEntryFolder> passwordEntryFolders;
+    private PasswordEntryFolder selectedFolder;
+    private BaseAddPasswordController baseAddPasswordController = new BaseAddPasswordController();
 
     public PasswordHomeController() {
 
@@ -91,6 +93,7 @@ public class PasswordHomeController implements Initializable {
         sidebar.getChildren().add(logoutButton);
 
         Label passwordFolderNavigationLabel = new Label("Load Passwords:");
+        passwordFolderNavigationLabel.setId("folderNavigationLabel");
         passwordFolderNavigationLabel.setFont(Font.font("System", FontWeight.BOLD, 18));
         sidebar.getChildren().add(passwordFolderNavigationLabel);
         try {
@@ -98,7 +101,6 @@ public class PasswordHomeController implements Initializable {
         } catch (LoginException | ClassNotFoundException e) {
             e.printStackTrace();
         }
-        sidebar.getChildren().add(folderNavigationTreeView);
     }
 
     public void setTitlePane() {
@@ -107,18 +109,28 @@ public class PasswordHomeController implements Initializable {
         addNewPasswordFolderButton.setOnAction(e -> {
             try {
                 addNewPasswordFolder();
-            } catch (LoginException | IOException ex) {
+            } catch (LoginException | IOException | ClassNotFoundException ex) {
                 ex.printStackTrace();
             }
         });
         JFXButton removePasswordFolderButton = new JFXButton("Remove Folder");
+        removePasswordFolderButton.setOnAction(e -> {
+            try {
+                deletePasswordFolder();
+            } catch (IOException | LoginException ex) {
+                ex.printStackTrace();
+            }
+        });
+        addNewPasswordFolderButton.setId("addNewFolderButton");
         addNewPasswordFolderButton.setPrefHeight(25);
         addNewPasswordFolderButton.setPrefWidth(200);
+        removePasswordFolderButton.setId("removeFolderButton");
         removePasswordFolderButton.setPrefHeight(25);
         removePasswordFolderButton.setPrefWidth(200);
         passwordFolderSettingsVbox.getChildren().add(addNewPasswordFolderButton);
         passwordFolderSettingsVbox.getChildren().add(removePasswordFolderButton);
         TitledPane passwordFolderSettingsTitlePane = new TitledPane("Password Folder Settings", passwordFolderSettingsVbox);
+        passwordFolderSettingsTitlePane.setId("folderSettingsTitlePane");
         passwordFolderSettingsTitlePane.setExpanded(false);
         folderMenuTitlePane = passwordFolderSettingsTitlePane;
     }
@@ -130,6 +142,7 @@ public class PasswordHomeController implements Initializable {
     public void setImageView() throws FileNotFoundException {
         Image image = new Image(new FileInputStream("src/main/resources/com/jamesd/passwordmanager/icons/1password-logo-round.png"));
         ImageView logo = new ImageView(image);
+        logo.setId("sidebarLogo");
         logo.setFitHeight(119);
         logo.setFitWidth(215);
         logo.setPickOnBounds(true);
@@ -142,12 +155,16 @@ public class PasswordHomeController implements Initializable {
         Button addPasswordButton = new Button("Add New Entry");
         Button userPreferencesButton = new Button("User Preferences");
         Button logoutButton = new Button("Logout");
+        homeButton.setId("homeButton");
         homeButton.setPrefHeight(35);
         homeButton.setPrefWidth(215);
+        addPasswordButton.setId("addPasswordButton");
         addPasswordButton.setPrefHeight(35);
         addPasswordButton.setPrefWidth(215);
+        userPreferencesButton.setId("userPreferencesButton");
         userPreferencesButton.setPrefHeight(35);
         userPreferencesButton.setPrefWidth(215);
+        logoutButton.setId("logoutButton");
         logoutButton.setPrefHeight(35);
         logoutButton.setPrefWidth(215);
         homeButton.setOnAction(e -> {
@@ -160,7 +177,7 @@ public class PasswordHomeController implements Initializable {
         addPasswordButton.setOnAction(e -> {
             try {
                 addPassword();
-            } catch (LoginException | IOException ex) {
+            } catch (LoginException | IOException | ClassNotFoundException ex) {
                 ex.printStackTrace();
             }
         });
@@ -189,7 +206,7 @@ public class PasswordHomeController implements Initializable {
         deletePasswordsButton.setGraphic(delete);
     }
 
-    private void loadAddPasswordFolderModal() throws IOException {
+    private void loadAddPasswordFolderModal() throws IOException, LoginException, ClassNotFoundException {
         Stage addPasswordFolderStage = new Stage();
         FXMLLoader addPasswordFolderLoader = new FXMLLoader(AddFolderController.class.getResource("/com/jamesd/passwordmanager/views/add-folder-modal.fxml"));
         AnchorPane addPasswordFolderPane = addPasswordFolderLoader.load();
@@ -200,6 +217,7 @@ public class PasswordHomeController implements Initializable {
         addPasswordFolderStage.initModality(Modality.APPLICATION_MODAL);
         stage = addPasswordFolderStage;
         stage.showAndWait();
+        PasswordManagerApp.getPasswordHomeController().populatePasswordFolders();
     }
 
     private void loadDeletePasswordFolderModal() throws IOException {
@@ -219,7 +237,7 @@ public class PasswordHomeController implements Initializable {
         Stage addPasswordStage = new Stage();
         FXMLLoader addPasswordLoader = new FXMLLoader(BaseAddPasswordController.class.getResource("/com/jamesd/passwordmanager/views/base-add-password-modal.fxml"));
         AnchorPane addPasswordPane = addPasswordLoader.load();
-        setBaseAddPasswordController(addPasswordLoader.getController());
+        PasswordManagerApp.getPasswordHomeController().setBaseAddPasswordController(addPasswordLoader.getController());
         Scene addPasswordScene = new Scene(addPasswordPane);
         addPasswordStage.setScene(addPasswordScene);
         addPasswordStage.setTitle("Add New Password");
@@ -227,8 +245,6 @@ public class PasswordHomeController implements Initializable {
         addPasswordStage.initModality(Modality.APPLICATION_MODAL);
         stage = addPasswordStage;
         stage.showAndWait();
-        //PasswordManagerApp.getPasswordHomeController().populatePasswordList();
-        //PasswordManagerApp.getPasswordHomeController().passwordTableView.refresh();
     }
 
     private void loadDeletePasswordModal() throws IOException{
@@ -259,28 +275,30 @@ public class PasswordHomeController implements Initializable {
 
     public void populatePasswordFolders() throws LoginException, ClassNotFoundException {
         if(PasswordManagerApp.getLoggedInUser() != null) {
-            Class<?> websitePasswordEntryClass = Class.forName("com.jamesd.passwordmanager.Models.Passwords.WebsitePasswordEntry");
+            Class<?> websiteEntryClass = Class.forName("com.jamesd.passwordmanager.Models.Passwords.WebsitePasswordEntry");
+            Class<?> databaseEntryClass = Class.forName("com.jamesd.passwordmanager.Models.Passwords.DatabasePasswordEntry");
             TreeItem<String> folderNavigationRoot = new TreeItem<>("Root Folder");
-            User user = PasswordManagerApp.getLoggedInUser();
-            List<PasswordEntryFolder> passwordEntryFolders = StoredPassSQLQueries.queryPasswordFolderContainerByUsername(user.getUsername());
-            PasswordHomeController.passwordEntryFolders = passwordEntryFolders;
-            for(PasswordEntryFolder folder : passwordEntryFolders) {
+            List<PasswordEntryFolder> passwordEntryFolders = StoredPassSQLQueries.queryPasswordFolderContainerByUsername(
+                    PasswordManagerApp.getLoggedInUser().getUsername());
+            PasswordManagerApp.getPasswordHomeController().setPasswordEntryFolders(passwordEntryFolders);
+            for(PasswordEntryFolder folder : PasswordManagerApp.getPasswordHomeController().getPasswordEntryFolders()) {
                 TreeItem<String> folderLeaf = new TreeItem<>(folder.getPasswordFolder(), GlyphsDude.createIcon(FontAwesomeIcon.FOLDER, "1.5em"));
                 Boolean set = false;
                 for (TreeItem<String> folderNode : folderNavigationRoot.getChildren()) {
-                    if(folderNode.getValue().contentEquals(folder.getPasswordType())) {
+                    if(folderNode.getValue().contentEquals(folder.getReadableTypeString())) {
                         folderNode.getChildren().add(folderLeaf);
                         set = true;
                         break;
                     }
                 }
                 if(!set) {
-                    String folderType = "";
+                    String folderType = folder.getReadableTypeString();
                     Text icon = null;
                     Class<?> classOfEntry = PasswordEntryFolder.EntryFactory.determineEntryType(folder);
-                    if(websitePasswordEntryClass.equals(classOfEntry)) {
-                        folderType = "Website Passwords";
+                    if(websiteEntryClass.equals(classOfEntry)) {
                         icon = GlyphsDude.createIcon(FontAwesomeIcon.INTERNET_EXPLORER, "1.5em");
+                    } else if(databaseEntryClass.equals(classOfEntry)) {
+                        icon = GlyphsDude.createIcon(FontAwesomeIcon.DATABASE, "1.5em");
                     }
                     TreeItem<String> folderNode = new TreeItem<>(folderType, icon);
                     folderNavigationRoot.getChildren().add(folderNode);
@@ -290,32 +308,44 @@ public class PasswordHomeController implements Initializable {
             TreeView<String> navView = new TreeView<>(folderNavigationRoot);
             navView.getSelectionModel().selectedItemProperty().addListener((obs, oldValue, newValue) -> {
                 if(newValue.isLeaf()) {
-                    for(PasswordEntryFolder folder : passwordEntryFolders) {
+                    for(PasswordEntryFolder folder : PasswordManagerApp.getPasswordHomeController().getPasswordEntryFolders()) {
                         Class<?> classOfEntry = PasswordEntryFolder.EntryFactory.determineEntryType(folder);
                         if(folder.getPasswordFolder().equals(newValue.getValue())) {
-                            if(websitePasswordEntryClass.equals(classOfEntry)) {
+                            if(websiteEntryClass.equals(classOfEntry)) {
                                 populateWebsiteEntryPasswords(folder);
+                            } else if(databaseEntryClass.equals(classOfEntry)) {
+                                populateDatabaseEntryPasswords(folder);
                             }
                         }
                     }
                 }
             });
+            navView.setId("folderNavigationTreeView");
             navView.setPrefWidth(215);
             navView.setPrefHeight(265);
             folderNavigationTreeView = navView;
+            List<Node> navViews = sidebar.getChildren()
+                    .stream()
+                    .filter(o -> o.getId().equals("folderNavigationTreeView"))
+                    .collect(Collectors.toList());
+            if(navViews.isEmpty()) {
+                sidebar.getChildren().add(folderNavigationTreeView);
+                PasswordManagerApp.getPasswordHomeController().setSidebar(sidebar);
+            } else {
+                folderNavigationTreeView.getRoot().setExpanded(true);
+                sidebar.getChildren().set(7, folderNavigationTreeView);
+                PasswordManagerApp.getPasswordHomeController().setSidebar(sidebar);
+            }
         } else {
             throw new LoginException("User is not logged in. Aborting process.");
         }
     }
 
-    private void populateWebsiteEntryPasswords(PasswordEntryFolder folder) {
+    public void populateWebsiteEntryPasswords(PasswordEntryFolder folder) {
+        PasswordManagerApp.getPasswordHomeController().setSelectedFolder(folder);
         WebsitePasswordTable websitePasswordTable = new WebsitePasswordTable();
         try {
-            List<Node> tableViewList = PasswordManagerApp.getPasswordHomeController().getPasswordTableVbox().getChildren()
-                    .stream()
-                    .filter(o -> o.getId()
-                            .equals("websiteEntryTableView"))
-                    .collect(Collectors.toList());
+            List<Node> tableViewList = PasswordManagerApp.getPasswordHomeController().getPasswordTableVbox().getChildren();
             TableView<WebsitePasswordEntryWrapper> websitePasswordEntryTableView =
                     websitePasswordTable.createTableView(folder);
             websitePasswordEntryTableView.setId("websiteEntryTableView");
@@ -323,12 +353,34 @@ public class PasswordHomeController implements Initializable {
             websitePasswordEntryTableView.setPrefHeight(210.0);
             websitePasswordEntryTableView.setPrefWidth(1085.0);
             websitePasswordEntryTableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-            if(!tableViewList.isEmpty()) {
-                passwordTableView = websitePasswordEntryTableView;
-                PasswordManagerApp.getPasswordHomeController().getPasswordTableVbox().getChildren().set(1, passwordTableView);
+            if(tableViewList.size() < 2) {
+                PasswordManagerApp.getPasswordHomeController().getPasswordTableVbox().getChildren().add(websitePasswordEntryTableView);
             } else {
-                passwordTableView = websitePasswordEntryTableView;
-                PasswordManagerApp.getPasswordHomeController().getPasswordTableVbox().getChildren().add(passwordTableView);
+                PasswordManagerApp.getPasswordHomeController().getPasswordTableVbox().getChildren().set(1, websitePasswordEntryTableView);
+            }
+        } catch (MalformedURLException
+                | LoginException
+                | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void populateDatabaseEntryPasswords(PasswordEntryFolder folder) {
+        PasswordManagerApp.getPasswordHomeController().setSelectedFolder(folder);
+        DatabasePasswordTable databasePasswordTable = new DatabasePasswordTable();
+        try {
+            List<Node> tableViewList = PasswordManagerApp.getPasswordHomeController().getPasswordTableVbox().getChildren();
+            TableView<DatabasePasswordEntryWrapper> databasePasswordEntryTableView =
+                    databasePasswordTable.createTableView(folder);
+            databasePasswordEntryTableView.setId("databaseEntryTableView");
+            databasePasswordEntryTableView.setMinHeight(210.0);
+            databasePasswordEntryTableView.setPrefHeight(210.0);
+            databasePasswordEntryTableView.setPrefWidth(1085.0);
+            databasePasswordEntryTableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+            if(tableViewList.size() < 2) {
+                PasswordManagerApp.getPasswordHomeController().getPasswordTableVbox().getChildren().add(databasePasswordEntryTableView);
+            } else {
+                PasswordManagerApp.getPasswordHomeController().getPasswordTableVbox().getChildren().set(1, databasePasswordEntryTableView);
             }
         } catch (MalformedURLException
                 | LoginException
@@ -338,10 +390,20 @@ public class PasswordHomeController implements Initializable {
     }
 
     @FXML
-    private void addNewPasswordFolder() throws LoginException, IOException {
+    private void addNewPasswordFolder() throws LoginException, IOException, ClassNotFoundException {
         if(PasswordManagerApp.getLoggedInUser() != null) {
             loadAddPasswordFolderModal();
             logger.info("Switched context to AddFolderController");
+        } else {
+            throw new LoginException("User is not logged in. Aborting process.");
+        }
+    }
+
+    @FXML
+    private void deletePasswordFolder() throws LoginException, IOException {
+        if(PasswordManagerApp.getLoggedInUser() != null) {
+            loadDeletePasswordFolderModal();
+            logger.info("Switched context to DeleteFolderController");
         } else {
             throw new LoginException("User is not logged in. Aborting process.");
         }
@@ -369,16 +431,24 @@ public class PasswordHomeController implements Initializable {
 
     @FXML
     public void deletePasswords() throws LoginException, IOException {
-        /*
         if(PasswordManagerApp.getLoggedInUser() != null) {
-            List<Object> passwordsToBeDeleted = List.of();
-            for(Object o : loadedPasswords){
+            List<Object> passwordsToBeDeleted = new ArrayList<>();
+            TableView<Object> tableView =
+                    (TableView<Object>)
+                            PasswordManagerApp.getPasswordHomeController().getPasswordTableVbox().getChildren().get(1);
+            for(Object o : tableView.getItems()){
                 try {
-                    Class websitePasswordEntryWrapperClass = Class.forName("com.jamesd.passwordmanager.Models.Passwords.WebsitePasswordEntryWrapper");
-                    if(websitePasswordEntryWrapperClass.equals(o)) {
+                    Class<?> websitePasswordEntryWrapperClass = Class.forName("com.jamesd.passwordmanager.Wrappers.WebsitePasswordEntryWrapper");
+                    Class<?> databasePasswordEntryWrapperClass = Class.forName("com.jamesd.passwordmanager.Wrappers.DatabasePasswordEntryWrapper");
+                    if(websitePasswordEntryWrapperClass.isInstance(o)) {
                         WebsitePasswordEntryWrapper websitePasswordEntryWrapper = (WebsitePasswordEntryWrapper) o;
                         if(websitePasswordEntryWrapper.isChecked().getValue()) {
                             passwordsToBeDeleted.add(websitePasswordEntryWrapper);
+                        }
+                    } if(databasePasswordEntryWrapperClass.isInstance(o)) {
+                        DatabasePasswordEntryWrapper databasePasswordEntryWrapper = (DatabasePasswordEntryWrapper) o;
+                        if(databasePasswordEntryWrapper.isChecked().getValue()) {
+                            passwordsToBeDeleted.add(databasePasswordEntryWrapper);
                         }
                     }
                 } catch (ClassNotFoundException e) {
@@ -392,13 +462,29 @@ public class PasswordHomeController implements Initializable {
         } else {
             throw new LoginException("User is not logged in. Aborting process.");
         }
-         */
     }
 
     @FXML
-    private void confirmDelete() throws IOException, LoginException {
-        DeletePasswordController deletePasswordController = new DeletePasswordController();
-        deletePasswordController.deleteMultipleEntries(passwordTableView);
+    private void confirmDelete() throws LoginException, ClassNotFoundException {
+        if(PasswordManagerApp.getLoggedInUser() != null) {
+            Class<?> websitePasswordEntryClass = Class.forName("com.jamesd.passwordmanager.Models.Passwords.WebsitePasswordEntry");
+            Class<?> databasePasswordEntryClass = Class.forName("com.jamesd.passwordmanager.Models.Passwords.DatabasePasswordEntry");
+            TableView<Object> tableView =
+                    (TableView<Object>)
+                            PasswordManagerApp.getPasswordHomeController().getPasswordTableVbox().getChildren().get(1);
+            DeletePasswordController deletePasswordController = new DeletePasswordController();
+            deletePasswordController.deleteMultipleEntries(tableView, PasswordManagerApp.getPasswordHomeController().getSelectedFolder());
+            PasswordManagerApp.getPasswordHomeController().populatePasswordFolders();
+            if(PasswordEntryFolder.EntryFactory.determineEntryType(PasswordManagerApp.getPasswordHomeController().getSelectedFolder())
+                    .equals(websitePasswordEntryClass)) {
+                PasswordManagerApp.getPasswordHomeController().populateWebsiteEntryPasswords(PasswordManagerApp.getPasswordHomeController().getSelectedFolder());
+            } if(PasswordEntryFolder.EntryFactory.determineEntryType(PasswordManagerApp.getPasswordHomeController().getSelectedFolder())
+                    .equals(databasePasswordEntryClass)) {
+                PasswordManagerApp.getPasswordHomeController().populateDatabaseEntryPasswords(PasswordManagerApp.getPasswordHomeController().getSelectedFolder());
+            }
+        } else {
+            throw new LoginException("User is not logged in. Aborting process.");
+        }
     }
 
     @FXML
@@ -417,7 +503,7 @@ public class PasswordHomeController implements Initializable {
     }
 
     @FXML
-    public void addPassword() throws LoginException, IOException {
+    public void addPassword() throws LoginException, IOException, ClassNotFoundException {
         if(PasswordManagerApp.getLoggedInUser() != null) {
             loadAddPasswordModal();
             logger.info("Switched context to the AddPasswordController.");
@@ -426,23 +512,84 @@ public class PasswordHomeController implements Initializable {
         }
     }
 
+    public void viewNewlyAddedPassword() throws ClassNotFoundException {
+        List<Node> treeView = sidebar.getChildren()
+                .stream()
+                .filter(o -> o.getId().equals("folderNavigationTreeView"))
+                .collect(Collectors.toList());
+        if(!treeView.isEmpty()) {
+            TreeView<String> folderNavigationTreeView = (TreeView<String>) treeView.get(0);
+            if (PasswordManagerApp.getPasswordHomeController()
+                    .getBaseAddPasswordController()
+                    .getSelectedFolder()
+                    .getPasswordFolder() != null) {
+
+                PasswordEntryFolder selectedFolder = PasswordManagerApp.getPasswordHomeController()
+                        .getBaseAddPasswordController().getSelectedFolder();
+                TreeViewIteratorUtil<String> treeViewIteratorUtil = new TreeViewIteratorUtil<>(folderNavigationTreeView.getRoot());
+                TreeItem<String> childNode = new TreeItem<>();
+                while(treeViewIteratorUtil.hasNext()) {
+                    TreeItem<String> currentNode = treeViewIteratorUtil.next();
+                    System.out.println("Current node value: " + currentNode.getValue());
+                    System.out.println("Selected folder: " + selectedFolder.getPasswordFolder());
+                    if(currentNode.getValue().equals(selectedFolder.getPasswordFolder())) {
+                        childNode = currentNode;
+                        break;
+                    }
+                }
+                childNode.getParent().setExpanded(true);
+                folderNavigationTreeView.getSelectionModel().select(childNode);
+
+                Class<?> websitePasswordEntryClass = Class.forName("com.jamesd.passwordmanager.Models.Passwords.WebsitePasswordEntry");
+                Class<?> databasePasswordEntryClass = Class.forName("com.jamesd.passwordmanager.Models.Passwords.DatabasePasswordEntry");
+                if(websitePasswordEntryClass.equals(PasswordEntryFolder.EntryFactory.determineEntryType(selectedFolder))) {
+                    populateWebsiteEntryPasswords(selectedFolder);
+                    TableView<WebsitePasswordEntryWrapper> tableView = (TableView<WebsitePasswordEntryWrapper>)
+                            PasswordManagerApp.getPasswordHomeController().getPasswordTableVbox().getChildren().get(1);
+                    tableView.getSelectionModel().select(tableView.getItems().size() - 1, tableView.getColumns().get(1));
+                } if(databasePasswordEntryClass.equals(PasswordEntryFolder.EntryFactory.determineEntryType(selectedFolder))) {
+                    populateDatabaseEntryPasswords(selectedFolder);
+                    TableView<DatabasePasswordEntryWrapper> tableView = (TableView<DatabasePasswordEntryWrapper>)
+                            PasswordManagerApp.getPasswordHomeController().getPasswordTableVbox().getChildren().get(1);
+                    tableView.getSelectionModel().select(tableView.getItems().size() - 1, tableView.getColumns().get(1));
+                }
+            }
+        }
+    }
+
     public static Stage getStage() {
         return stage;
     }
 
-    public static List<PasswordEntryFolder> getPasswordEntryFolders() {
+    public VBox getSidebar() {
+        return sidebar;
+    }
+
+    public void setSidebar(VBox sidebar) {
+        this.sidebar = sidebar;
+    }
+
+    public List<PasswordEntryFolder> getPasswordEntryFolders() {
         return passwordEntryFolders;
     }
 
-    public static void setPasswordEntryFolders(List<PasswordEntryFolder> passwordEntryFolders) {
-        PasswordHomeController.passwordEntryFolders = passwordEntryFolders;
+    public void setPasswordEntryFolders(List<PasswordEntryFolder> passwordEntryFolders) {
+        this.passwordEntryFolders = passwordEntryFolders;
     }
 
-    public static BaseAddPasswordController getBaseAddPasswordController() {
+    public BaseAddPasswordController getBaseAddPasswordController() {
         return baseAddPasswordController;
     }
 
-    public static void setBaseAddPasswordController(BaseAddPasswordController baseAddPasswordController) {
-        PasswordHomeController.baseAddPasswordController = baseAddPasswordController;
+    public void setBaseAddPasswordController(BaseAddPasswordController baseAddPasswordController) {
+        this.baseAddPasswordController = baseAddPasswordController;
+    }
+
+    public PasswordEntryFolder getSelectedFolder() {
+        return selectedFolder;
+    }
+
+    public void setSelectedFolder(PasswordEntryFolder folder) {
+        selectedFolder = folder;
     }
 }

@@ -24,7 +24,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
 
-public class AddFolderController extends BaseController implements Initializable {
+public class AddFolderController extends ErrorChecker implements Initializable {
 
     @FXML
     private VBox addFolderVbox = new VBox();
@@ -54,7 +54,7 @@ public class AddFolderController extends BaseController implements Initializable
         setLabels();
         setTextField();
         setComboBox();
-        setButton();
+        setButtons();
         addFolderVbox.getChildren().add(folderNameLabel);
         addFolderVbox.getChildren().add(folderNameTextField);
         addFolderVbox.getChildren().add(folderTypeLabel);
@@ -79,7 +79,7 @@ public class AddFolderController extends BaseController implements Initializable
         this.folderTypeLabel = folderTypeLabel;
     }
 
-    private void setButton() {
+    private void setButtons() {
         Button addNewFolderButton = new Button("Add Folder");
         addNewFolderButton.setId("addNewFolderButton");
         Insets insets = new Insets(20, 0, 0, 0);
@@ -87,7 +87,7 @@ public class AddFolderController extends BaseController implements Initializable
         addNewFolderButton.setOnAction(e -> {
             try {
                 confirmAndAddNewFolder(e);
-            } catch (GeneralSecurityException ex) {
+            } catch (GeneralSecurityException | ClassNotFoundException ex) {
                 ex.printStackTrace();
             }
         });
@@ -143,7 +143,7 @@ public class AddFolderController extends BaseController implements Initializable
     }
 
     @FXML
-    public void confirmAndAddNewFolder(Event event) throws GeneralSecurityException {
+    public void confirmAndAddNewFolder(Event event) throws GeneralSecurityException, ClassNotFoundException {
         if(PasswordManagerApp.getLoggedInUser() != null) {
             checkAndResetLabels();
             if(hasErroneousFields()) {
@@ -156,10 +156,11 @@ public class AddFolderController extends BaseController implements Initializable
         }
     }
 
-    private void addNewFolder() {
+    private void addNewFolder() throws LoginException, ClassNotFoundException {
         PasswordEntryFolder newFolder = new PasswordEntryFolder(folderTypeComboBox.getSelectionModel().getSelectedItem(),
                 folderNameTextField.getText());
         StoredPassSQLQueries.addNewPasswordFolderToDb(newFolder);
+        PasswordManagerApp.getPasswordHomeController().populatePasswordFolders();
         setFolderTypeEmptyFlag(false);
         setFolderNameEmptyFlag(false);
         PasswordHomeController.getStage().close();

@@ -2,6 +2,7 @@ package com.jamesd.passwordmanager.DAO;
 
 import com.azure.cosmos.models.CosmosItemRequestOptions;
 import com.jamesd.passwordmanager.Models.HierarchyModels.PasswordEntryFolder;
+import com.jamesd.passwordmanager.Models.Passwords.DatabasePasswordEntry;
 import com.jamesd.passwordmanager.Models.Users.User;
 import com.jamesd.passwordmanager.Models.Passwords.WebsitePasswordEntry;
 import com.azure.cosmos.CosmosClient;
@@ -9,6 +10,7 @@ import com.azure.cosmos.CosmosContainer;
 import com.azure.cosmos.CosmosDatabase;
 import com.azure.cosmos.models.CosmosQueryRequestOptions;
 import com.azure.cosmos.util.CosmosPagedIterable;
+import com.jamesd.passwordmanager.PasswordManagerApp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +18,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class StoredPassSQLQueries extends SQLQueries {
 
@@ -82,20 +83,31 @@ public class StoredPassSQLQueries extends SQLQueries {
         return createIfNotExistContainer(getStoredPassDb(), userContainerId, partitionKeyPath);
     }
 
+    private static void updateInMemoryPasswordFolderData(PasswordEntryFolder folder) {
+        List<PasswordEntryFolder> loadedFolders = PasswordManagerApp.getPasswordHomeController().getPasswordEntryFolders();
+        for(PasswordEntryFolder currentFolder : loadedFolders) {
+            if(folder.getPasswordFolder().contentEquals(currentFolder.getPasswordFolder())) {
+                currentFolder.setData(folder.getData());
+                break;
+            }
+        }
+    }
+
     public static void addNewPasswordFolderToDb(PasswordEntryFolder folder) {
         logger.info("Adding new password folder to the database...");
         getUserPasswordsContainer().createItem(folder);
         logger.info("Password folder created successfully.");
     }
 
-    public static void addNewPasswordToDb(PasswordEntryFolder folder, String passwordName, String siteUrl,
-                                          String masterUsername, String passwordUsername, String currentDate,
-                                          String encryptedPassword) throws ClassNotFoundException {
+    public static void addNewWebsitePasswordToDb(PasswordEntryFolder folder, String passwordName, String siteUrl,
+                                                 String masterUsername, String passwordUsername, String currentDate,
+                                                 String encryptedPassword) throws ClassNotFoundException {
         logger.info("Adding new password with website URL to database...");
         Class<?> passwordEntryClass = Class.forName("com.jamesd.passwordmanager.Models.Passwords.WebsitePasswordEntry");
         Class<?> classOfEntry = PasswordEntryFolder.EntryFactory.determineEntryType(folder);
         if(passwordEntryClass.equals(classOfEntry)) {
-            WebsitePasswordEntry entry = new WebsitePasswordEntry(passwordName, siteUrl, masterUsername, passwordUsername, currentDate, encryptedPassword);
+            WebsitePasswordEntry entry = new WebsitePasswordEntry(passwordName, siteUrl, masterUsername, passwordUsername,
+                    currentDate, encryptedPassword);
             HashMap<Object, Object> passwordMap = new HashMap<>();
             passwordMap.put("id", entry.getId());
             passwordMap.put("passwordName", entry.getPasswordName());
@@ -105,19 +117,47 @@ public class StoredPassSQLQueries extends SQLQueries {
             passwordMap.put("passwordUsername", entry.getPasswordUsername());
             passwordMap.put("dateSet", entry.getDateSet());
             folder.getData().add(passwordMap);
+            updateInMemoryPasswordFolderData(folder);
             getUserPasswordsContainer().upsertItem(folder);
-            logger.info("Password entry created successfully.");
+            logger.info("Website password entry created successfully.");
         } else {
             logger.error("Class cast exception occurred! " + classOfEntry + " is not of type " + passwordEntryClass);
         }
     }
 
-    public static void updatePasswordInDb(WebsitePasswordEntry entry, PasswordEntryFolder factory) throws ClassNotFoundException {
+    public static void addNewDatabasePasswordToDb(PasswordEntryFolder folder, String passwordName, String hostname,
+                                                  String masterUsername, String databaseName, String databaseUsername,
+                                                  String currentDate, String encryptedPassword) throws ClassNotFoundException {
+        logger.info("Adding new database password to database...");
+        Class<?> passwordEntryClass = Class.forName("com.jamesd.passwordmanager.Models.Passwords.DatabasePasswordEntry");
+        Class<?> classOfEntry = PasswordEntryFolder.EntryFactory.determineEntryType(folder);
+        if(passwordEntryClass.equals(classOfEntry)) {
+            DatabasePasswordEntry entry = new DatabasePasswordEntry(passwordName, hostname, databaseName, masterUsername,
+                    databaseUsername, currentDate, encryptedPassword);
+            HashMap<Object, Object> passwordMap = new HashMap<>();
+            passwordMap.put("id", entry.getId());
+            passwordMap.put("passwordName", entry.getPasswordName());
+            passwordMap.put("encryptedPassword", entry.getEncryptedPassword());
+            passwordMap.put("hostname", entry.getHostName());
+            passwordMap.put("databaseName", entry.getDatabaseName());
+            passwordMap.put("masterUsername", entry.getMasterUsername());
+            passwordMap.put("databaseUsername", entry.getDatabaseUsername());
+            passwordMap.put("dateSet", entry.getDateSet());
+            folder.getData().add(passwordMap);
+            updateInMemoryPasswordFolderData(folder);
+            getUserPasswordsContainer().upsertItem(folder);
+            logger.info("Database password entry created successfully.");
+        } else {
+            logger.error("Class cast exception occurred! " + classOfEntry + " is not of type " + passwordEntryClass);
+        }
+    }
+
+    public static void updateWebsitePasswordInDb(WebsitePasswordEntry entry, PasswordEntryFolder folder) throws ClassNotFoundException {
         logger.info("Updating password in database...");
         Class<?> passwordEntryClass = Class.forName("com.jamesd.passwordmanager.Models.Passwords.WebsitePasswordEntry");
-        Class<?> classOfEntry = PasswordEntryFolder.EntryFactory.determineEntryType(factory);
-        if(passwordEntryClass.isInstance(classOfEntry)) {
-            factory.getData().forEach(data -> {
+        Class<?> classOfEntry = PasswordEntryFolder.EntryFactory.determineEntryType(folder);
+        if(passwordEntryClass.equals(classOfEntry)) {
+            folder.getData().forEach(data -> {
                 if (data.get("id").equals(entry.getId())) {
                     data.clear();
                     data.put("id", entry.getId());
@@ -129,46 +169,81 @@ public class StoredPassSQLQueries extends SQLQueries {
                     data.put("dateSet", entry.getDateSet());
                 }
             });
-            getUserPasswordsContainer().upsertItem(entry);
+            updateInMemoryPasswordFolderData(folder);
+            getUserPasswordsContainer().upsertItem(folder);
             logger.info("Password updated successfully.");
         } else {
             logger.error("Class cast exception occurred! " + classOfEntry + " is not of type " + passwordEntryClass);
         }
     }
 
-    public static void updatePasswordInDb(WebsitePasswordEntry entry) {
+    public static void updateDatabasePasswordInDb(DatabasePasswordEntry entry, PasswordEntryFolder folder) throws ClassNotFoundException {
         logger.info("Updating password in database...");
-        getUserPasswordsContainer().upsertItem(entry);
-        logger.info("Password updated successfully.");
-    }
-
-    public static void deletePasswordInDb(WebsitePasswordEntry entry, PasswordEntryFolder factory) throws ClassNotFoundException {
-        logger.info("Deleting password in database...");
-        Class<?> passwordEntryClass = Class.forName("com.jamesd.passwordmanager.Models.Passwords.WebsitePasswordEntry");
-        Class<?> classOfEntry = PasswordEntryFolder.EntryFactory.determineEntryType(factory);
-        if(passwordEntryClass.isInstance(classOfEntry)) {
-            AtomicReference<Integer> indexToRemove = new AtomicReference<>(0);
-            factory.getData().forEach(data -> {
-                if(data.get("id").equals(entry.getId())) {
-                    indexToRemove.set(factory.getData().indexOf(data));
+        Class<?> passwordEntryClass = Class.forName("com.jamesd.passwordmanager.Models.Passwords.DatabasePasswordEntry");
+        Class<?> classOfEntry = PasswordEntryFolder.EntryFactory.determineEntryType(folder);
+        if(passwordEntryClass.equals(classOfEntry)) {
+            folder.getData().forEach(data -> {
+                if (data.get("id").equals(entry.getId())) {
+                    data.clear();
+                    data.put("id", entry.getId());
+                    data.put("passwordName", entry.getPasswordName());
+                    data.put("encryptedPassword", entry.getEncryptedPassword());
+                    data.put("hostname", entry.getHostName());
+                    data.put("masterUsername", entry.getMasterUsername());
+                    data.put("databaseName", entry.getDatabaseName());
+                    data.put("databaseUsername", entry.getDatabaseUsername());
+                    data.put("dateSet", entry.getDateSet());
                 }
             });
-            factory.getData().remove(indexToRemove.get());
-            getUserPasswordsContainer().upsertItem(entry);
+            updateInMemoryPasswordFolderData(folder);
+            getUserPasswordsContainer().upsertItem(folder);
+            logger.info("Password updated successfully.");
         } else {
             logger.error("Class cast exception occurred! " + classOfEntry + " is not of type " + passwordEntryClass);
         }
     }
 
-    public static void deletePasswordInDb(WebsitePasswordEntry entry) {
+    public static void deletePasswordInDb(Object entry, PasswordEntryFolder folder) throws ClassNotFoundException {
         logger.info("Deleting password in database...");
-        getUserPasswordsContainer().deleteItem(entry, new CosmosItemRequestOptions());
-        logger.info("Password deleted successfully.");
+        Class<?> websiteEntryClass = Class.forName("com.jamesd.passwordmanager.Models.Passwords.WebsitePasswordEntry");
+        Class<?> databaseEntryClass = Class.forName("com.jamesd.passwordmanager.Models.Passwords.DatabasePasswordEntry");
+        Class<?> classOfEntry = PasswordEntryFolder.EntryFactory.determineEntryType(folder);
+        if(websiteEntryClass.equals(classOfEntry)) {
+            WebsitePasswordEntry websitePasswordEntry = (WebsitePasswordEntry) entry;
+            int indexToRemove = -1;
+            for(HashMap<Object, Object> data : folder.getData()) {
+                if(data.get("id").equals(websitePasswordEntry.getId())) {
+                    indexToRemove = folder.getData().indexOf(data);
+                }
+            }
+            folder.getData().remove(indexToRemove);
+            updateInMemoryPasswordFolderData(folder);
+            getUserPasswordsContainer().upsertItem(folder);
+            logger.info("Website password deleted successfully.");
+        }
+        else if(databaseEntryClass.equals(classOfEntry)) {
+            DatabasePasswordEntry databasePasswordEntry = (DatabasePasswordEntry) entry;
+            int indexToRemove = -1;
+            for(HashMap<Object, Object> data : folder.getData()) {
+                if(data.get("id").equals(databasePasswordEntry.getId())) {
+                    indexToRemove = folder.getData().indexOf(data);
+                }
+            }
+            folder.getData().remove(indexToRemove);
+            updateInMemoryPasswordFolderData(folder);
+            getUserPasswordsContainer().upsertItem(folder);
+            logger.info("Database password deleted successfully.");
+        } else {
+            logger.error("Class cast exception occurred! " + classOfEntry + " is not of types {" +
+                    "\n" + websiteEntryClass +
+                    "\n" + databaseEntryClass +
+                    "\n}");
+        }
     }
 
-    public static void deletePasswordFolderInDb(PasswordEntryFolder factory) {
+    public static void deletePasswordFolderInDb(PasswordEntryFolder folder) {
         logger.info("Deleting password folder in database...");
-        getUserPasswordsContainer().deleteItem(factory, new CosmosItemRequestOptions());
+        getUserPasswordsContainer().deleteItem(folder, new CosmosItemRequestOptions());
         logger.info("Password folder deleted successfully.");
     }
 
@@ -186,6 +261,13 @@ public class StoredPassSQLQueries extends SQLQueries {
     public static List<PasswordEntryFolder> queryPasswordFolderContainerByUsername(String username) {
         logger.info("Querying " + getUserPasswordsContainer().getId() + " container in " + getStoredPassDb().getId() + " database...");
         String sql =  "SELECT * FROM c WHERE c.masterUsername = '" + username + "'";
+        return queryPasswordFolderContainer(sql);
+    }
+
+    public static List<PasswordEntryFolder> queryPasswordFolderContainerByNameAndType(String folderName, String type) {
+        logger.info("Querying " + getUserPasswordsContainer().getId() + " container in " + getStoredPassDb().getId() + " database...");
+        logger.info("Obtaining password folders named " + folderName + " with type " + type + "...");
+        String sql = "SELECT * FROM c WHERE c.passwordFolder = '" + folderName + "' AND c.passwordType = '" + type + "'";
         return queryPasswordFolderContainer(sql);
     }
 

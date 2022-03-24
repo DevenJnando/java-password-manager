@@ -1,30 +1,23 @@
 package com.jamesd.passwordmanager;
 
-import com.jamesd.passwordmanager.Controllers.PasswordDetailsController;
+import com.jamesd.passwordmanager.Controllers.BaseDetailsController;
 import com.jamesd.passwordmanager.Controllers.PasswordHomeController;
 import com.jamesd.passwordmanager.Controllers.PreferencesController;
 import com.jamesd.passwordmanager.DAO.MasterSQLQueries;
 import com.jamesd.passwordmanager.DAO.PropertiesUtil;
 import com.jamesd.passwordmanager.DAO.StoredPassSQLQueries;
 import com.jamesd.passwordmanager.Models.Users.User;
-import com.jamesd.passwordmanager.Wrappers.WebsitePasswordEntryWrapper;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import javax.security.auth.login.LoginException;
 import java.io.File;
 import java.io.IOException;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 
 public class PasswordManagerApp extends Application {
 
@@ -53,16 +46,16 @@ public class PasswordManagerApp extends Application {
     private static User loggedInUser;
 
     private static PasswordHomeController passwordHomeController;
-    private static PasswordDetailsController passwordDetailsController;
+    private static BaseDetailsController passwordDetailsController;
     private static PreferencesController preferencesController;
 
     private static Logger logger = LoggerFactory.getLogger(PasswordManagerApp.class);
 
     @Override
-    public void start(Stage stage) throws IOException, ClassNotFoundException {
+    public void start(Stage stage) throws IOException {
         PropertiesUtil.initialise();
         passwordHomeController = new PasswordHomeController();
-        passwordDetailsController = new PasswordDetailsController();
+        passwordDetailsController = new BaseDetailsController();
         preferencesController = new PreferencesController();
         stage.setTitle("DevenJnando Password Manager");
         mainStage = stage;
@@ -115,35 +108,28 @@ public class PasswordManagerApp extends Application {
     public static void loadPasswordHomeView() throws IOException {
         FXMLLoader passwordHomeLoader = new FXMLLoader(PasswordHomeController.class
                 .getResource("/com/jamesd/passwordmanager/views/users-passwords.fxml"));
-        FXMLLoader passwordDetailsLoader = new FXMLLoader(PasswordDetailsController.class
-                .getResource("/com/jamesd/passwordmanager/views/password-details.fxml"));
+        FXMLLoader passwordDetailsLoader = new FXMLLoader(BaseDetailsController.class
+                .getResource("/com/jamesd/passwordmanager/views/base-details-view.fxml"));
+        FXMLLoader sideBarLoader = new FXMLLoader(PasswordHomeController.class
+                .getResource("/com/jamesd/passwordmanager/views/sidebar-menu.fxml"));
         BorderPane homePane = passwordHomeLoader.load();
-        BorderPane detailsPane = passwordDetailsLoader.load();
+        VBox detailsVbox = passwordDetailsLoader.load();
         passwordHomeController = passwordHomeLoader.getController();
         passwordDetailsController = passwordDetailsLoader.getController();
-        homePane.setLeft(FXMLLoader.load(PasswordHomeController.class
-                .getResource("/com/jamesd/passwordmanager/views/sidebar-menu.fxml")));
-        homePane.setCenter(detailsPane);
+        homePane.setLeft(sideBarLoader.load());
+        homePane.setCenter(detailsVbox);
         rootLayout.setTop(null);
         rootLayout.setCenter(homePane);
-    }
-
-    public static void loadPasswordDetailsView(WebsitePasswordEntryWrapper passwordEntry) throws IOException,
-            InvalidAlgorithmParameterException, LoginException, NoSuchPaddingException, IllegalBlockSizeException,
-            NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
-        passwordDetailsController.clear();
-        passwordDetailsController.setPasswordEntryWrapper(passwordEntry);
-        passwordDetailsController.setIcons();
-        passwordDetailsController.populatePasswordLayout();
     }
 
     public static void loadPreferencesView() throws IOException{
         FXMLLoader preferencesLoader = new FXMLLoader(PreferencesController.class
                 .getResource("/com/jamesd/passwordmanager/views/preferences.fxml"));
+        FXMLLoader sideBarLoader = new FXMLLoader(PasswordHomeController.class
+                .getResource("/com/jamesd/passwordmanager/views/sidebar-menu.fxml"));
         BorderPane preferencesPane = preferencesLoader.load();
         preferencesController = preferencesLoader.getController();
-        preferencesPane.setLeft(FXMLLoader.load(PreferencesController.class
-                .getResource("/com/jamesd/passwordmanager/views/sidebar-menu.fxml")));
+        preferencesPane.setLeft(sideBarLoader.load());
         rootLayout.setTop(null);
         rootLayout.setCenter(preferencesPane);
     }
@@ -165,7 +151,7 @@ public class PasswordManagerApp extends Application {
 
     public static PasswordHomeController getPasswordHomeController() { return passwordHomeController; }
 
-    public static PasswordDetailsController getPasswordDetailsController() {
+    public static BaseDetailsController getPasswordDetailsController() {
         return passwordDetailsController;
     }
 

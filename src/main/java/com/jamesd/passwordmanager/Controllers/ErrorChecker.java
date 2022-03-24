@@ -8,12 +8,12 @@ import org.slf4j.LoggerFactory;
 
 import java.util.stream.Collectors;
 
-public abstract class BaseController {
+public abstract class ErrorChecker {
 
-    private static Logger logger = LoggerFactory.getLogger(BaseController.class);
+    private static Logger logger = LoggerFactory.getLogger(ErrorChecker.class);
 
 
-    public BaseController() {
+    public ErrorChecker() {
 
     }
 

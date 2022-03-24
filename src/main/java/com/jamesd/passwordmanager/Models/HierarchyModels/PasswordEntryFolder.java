@@ -1,5 +1,6 @@
 package com.jamesd.passwordmanager.Models.HierarchyModels;
 
+import com.jamesd.passwordmanager.Models.Passwords.DatabasePasswordEntry;
 import com.jamesd.passwordmanager.Models.Passwords.WebsitePasswordEntry;
 import com.jamesd.passwordmanager.PasswordManagerApp;
 
@@ -64,6 +65,31 @@ public class PasswordEntryFolder {
         this.data = data;
     }
 
+    public String getReadableTypeString() {
+        List<String> types = List.of("WebPassword",
+                                    "DatabasePassword",
+                                    "CreditCard",
+                                    "Passport",
+                                    "Document");
+        for(String type : types) {
+            if(getPasswordType().contentEquals(type)) {
+                switch(type) {
+                    case "WebPassword" :
+                        return "Website Passwords";
+                    case "DatabasePassword" :
+                        return "Database Passwords";
+                    case "CreditCard" :
+                        return "Credit/Debit Cards";
+                    case "Passport" :
+                        return "Passports";
+                    case "Document" :
+                        return "Documents";
+                }
+            }
+        }
+        return null;
+    }
+
     public String getId() {
         return this.id;
     }
@@ -102,6 +128,16 @@ public class PasswordEntryFolder {
         this.masterUsername = masterUsername;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        PasswordEntryFolder object = (PasswordEntryFolder) o;
+        return(getId() == null || getId().equals(object.getId())
+        && getMasterUsername() == null || getMasterUsername().equals(object.getMasterUsername())
+        && getPasswordFolder() == null || getPasswordFolder().equals(object.getPasswordFolder())
+        && getPasswordType() == null || getPasswordType().equals(object.getPasswordType())
+        && getData() == null || getData().equals(object.getData()));
+    }
+
     public static class EntryFactory {
 
         public static Class<?> determineEntryType(PasswordEntryFolder folder) {
@@ -109,8 +145,7 @@ public class PasswordEntryFolder {
                 case "WebPassword":
                     return WebsitePasswordEntry.class;
                 case "DatabasePassword":
-                    //TODO: Implement database password class
-                    return null;
+                    return DatabasePasswordEntry.class;
                 case "CreditCard":
                     //TODO: Implement Credit card class
                     return null;
@@ -143,11 +178,32 @@ public class PasswordEntryFolder {
             return listOfEntries;
         }
 
+        private static List<DatabasePasswordEntry> getListOfDatabasePasswords(PasswordEntryFolder folder) {
+            List<DatabasePasswordEntry> listOfEntries = new ArrayList<>();
+            folder.getData().forEach((data) -> {
+                DatabasePasswordEntry entry = PasswordEntryBuilder.DatabasePasswordEntryBuilder.newInstance()
+                        .withId((String) data.get("id"))
+                        .withPasswordName((String) data.get("passwordName"))
+                        .withEncryptedPassword((String) data.get("encryptedPassword"))
+                        .withHostName((String) data.get("hostname"))
+                        .withDatabaseName((String) data.get("databaseName"))
+                        .withMasterUsername((String) data.get("masterUsername"))
+                        .withDatabaseUsername((String) data.get("databaseUsername"))
+                        .withDateSet((String) data.get("dateSet"))
+                        .build();
+                listOfEntries.add(entry);
+            });
+            return listOfEntries;
+        }
+
         public static List<?> generateEntries(PasswordEntryFolder folder) throws ClassNotFoundException {
             Class<?> passwordEntryClass = Class.forName("com.jamesd.passwordmanager.Models.Passwords.WebsitePasswordEntry");
+            Class<?> databaseEntryClass = Class.forName("com.jamesd.passwordmanager.Models.Passwords.DatabasePasswordEntry");
             Class<?> classOfEntry = determineEntryType(folder);
             if(passwordEntryClass.equals(classOfEntry)) {
                 return getListOfWebPasswords(folder);
+            } if(databaseEntryClass.equals(classOfEntry)) {
+                return getListOfDatabasePasswords(folder);
             }
             else {
                 return new ArrayList<>();

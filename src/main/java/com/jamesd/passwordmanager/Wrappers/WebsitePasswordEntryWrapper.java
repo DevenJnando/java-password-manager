@@ -5,22 +5,16 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.scene.image.ImageView;
 
-public class WebsitePasswordEntryWrapper {
+public class WebsitePasswordEntryWrapper extends BaseWrapper {
     private WebsitePasswordEntry websitePasswordEntry;
-    private ImageView favicon;
-    private BooleanProperty checked = new SimpleBooleanProperty();
 
     public WebsitePasswordEntryWrapper() {
 
     }
 
     public WebsitePasswordEntryWrapper(WebsitePasswordEntry websitePasswordEntry, ImageView favicon) {
+        super(favicon);
         this.websitePasswordEntry = websitePasswordEntry;
-        this.favicon = favicon;
-    }
-
-    public ImageView getFavicon() {
-        return this.favicon;
     }
 
     public WebsitePasswordEntry getWebsitePasswordEntry() {
@@ -29,17 +23,5 @@ public class WebsitePasswordEntryWrapper {
 
     public void setWebsitePasswordEntry(WebsitePasswordEntry websitePasswordEntry) {
         this.websitePasswordEntry = websitePasswordEntry;
-    }
-
-    public BooleanProperty isChecked() {
-        return checked;
-    }
-
-    public void setChecked(Boolean checked) {
-        this.checked.set(checked);
-    }
-
-    public void setFavicon(ImageView favicon) {
-        this.favicon = favicon;
     }
 }

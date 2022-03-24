@@ -1,9 +1,8 @@
 package com.jamesd.passwordmanager.Tables;
 
-import com.jamesd.passwordmanager.DAO.StoredPassSQLQueries;
+import com.jamesd.passwordmanager.Controllers.BaseDetailsController;
 import com.jamesd.passwordmanager.Models.HierarchyModels.PasswordEntryFolder;
 import com.jamesd.passwordmanager.Models.Passwords.WebsitePasswordEntry;
-import com.jamesd.passwordmanager.Models.Users.User;
 import com.jamesd.passwordmanager.PasswordManagerApp;
 import com.jamesd.passwordmanager.Wrappers.WebsitePasswordEntryWrapper;
 import javafx.beans.property.BooleanProperty;
@@ -33,13 +32,10 @@ import java.net.URL;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
-public class WebsitePasswordTable {
+public class WebsitePasswordTable extends BasePasswordTable<WebsitePasswordEntryWrapper, WebsitePasswordEntry> {
 
     @FXML
     private TableView<WebsitePasswordEntryWrapper> passwordTableView = new TableView<>();
@@ -48,36 +44,6 @@ public class WebsitePasswordTable {
 
     public WebsitePasswordTable() {
 
-    }
-
-    private long daysSinceLastUpdate(String passwordEntryDateSet) {
-        LocalDate currentDate = LocalDate.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        LocalDate dateSet = LocalDate.parse(passwordEntryDateSet, formatter);
-        long daysSinceLastUpdate = dateSet.until(currentDate, ChronoUnit.DAYS);
-        return daysSinceLastUpdate;
-    }
-
-    private Boolean passwordNeedsUpdated(String passwordEntryDateSet) {
-        Boolean needsUpdated = false;
-        long daysSinceLastUpdate = daysSinceLastUpdate(passwordEntryDateSet);
-        if(daysSinceLastUpdate > 182) {
-            needsUpdated = true;
-        }
-        return needsUpdated;
-    }
-
-    private void checkIfPasswordNeedsUpdated(List<WebsitePasswordEntry> passwordEntries) {
-        for(WebsitePasswordEntry entry : passwordEntries) {
-            if(passwordNeedsUpdated(entry.getDateSet())) {
-                long daysOutOfDate = daysSinceLastUpdate(entry.getDateSet());
-
-                String outOfDateMessage = daysOutOfDate > 1
-                        ? "Password is " + daysOutOfDate + " days out of date!"
-                        : "Password is " + daysOutOfDate + " day out of date!";
-                entry.setNeedsUpdatedMessage(outOfDateMessage);
-            }
-        }
     }
 
     public Boolean getUrlFavicon(String protocol, String url) {
@@ -115,6 +81,7 @@ public class WebsitePasswordTable {
         }
     }
 
+    @Override
     public List<WebsitePasswordEntryWrapper> wrapPasswords(List<WebsitePasswordEntry> passwordEntries) throws MalformedURLException {
         List<WebsitePasswordEntryWrapper> passwordsWithFavicons = new ArrayList();
         for(WebsitePasswordEntry entry : passwordEntries) {
@@ -132,54 +99,7 @@ public class WebsitePasswordTable {
         return passwordsWithFavicons;
     }
 
-    public TableView<WebsitePasswordEntryWrapper> populatePasswordList(PasswordEntryFolder folder)
-            throws LoginException, MalformedURLException, ClassNotFoundException {
-        if(PasswordManagerApp.getLoggedInUser() != null) {
-            Class<?> passwordEntryClass = Class.forName("com.jamesd.passwordmanager.Models.Passwords.WebsitePasswordEntry");
-            Class<?> classOfEntry = PasswordEntryFolder.EntryFactory.determineEntryType(folder);
-            List<?> genericPasswordList = PasswordEntryFolder.EntryFactory.generateEntries(folder);
-            List<WebsitePasswordEntry> passwordList = new ArrayList<>();
-            if(passwordEntryClass.equals(classOfEntry)) {
-                passwordList = (List<WebsitePasswordEntry>) genericPasswordList;
-                checkIfPasswordNeedsUpdated(passwordList);
-            }
-            List<WebsitePasswordEntryWrapper> wrappedPasswords = wrapPasswords(passwordList);
-            ObservableList<WebsitePasswordEntryWrapper> oPasswordList = FXCollections.observableList(wrappedPasswords);
-            loadColumns();
-            passwordTableView.setItems(oPasswordList);
-            passwordTableView.setCursor(Cursor.HAND);
-            passwordTableView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
-            passwordTableView.getSelectionModel().setCellSelectionEnabled(true);
-            passwordTableView.setEditable(true);
-            passwordTableView.getSelectionModel().selectedItemProperty().addListener((observableValue, passwordEntry, t1) -> {
-                try {
-                    TablePosition position = passwordTableView.getSelectionModel().getSelectedCells().get(0);
-                    TableColumn selectedColumn = position.getTableColumn();
-                    if (!selectedColumn.getText().equals("Checkbox")) {
-                        try {
-                            PasswordManagerApp.loadPasswordDetailsView(t1);
-                        } catch (IOException
-                                | LoginException
-                                | InvalidAlgorithmParameterException
-                                | NoSuchPaddingException
-                                | IllegalBlockSizeException
-                                | NoSuchAlgorithmException
-                                | BadPaddingException
-                                | InvalidKeyException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                } catch (IndexOutOfBoundsException e) {
-                    logger.error("Password table not loaded. Cannot create listener.");
-                }
-            });
-            logger.info("Successfully populated password list.");
-            return this.passwordTableView;
-        } else {
-            throw new LoginException("User is not logged in. Aborting process.");
-        }
-    }
-
+    @Override
     protected void loadColumns() {
         TableColumn<WebsitePasswordEntryWrapper, Boolean> checkMark = new TableColumn("Checkbox");
         TableColumn<WebsitePasswordEntryWrapper, String> faviconCol = new TableColumn("");
@@ -205,8 +125,53 @@ public class WebsitePasswordTable {
         passwordTableView.getColumns().setAll(checkMark, faviconCol, passwordNameCol, siteUrlCol, passwordUsernameCol, dateSetCol, updateMessageCol);
     }
 
+    @Override
     public TableView<WebsitePasswordEntryWrapper> createTableView(PasswordEntryFolder folder)
-            throws MalformedURLException, LoginException, ClassNotFoundException {
-        return populatePasswordList(folder);
+            throws LoginException, MalformedURLException, ClassNotFoundException {
+        if(PasswordManagerApp.getLoggedInUser() != null) {
+            Class<?> passwordEntryClass = Class.forName("com.jamesd.passwordmanager.Models.Passwords.WebsitePasswordEntry");
+            Class<?> classOfEntry = PasswordEntryFolder.EntryFactory.determineEntryType(folder);
+            List<?> genericPasswordList = PasswordEntryFolder.EntryFactory.generateEntries(folder);
+            List<WebsitePasswordEntry> passwordList = new ArrayList<>();
+            if(passwordEntryClass.equals(classOfEntry)) {
+                passwordList = (List<WebsitePasswordEntry>) genericPasswordList;
+                checkIfPasswordNeedsUpdated(passwordList);
+            }
+            List<WebsitePasswordEntryWrapper> wrappedPasswords = wrapPasswords(passwordList);
+            ObservableList<WebsitePasswordEntryWrapper> oPasswordList = FXCollections.observableList(wrappedPasswords);
+            loadColumns();
+            passwordTableView.setItems(oPasswordList);
+            passwordTableView.setCursor(Cursor.HAND);
+            passwordTableView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+            passwordTableView.getSelectionModel().setCellSelectionEnabled(true);
+            passwordTableView.setEditable(true);
+            passwordTableView.getSelectionModel().selectedItemProperty().addListener((observableValue, passwordEntry, t1) -> {
+                try {
+                    TablePosition position = passwordTableView.getSelectionModel().getSelectedCells().get(0);
+                    TableColumn selectedColumn = position.getTableColumn();
+                    if (!selectedColumn.getText().equals("Checkbox")) {
+                        try {
+                            BaseDetailsController controller = PasswordManagerApp.getPasswordDetailsController();
+                            controller.setWebDetailsBorderPane(t1, folder);
+                        } catch (IOException
+                                | LoginException
+                                | InvalidAlgorithmParameterException
+                                | NoSuchPaddingException
+                                | IllegalBlockSizeException
+                                | NoSuchAlgorithmException
+                                | BadPaddingException
+                                | InvalidKeyException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                } catch (IndexOutOfBoundsException e) {
+                    logger.error("Password table not loaded. Cannot create listener.");
+                }
+            });
+            logger.info("Successfully populated password list.");
+            return this.passwordTableView;
+        } else {
+            throw new LoginException("User is not logged in. Aborting process.");
+        }
     }
 }

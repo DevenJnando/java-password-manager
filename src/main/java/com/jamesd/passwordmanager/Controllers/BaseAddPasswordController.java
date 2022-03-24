@@ -1,6 +1,7 @@
 package com.jamesd.passwordmanager.Controllers;
 
 import com.jamesd.passwordmanager.Models.HierarchyModels.PasswordEntryFolder;
+import com.jamesd.passwordmanager.PasswordManagerApp;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -80,7 +81,7 @@ public class BaseAddPasswordController implements Initializable {
     }
 
     private void populateFolderChoiceBox(String passwordType) {
-        List<PasswordEntryFolder> folders = PasswordHomeController.getPasswordEntryFolders();
+        List<PasswordEntryFolder> folders = PasswordManagerApp.getPasswordHomeController().getPasswordEntryFolders();
         List<String> relevantFolderNames = new ArrayList<>();
         folders.forEach(o -> {
                     if(o.getPasswordType().equals(typeFinder(passwordType))) {
@@ -91,15 +92,17 @@ public class BaseAddPasswordController implements Initializable {
         folderChoiceBox.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             for(PasswordEntryFolder folder : folders) {
                 if(folder.getPasswordFolder().equals(newVal)) {
-                    setSelectedFolder(folder);
+                    PasswordManagerApp.getPasswordHomeController().getBaseAddPasswordController().setSelectedFolder(folder);
                 }
             }
         });
-        PasswordHomeController.getBaseAddPasswordController().setFolderChoiceBox(folderChoiceBox);
+        PasswordManagerApp.getPasswordHomeController()
+                .getBaseAddPasswordController().setFolderChoiceBox(folderChoiceBox);
         if(this.folderChoiceBox.isDisabled()) {
             this.folderChoiceBox.setDisable(false);
         }
-        baseAddPasswordVbox.getChildren().set(3, PasswordHomeController.getBaseAddPasswordController().getFolderChoiceBox());
+        baseAddPasswordVbox.getChildren().set(3, PasswordManagerApp.getPasswordHomeController()
+                .getBaseAddPasswordController().getFolderChoiceBox());
     }
 
     private void loadAddPasswordView(String passwordType) throws IOException {
@@ -112,8 +115,8 @@ public class BaseAddPasswordController implements Initializable {
                 break;
             case "Database password":
                 //TODO: replace with actual view + controller once finished
-                viewToLoad = "/com/jamesd/passwordmanager/views/add-website-password-modal.fxml";
-                controllerClass = AddWebsitePasswordController.class;
+                viewToLoad = "/com/jamesd/passwordmanager/views/add-database-password-modal.fxml";
+                controllerClass = AddDatabasePasswordController.class;
                 break;
             case "Credit/Debit card":
                 viewToLoad = "/com/jamesd/passwordmanager/views/add-website-password-modal.fxml";
@@ -132,8 +135,10 @@ public class BaseAddPasswordController implements Initializable {
         }
         FXMLLoader viewLoader = new FXMLLoader(controllerClass.getResource(viewToLoad));
         AnchorPane addPasswordAnchorPane = viewLoader.load();
-        PasswordHomeController.getBaseAddPasswordController().setAddPasswordAnchorPane(addPasswordAnchorPane);
-        baseAddPasswordVbox.getChildren().set(4, PasswordHomeController.getBaseAddPasswordController().getAddPasswordAnchorPane());
+        PasswordManagerApp.getPasswordHomeController()
+                .getBaseAddPasswordController().setAddPasswordAnchorPane(addPasswordAnchorPane);
+        baseAddPasswordVbox.getChildren().set(4, PasswordManagerApp.getPasswordHomeController()
+                .getBaseAddPasswordController().getAddPasswordAnchorPane());
     }
 
     public ChoiceBox<String> getPasswordTypeChoiceBox() {
