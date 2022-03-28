@@ -2,11 +2,13 @@
 Password manager app in Java
 
 ## Cloning and running
+
 <br/>
 For running from source, add the following vm option to the java build configuration: `--add-opens=java.base/java.lang.reflect=com.jfoenix` 
 Java 11 and JavaFX are required for this application to work.
 
 ## Brief breakdown of how it works
+
 <br/>
 The frontend of this application is written in JavaFX. I wanted to make a password manager as a standalone application with the logic that having it hosted on a web server as a web application could introduce an additional point of vulnerability for hypothetical undesirables!
 <br/>
@@ -18,7 +20,9 @@ User's passwords and credentials are two-way encrypted using an implementation o
 <br/>
 For presentation and processing of business logic and MVC architecture has been implemented. The modularity of this architecture, as well as the use of other design patterns (builders, factories, reflection, etc.) make the code more readable and more cohesive. It also makes diagnosing and locating bugs far easier.
 <br/>
+
 ## Working features
+
 <br/>
 *Register and login (Currently only allows username for login)
 <br/>
@@ -34,7 +38,9 @@ For presentation and processing of business logic and MVC architecture has been 
 <br/>
 *Change timescale before a password reminder is given
 <br/>
+
 ## Features to come
+
 <br/>
 *Unit tests need written for utility classes and controller methods (Shame on me! Should have written those much sooner!) - dev benefit
 <br/>
