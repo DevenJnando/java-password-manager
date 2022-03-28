@@ -1,5 +1,6 @@
 package com.jamesd.passwordmanager.Models.HierarchyModels;
 
+import com.jamesd.passwordmanager.Models.Passwords.CreditDebitCardEntry;
 import com.jamesd.passwordmanager.Models.Passwords.DatabasePasswordEntry;
 import com.jamesd.passwordmanager.Models.Passwords.WebsitePasswordEntry;
 import com.jamesd.passwordmanager.PasswordManagerApp;
@@ -147,8 +148,7 @@ public class PasswordEntryFolder {
                 case "DatabasePassword":
                     return DatabasePasswordEntry.class;
                 case "CreditCard":
-                    //TODO: Implement Credit card class
-                    return null;
+                    return CreditDebitCardEntry.class;
                 case "Passport":
                     //TODO: Implement Passport class
                     return null;
@@ -190,6 +190,24 @@ public class PasswordEntryFolder {
                         .withMasterUsername((String) data.get("masterUsername"))
                         .withDatabaseUsername((String) data.get("databaseUsername"))
                         .withDateSet((String) data.get("dateSet"))
+                        .build();
+                listOfEntries.add(entry);
+            });
+            return listOfEntries;
+        }
+
+        private static List<CreditDebitCardEntry> getListOfCreditDebitCards(PasswordEntryFolder folder) {
+            List<CreditDebitCardEntry> listOfEntries = new ArrayList<>();
+            folder.getData().forEach((data) -> {
+                CreditDebitCardEntry entry = PasswordEntryBuilder.CreditDebitCardEntryBuilder.newInstance()
+                        .withId((String) data.get("id"))
+                        .withPasswordName((String) data.get("passwordName"))
+                        .withCreditDebitCardNumber((String) data.get("cardNumber"))
+                        .withExpiryDate((String) data.get("expiryDate"))
+                        .withSecurityCode((String) data.get("securityCode"))
+                        .withAccountNumber((String) data.get("accountNumber"))
+                        .withSortCode((String) data.get("sortCode"))
+                        .withDateSet((String) data.get(("dateSet")))
                         .build();
                 listOfEntries.add(entry);
             });
