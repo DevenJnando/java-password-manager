@@ -2,13 +2,8 @@ package com.jamesd.passwordmanager.Models.Passwords;
 
 import com.jamesd.passwordmanager.Utils.EncryptDecryptPasswordsUtil;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 import java.io.IOException;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
+import java.security.GeneralSecurityException;
 
 public class StoredPassDbKey extends PasswordEntry {
 
@@ -29,8 +24,8 @@ public class StoredPassDbKey extends PasswordEntry {
     }
 
     public void decryptMasterPassword()
-            throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException,
-            NoSuchAlgorithmException, IOException, BadPaddingException, InvalidKeyException {
+            throws GeneralSecurityException,
+            IOException {
         this.decryptedPassword = EncryptDecryptPasswordsUtil.decryptPassword(getEncryptedPassword());
     }
 }

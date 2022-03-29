@@ -1,6 +1,5 @@
-package com.jamesd.passwordmanager.DAO;
+package com.jamesd.passwordmanager.Utils;
 
-import com.azure.cosmos.CosmosClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

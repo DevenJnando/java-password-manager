@@ -18,6 +18,7 @@ import javax.crypto.NoSuchPaddingException;
 import javax.security.auth.login.LoginException;
 import java.io.IOException;
 import java.net.URL;
+import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -64,8 +65,7 @@ public class BaseDetailsController implements Initializable {
     }
 
     public void setWebDetailsBorderPane(WebsitePasswordEntryWrapper passwordEntry, PasswordEntryFolder parentFolder)
-            throws IOException, InvalidAlgorithmParameterException, LoginException, NoSuchPaddingException,
-            IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+            throws IOException, GeneralSecurityException {
         prepareDetailsVbox();
         FXMLLoader detailsLoader = new FXMLLoader(WebPasswordDetailsController.class
                 .getResource("/com/jamesd/passwordmanager/views/web-password-details.fxml"));
@@ -76,8 +76,7 @@ public class BaseDetailsController implements Initializable {
     }
 
     public void setDatabaseDetailsBorderPane(DatabasePasswordEntryWrapper databaseEntry, PasswordEntryFolder parentFolder)
-            throws IOException, InvalidAlgorithmParameterException, LoginException, NoSuchPaddingException,
-            IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+            throws IOException, GeneralSecurityException {
         prepareDetailsVbox();
         FXMLLoader detailsLoader = new FXMLLoader(DatabasePasswordDetailsController.class
                 .getResource("/com/jamesd/passwordmanager/views/database-password-details.fxml"));
@@ -89,8 +88,7 @@ public class BaseDetailsController implements Initializable {
 
     public static void loadWebPasswordDetailsView(WebsitePasswordEntryWrapper passwordEntry, PasswordEntryFolder parentFolder,
                                                   WebPasswordDetailsController passwordDetailsController)
-            throws IOException, InvalidAlgorithmParameterException, LoginException, NoSuchPaddingException, IllegalBlockSizeException,
-            NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+            throws IOException, GeneralSecurityException {
         passwordDetailsController.clear();
         passwordDetailsController.setEntryWrapper(passwordEntry);
         passwordDetailsController.setParentFolder(parentFolder);
@@ -99,8 +97,8 @@ public class BaseDetailsController implements Initializable {
 
     public static void loadDatabasePasswordDetailsView(DatabasePasswordEntryWrapper databaseEntry, PasswordEntryFolder parentFolder,
                                                        DatabasePasswordDetailsController databaseDetailsController)
-            throws InvalidAlgorithmParameterException, LoginException, NoSuchPaddingException, IllegalBlockSizeException,
-            NoSuchAlgorithmException, IOException, BadPaddingException, InvalidKeyException {
+            throws GeneralSecurityException,
+            IOException {
         databaseDetailsController.clear();
         databaseDetailsController.setEntryWrapper(databaseEntry);
         databaseDetailsController.setParentFolder(parentFolder);

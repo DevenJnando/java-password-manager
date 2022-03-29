@@ -14,15 +14,15 @@ public abstract class PasswordCreateUtil {
         throw new UnsupportedOperationException("Cannot instantiate an abstract utility class.");
     }
 
-    private static List populateList(int bottom, int top) {
-        List<Integer> list = new ArrayList();
+    public static List<Integer> populateList(int bottom, int top) {
+        List<Integer> list = new ArrayList<>();
         for(int i = bottom; i < top; i++) {
             list.add(i);
         }
         return list;
     }
 
-    private static List<Integer> fourRandomCharacters(List<Integer> list) {
+    public static List<Integer> fourRandomCharacters(List<Integer> list) {
         List<Integer> randomList = new ArrayList<>();
         for(int i = 0; i < 4; i ++) {
             Collections.shuffle(list);
@@ -64,13 +64,7 @@ public abstract class PasswordCreateUtil {
         for (int charAsInt : allRandomChars) {
             buffer.append((char) charAsInt);
         }
-        String finalString = buffer.toString();
-        return finalString;
-    }
-
-    private static Integer characterLength(String password) {
-        List<Integer> charLength = password.chars().boxed().collect(Collectors.toList());
-        return charLength.size();
+        return buffer.toString();
     }
 
     private static Integer upperCaseChars(String password) {
@@ -126,7 +120,7 @@ public abstract class PasswordCreateUtil {
         return specialChars.size();
     }
 
-    public static Integer characterContentStrength(int content) {
+    private static Integer characterContentStrength(int content) {
         Integer maxStrength = 4;
         switch (content) {
             case 0:
@@ -155,35 +149,34 @@ public abstract class PasswordCreateUtil {
         Integer numericalStrength = characterContentStrength(numericals);
         Integer specialCharStrength = characterContentStrength(specialChars);
 
-        Integer totalStrength = upperCaseStrength + lowerCaseStrength + numericalStrength + specialCharStrength;
-        return totalStrength;
+        return upperCaseStrength + lowerCaseStrength + numericalStrength + specialCharStrength;
     }
 
-    private static boolean isBetween (int x, int bottom, int top) {
+    public static boolean isBetween (int x, int bottom, int top) {
         return bottom <= x && x <= top;
     }
 
-    public static Boolean checkPasswordStrength(String enteredPassword, Label passwordLabel, String initalText) {
-        Boolean passwordIsAcceptable = false;
-        Integer strength = passwordStrength(enteredPassword);
+    public static Boolean checkPasswordStrength(String enteredPassword, Label passwordLabel, String initialText) {
+        boolean passwordIsAcceptable = false;
+        int strength = passwordStrength(enteredPassword);
         if (isBetween(strength, 0, 4)) {
-            passwordLabel.setText(initalText + " (Too weak!)");
+            passwordLabel.setText(initialText + " (Too weak!)");
             passwordLabel.setTextFill(Color.DARKRED);
             passwordIsAcceptable = false;
         } else if (isBetween(strength, 4, 8)) {
-            passwordLabel.setText(initalText + "  (Weak...)");
+            passwordLabel.setText(initialText + "  (Weak...)");
             passwordLabel.setTextFill(Color.RED);
             passwordIsAcceptable = true;
         } else if (isBetween(strength, 8, 12)) {
-            passwordLabel.setText(initalText + "  (Medium)");
+            passwordLabel.setText(initialText + "  (Medium)");
             passwordLabel.setTextFill(Color.ORANGE);
             passwordIsAcceptable = true;
         } else if (isBetween(strength, 12, 15)) {
-            passwordLabel.setText(initalText + "  (Strong)");
+            passwordLabel.setText(initialText + "  (Strong)");
             passwordLabel.setTextFill(Color.GREEN);
             passwordIsAcceptable = true;
         } else if (strength == 16) {
-            passwordLabel.setText(initalText + "  (Very strong)");
+            passwordLabel.setText(initialText + "  (Very strong)");
             passwordLabel.setTextFill(Color.DARKGREEN);
             passwordIsAcceptable = true;
         }
@@ -191,7 +184,7 @@ public abstract class PasswordCreateUtil {
     }
 
     public static TextFormatter<String> createTextFormatter(Integer length) {
-        TextFormatter<String> textFormatter = new TextFormatter<>(change -> {
+        return new TextFormatter<>(change -> {
             String newText = change.getControlNewText();
             if(newText.length() > length) {
                 return null;
@@ -199,6 +192,5 @@ public abstract class PasswordCreateUtil {
                 return change;
             }
         });
-        return textFormatter;
     }
 }

@@ -16,6 +16,7 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.security.auth.login.LoginException;
 import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -43,9 +44,9 @@ public class LoginAuthentication extends Authenticator{
         return this.user;
     }
 
-    public Boolean login(String loginMethod) throws LoginException, InvalidAlgorithmParameterException, NoSuchPaddingException,
-            IllegalBlockSizeException, NoSuchAlgorithmException, IOException, BadPaddingException, InvalidKeySpecException,
-            InvalidKeyException, SQLException {
+    public Boolean login(String loginMethod) throws GeneralSecurityException,
+            IOException,
+            SQLException {
         String loginId = getLoginController().getUsernameEmailLoginField().getText();
         String password = getLoginController().getPasswordLoginField().getText();
         if(loginMethod.equals("username")) {
@@ -61,8 +62,8 @@ public class LoginAuthentication extends Authenticator{
     }
 
     public static void unlockStoredPassDb(List<StoredPassDbKey> storedPassKeys, String string, String loginMethod)
-            throws LoginException, InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException,
-            NoSuchAlgorithmException, IOException, BadPaddingException, InvalidKeyException, InvalidKeySpecException,
+            throws GeneralSecurityException,
+            IOException,
             SQLException {
         for(StoredPassDbKey entry : storedPassKeys) {
             EncryptDecryptPasswordsUtil.initialise(entry.getDecryptionKey());
@@ -80,16 +81,16 @@ public class LoginAuthentication extends Authenticator{
     }
 
     public Boolean validateUsernameAndPassword(String loginId, String password, String loginMethod)
-            throws LoginException, InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException,
-            NoSuchAlgorithmException, IOException, BadPaddingException, InvalidKeySpecException, InvalidKeyException,
+            throws GeneralSecurityException,
+            IOException,
             SQLException {
         List<User> users = MasterSQLQueries.queryUsersByUsername(loginId);
         return authenticate(users, loginId, loginMethod, password);
     }
 
     public Boolean validateEmailAndPassword(String loginId, String password, String loginMethod)
-            throws LoginException, InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException,
-            NoSuchAlgorithmException, IOException, BadPaddingException, InvalidKeySpecException, InvalidKeyException,
+            throws GeneralSecurityException,
+            IOException,
             SQLException {
         List<User> users = MasterSQLQueries.queryUsersByEmail(loginId);
         return authenticate(users, loginId, loginMethod, password);
@@ -105,9 +106,8 @@ public class LoginAuthentication extends Authenticator{
     }
 
     public Boolean authenticate(List<User> users, String loginId, String loginMethod, String password)
-            throws InvalidAlgorithmParameterException, SQLException, LoginException, NoSuchPaddingException,
-            IllegalBlockSizeException, NoSuchAlgorithmException, IOException, BadPaddingException,
-            InvalidKeySpecException, InvalidKeyException {
+            throws GeneralSecurityException, SQLException,
+            IOException {
         if(validate(users, password)) {
             getLoginController().getLoginStatusLabel().setText("Login Successful, welcome back " + loginId + "!");
             MasterSQLQueries.initialiseStoredPassKey();

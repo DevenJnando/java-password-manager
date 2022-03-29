@@ -10,7 +10,6 @@ import com.jfoenix.controls.JFXPasswordField;
 import com.jfoenix.controls.JFXTextField;
 import de.jensd.fx.glyphs.GlyphsDude;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
-import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -18,27 +17,17 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import javax.security.auth.login.LoginException;
 import java.io.IOException;
 import java.net.URL;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
+import java.security.GeneralSecurityException;
 import java.sql.SQLException;
 import java.util.ResourceBundle;
-import java.util.stream.Collectors;
 
 public class LoginController implements Initializable {
 
@@ -120,9 +109,8 @@ public class LoginController implements Initializable {
         }
     }
 
-    public void onLoginButtonClick() throws InvalidAlgorithmParameterException, SQLException, LoginException,
-            NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, IOException,
-            BadPaddingException, InvalidKeySpecException, InvalidKeyException {
+    public void onLoginButtonClick() throws GeneralSecurityException, SQLException,
+            IOException {
         LoginAuthentication authentication = new LoginAuthentication(this);
 
         //TODO: Make this dynamically detect whether user is using E-mail or Username for login.

@@ -22,16 +22,15 @@ import javafx.scene.image.ImageView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 import javax.security.auth.login.LoginException;
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
+import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -153,14 +152,7 @@ public class WebsitePasswordTable extends BasePasswordTable<WebsitePasswordEntry
                         try {
                             BaseDetailsController controller = PasswordManagerApp.getPasswordDetailsController();
                             controller.setWebDetailsBorderPane(t1, folder);
-                        } catch (IOException
-                                | LoginException
-                                | InvalidAlgorithmParameterException
-                                | NoSuchPaddingException
-                                | IllegalBlockSizeException
-                                | NoSuchAlgorithmException
-                                | BadPaddingException
-                                | InvalidKeyException e) {
+                        } catch (GeneralSecurityException | IOException e) {
                             e.printStackTrace();
                         }
                     }

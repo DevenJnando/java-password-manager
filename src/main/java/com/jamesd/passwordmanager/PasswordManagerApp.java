@@ -4,7 +4,7 @@ import com.jamesd.passwordmanager.Controllers.BaseDetailsController;
 import com.jamesd.passwordmanager.Controllers.PasswordHomeController;
 import com.jamesd.passwordmanager.Controllers.PreferencesController;
 import com.jamesd.passwordmanager.DAO.MasterSQLQueries;
-import com.jamesd.passwordmanager.DAO.PropertiesUtil;
+import com.jamesd.passwordmanager.Utils.PropertiesUtil;
 import com.jamesd.passwordmanager.DAO.StoredPassSQLQueries;
 import com.jamesd.passwordmanager.Models.Users.User;
 import javafx.application.Application;

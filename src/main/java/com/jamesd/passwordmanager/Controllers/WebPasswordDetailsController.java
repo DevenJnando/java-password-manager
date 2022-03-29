@@ -23,16 +23,10 @@ import org.controlsfx.control.textfield.CustomTextField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 import javax.security.auth.login.LoginException;
 import java.io.IOException;
 import java.net.URL;
 import java.security.GeneralSecurityException;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 import java.util.ResourceBundle;
 
@@ -94,9 +88,8 @@ public class WebPasswordDetailsController extends BasePasswordDetailsController<
         }
     }
 
-    public void populatePasswordLayout() throws LoginException, InvalidAlgorithmParameterException,
-            NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, IOException,
-            BadPaddingException, InvalidKeyException {
+    public void populatePasswordLayout() throws GeneralSecurityException,
+            IOException {
         if(PasswordManagerApp.getLoggedInUser() != null) {
             setPasswordIcons();
             setTextFormatters();
