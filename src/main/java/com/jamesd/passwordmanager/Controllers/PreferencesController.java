@@ -27,8 +27,14 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
 
+/**
+ * Controller responsible for performing user preferences actions
+ */
 public class PreferencesController implements Initializable {
 
+    /**
+     * FXML fields
+     */
     @FXML
     ChoiceBox<String> reminderChoiceBox = new ChoiceBox<>();
     @FXML
@@ -40,22 +46,42 @@ public class PreferencesController implements Initializable {
     @FXML
     private JFXDrawer menuDrawer = new JFXDrawer();
 
+    /**
+     * Stage for modals
+     */
     private static Stage stage;
+
     private Logger logger = LoggerFactory.getLogger(PreferencesController.class);
 
+    /**
+     * Default constructor
+     */
     public PreferencesController() {
 
     }
 
+    /**
+     * Initialize method which populates the update reminder ChoiceBox
+     * @param url
+     * @param resourceBundle
+     */
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         initializeChoiceBox();
     }
 
+    /**
+     * Retrieves the Stage object
+     * @return Stage containing a modal
+     */
     public static Stage getStage() {
         return stage;
     }
 
+    /**
+     * Loads the "change master password" modal and switches context to the MasterPasswordController
+     * @throws IOException Throws IOException if the "change master password" view cannot be loaded
+     */
     public void loadChangeMasterPasswordView() throws IOException {
         Stage changeMasterPasswordStage = new Stage();
         FXMLLoader changeMasterPasswordLoader = new FXMLLoader
@@ -71,6 +97,12 @@ public class PreferencesController implements Initializable {
         stage.showAndWait();
     }
 
+    /**
+     * Populates the update reminder ChoiceBox object with 3 options:
+     * issue reminder after 1 month
+     * issue reminder after 6 months
+     * issue reminder after 1 year
+     */
     public void initializeChoiceBox() {
         if(PasswordManagerApp.getLoggedInUser() != null) {
             ArrayList<String> options = new ArrayList<>();
@@ -88,6 +120,11 @@ public class PreferencesController implements Initializable {
         }
     }
 
+    /**
+     * Displays a message to the user to let them know they have saved their settings successfully in the form of a
+     * label. This label is shown for 2 seconds and then fades
+     * @param savedLabel Label displaying "Saved!" to the user
+     */
     public void showSavedLabel(Label savedLabel) {
         FadeTransition fader = TransitionUtil.createFader(savedLabel);
         SequentialTransition fade = new SequentialTransition(
@@ -99,6 +136,10 @@ public class PreferencesController implements Initializable {
         fade.play();
     }
 
+    /**
+     * Saves the update reminder settings to the master database and feeds a successful operation back to the user
+     * @throws IOException Throws IOException if a connection to the master database cannot be established
+     */
     public void saveReminderSettings() throws IOException {
         if(PasswordManagerApp.getLoggedInUser() != null) {
             MasterSQLQueries.initialiseUsers();
@@ -110,6 +151,10 @@ public class PreferencesController implements Initializable {
         }
     }
 
+    /**
+     * Triggered by the "update master password" button. Calls the method to load the "update master password" modal
+     * @throws IOException Throws IOException if the "update master password" view cannot be loaded
+     */
     public void updateMasterPassword() throws IOException {
         if(PasswordManagerApp.getLoggedInUser() != null) {
             loadChangeMasterPasswordView();

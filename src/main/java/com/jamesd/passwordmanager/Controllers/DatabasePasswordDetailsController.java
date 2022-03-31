@@ -28,8 +28,14 @@ import java.security.GeneralSecurityException;
 import java.time.LocalDate;
 import java.util.ResourceBundle;
 
+/**
+ * Controller for the details screen for a DatabasePasswordEntry object.
+ */
 public class DatabasePasswordDetailsController extends BasePasswordDetailsController<DatabasePasswordEntryWrapper> implements Initializable {
 
+    /**
+     * FXML fields
+     */
     @FXML
     private JFXTextField hostnameField = new JFXTextField();
     @FXML
@@ -44,10 +50,18 @@ public class DatabasePasswordDetailsController extends BasePasswordDetailsContro
     private JFXButton copyDatabaseUsernameButton = new JFXButton();
 
 
+    /**
+     * Default constructor
+     */
     public DatabasePasswordDetailsController() {
 
     }
 
+    /**
+     * Initialize method which sets all text formatters and sets all icons
+     * @param url
+     * @param resourceBundle
+     */
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         setTextFormatters();
@@ -81,6 +95,12 @@ public class DatabasePasswordDetailsController extends BasePasswordDetailsContro
         copyDatabaseUsernameButton.setCursor(Cursor.HAND);
     }
 
+    /**
+     * Populates the details screen with the details of the selected DatabasePasswordEntry object for the user to view
+     * @throws GeneralSecurityException Throws a LoginException if the user calls this method whilst not logged in and
+     * a GeneralSecurityException if the encrypted password retrieved from the database cannot be decrypted
+     * @throws IOException Throws an IOException if the encrypted password from the database cannot be read
+     */
     public void populatePasswordLayout() throws GeneralSecurityException,
             IOException {
         if(PasswordManagerApp.getLoggedInUser() != null) {
@@ -90,10 +110,12 @@ public class DatabasePasswordDetailsController extends BasePasswordDetailsContro
             getEntryWrapper().getDatabasePasswordEntry().setDecryptedPassword
                     (EncryptDecryptPasswordsUtil.decryptPassword
                             (getEntryWrapper().getDatabasePasswordEntry().getEncryptedPassword()));
+
             ImageView logo = new ImageView(getEntryWrapper().getFavicon().getImage());
             logo.setFitWidth(128);
             logo.setFitHeight(128);
             logoHbox.getChildren().add(logo);
+
             passwordNameField.setText(getEntryWrapper().getDatabasePasswordEntry().getPasswordName());
             hostnameField.setText(getEntryWrapper().getDatabasePasswordEntry().getHostName());
             databaseNameField.setText(getEntryWrapper().getDatabasePasswordEntry().getDatabaseName());
@@ -105,6 +127,9 @@ public class DatabasePasswordDetailsController extends BasePasswordDetailsContro
         }
     }
 
+    /**
+     * Clears the details screen of all details
+     */
     public void clear() {
         logoHbox.getChildren().clear();
         passwordNameField.clear();
@@ -119,6 +144,9 @@ public class DatabasePasswordDetailsController extends BasePasswordDetailsContro
         }
     }
 
+    /**
+     * Generates a new random password for the user and displays it on screen
+     */
     public void generateNewPasswordAndUpdate() {
         visiblePasswordField.setEditable(true);
         hiddenPasswordField.setEditable(true);
@@ -139,6 +167,14 @@ public class DatabasePasswordDetailsController extends BasePasswordDetailsContro
         hiddenPasswordField.setEditable(false);
     }
 
+    /**
+     * Calls the updatePassword method with the DatabasePasswordEntry details to be updated in the database and displays
+     * a success message to the user on completion
+     * @throws GeneralSecurityException Throws a GeneralSecurityException if the plaintext password cannot be encrypted
+     * @throws IOException Throws an IOException if the plaintext password cannot be read
+     * @throws ClassNotFoundException Throws a ClassNotFoundException if the CustomTextField or CustomPasswordField
+     * classes cannot be found
+     */
     @FXML
     public void updatePassword() throws GeneralSecurityException, IOException, ClassNotFoundException {
         Node password = passwordVbox.getChildren().get(1);
@@ -146,6 +182,14 @@ public class DatabasePasswordDetailsController extends BasePasswordDetailsContro
         showSavedLabel();
     }
 
+    /**
+     * Updates the selected DatabasePasswordEntry password in its parent folder in the database
+     * @param password The displayed password field
+     * @param <T> The class of the displayed password field (Should only ever be CustomTextField or CustomPasswordField)
+     * @throws GeneralSecurityException
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
     public <T> void updatePassword(T password) throws GeneralSecurityException, IOException, ClassNotFoundException {
         PasswordEntryFolder parentFolder = getParentFolder();
         DatabasePasswordEntry entry = getEntryWrapper().getDatabasePasswordEntry();
@@ -176,14 +220,23 @@ public class DatabasePasswordDetailsController extends BasePasswordDetailsContro
         return null;
     }
 
+    /**
+     * Copies the hostname to the clipboard
+     */
     public void copyHostnameButton() {
         copyToClipboard(hostnameField.getText());
     }
 
+    /**
+     * Copies the database name to the clipboard
+     */
     public void copyDatabaseNameButton() {
         copyToClipboard(databaseNameField.getText());
     }
 
+    /**
+     * Copies the database username to the clipboard
+     */
     public void copyDatabaseUsernameButton() {
         copyToClipboard(databaseUsernameField.getText());
     }

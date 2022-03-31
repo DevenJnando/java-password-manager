@@ -10,20 +10,40 @@ import javafx.scene.control.TableView;
 import javax.security.auth.login.LoginException;
 import java.util.HashSet;
 
+/**
+ * Controller responsible for deleting one or multiple password entries from a parent folder
+ */
 public class DeletePasswordController {
 
+    /**
+     * Default constructor
+     */
     public DeletePasswordController() {
 
     }
 
+    /**
+     * Deletes a single PasswordEntry from the specified parent PasswordEntryFolder object
+     * @param entry Object (should always be of the PasswordEntry superclass) to be deleted
+     * @param parentFolder PasswordEntryFolder which the password entry belongs to
+     * @throws ClassNotFoundException Throws ClassNotFoundException if the entry Object is not a subclass of
+     * PasswordEntry
+     */
     public void deleteSingleEntry(Object entry, PasswordEntryFolder parentFolder)
             throws ClassNotFoundException {
         StoredPassSQLQueries.deletePasswordInDb(entry, parentFolder);
         WebPasswordDetailsController.getStage().close();
     }
 
+    /**
+     * Deletes multiple PasswordEntry objects from the specified parent PasswordEntryFolder object
+     * @param tableView TableView containing the list of PasswordEntry objects to be deleted
+     * @param selectedFolder PasswordEntryFolder which the password entries belong to
+     * @throws ClassNotFoundException Throws ClassNotFoundException if the Objects in tableView are not wrapped
+     * subclasses of PasswordEntry
+     */
     public void deleteMultipleEntries(TableView<Object> tableView, PasswordEntryFolder selectedFolder)
-            throws ClassNotFoundException, LoginException {
+            throws ClassNotFoundException {
         Class<?> websitePasswordEntryWrapperClass = Class.forName("com.jamesd.passwordmanager.Wrappers.WebsitePasswordEntryWrapper");
         Class<?> databasePasswordEntryWrapperClass = Class.forName("com.jamesd.passwordmanager.Wrappers.DatabasePasswordEntryWrapper");
         HashSet<Object> toBeDeleted = new HashSet<>();

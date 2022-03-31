@@ -20,6 +20,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * Class responsible for all password database queries
+ */
 public class StoredPassSQLQueries extends SQLQueries {
 
     private static CosmosClient storedPassClient;
@@ -28,6 +31,14 @@ public class StoredPassSQLQueries extends SQLQueries {
 
     protected static Logger logger = LoggerFactory.getLogger(StoredPassSQLQueries.class);
 
+    /**
+     * Connects to the password database server, creates the password database if it does not already exist, and
+     * connects to the logged-in user's container using the user's username. Creates the container if it does not yet
+     * exist
+     * @param key Key to the password database server
+     * @param username Username of the currently logged-in user
+     * @throws SQLException Throws SQLException if no user with the specified username can be found in the database
+     */
     public static void initialiseWithUsername(String key, String username) throws SQLException {
         storedPassClient = connectToStoredPassServer(key);
         storedPassDb = createIfNotExistsStoredPasswordsDb();
@@ -42,6 +53,13 @@ public class StoredPassSQLQueries extends SQLQueries {
         }
     }
 
+    /**
+     * Connects to the password database server, creates the password database if it does not already exist, and
+     * connects to the logged-in user's container using the user's email. Creates the container if it does not yet exist
+     * @param key Key to the password database server
+     * @param email Email of the currently logged-in user
+     * @throws SQLException Throws SQLException if no user with the specified email can be found in the database
+     */
     public static void initialiseWithEmail(String key, String email) throws SQLException {
         storedPassClient = connectToStoredPassServer(key);
         storedPassDb = createIfNotExistsStoredPasswordsDb();
@@ -57,33 +75,41 @@ public class StoredPassSQLQueries extends SQLQueries {
         }
     }
 
-    public static CosmosClient getStoredPassClient() {
-        return storedPassClient;
-    }
-
-    public static CosmosDatabase getStoredPassDb() {
-        return storedPassDb;
-    }
-
-    public static CosmosContainer getUserPasswordsContainer() {
-        return storedPassUserPasswordsContainer;
-    }
-
+    /**
+     * Connects to the password database server
+     * @param key Key which unlocks the password database server
+     * @return CosmosClient object connected to the password database server
+     */
     private static CosmosClient connectToStoredPassServer(String key) {
         logger.info("Using Azure Cosmos DB endpoint: " + PropertiesUtil.getProperties().getProperty("storedPassDb"));
         CosmosClient client = connect(PropertiesUtil.getProperties().getProperty("storedPassDb"), key);
         return client;
     }
 
+    /**
+     * Connects to the password database, or creates it if it does not yet exist
+     * @return CosmosDatabase object containing the password database
+     */
     private static CosmosDatabase createIfNotExistsStoredPasswordsDb() {
         String dbId = PropertiesUtil.getProperties().getProperty("storedPassDbName");
         return createIfNotExistsDb(getStoredPassClient(), dbId);
     }
 
+    /**
+     * Connects to the logged-in user's container in the password database, or creates it if it does not yet exist
+     * @param userContainerId ID of the logged-in user's container ID
+     * @param partitionKeyPath Partition key of the container
+     * @return CosmosContainer object which holds the logged-in user's container
+     */
     private static CosmosContainer createIfNotExistUserPasswordsContainer(String userContainerId, String partitionKeyPath) {
         return createIfNotExistContainer(getStoredPassDb(), userContainerId, partitionKeyPath);
     }
 
+    /**
+     * Updates a PasswordEntryFolder in memory. Should be called in conjunction with a folder update in the password
+     * database
+     * @param folder PasswordEntryFolder object which is to be updated in memory
+     */
     private static void updateInMemoryPasswordFolderData(PasswordEntryFolder folder) {
         List<PasswordEntryFolder> loadedFolders = PasswordManagerApp.getPasswordHomeController().getPasswordEntryFolders();
         for(PasswordEntryFolder currentFolder : loadedFolders) {
@@ -94,12 +120,27 @@ public class StoredPassSQLQueries extends SQLQueries {
         }
     }
 
+    /**
+     * Adds a new PasswordEntryFolder object to the password database
+     * @param folder PasswordEntryFolder to be added to the database
+     */
     public static void addNewPasswordFolderToDb(PasswordEntryFolder folder) {
         logger.info("Adding new password folder to the database...");
         getUserPasswordsContainer().createItem(folder);
         logger.info("Password folder created successfully.");
     }
 
+    /**
+     * Adds a new WebsitePasswordEntry object to its parent folder, and then updates that folder in the database
+     * @param folder PasswordEntryFolder which the WebsitePasswordEntry object belongs to
+     * @param passwordName Name of the password
+     * @param siteUrl URL of the website the password is for
+     * @param masterUsername Username of the user in this application
+     * @param passwordUsername Username of the user in the website password entry
+     * @param currentDate Current date of the update
+     * @param encryptedPassword Encrypted password of the website password entry
+     * @throws ClassNotFoundException Throws ClassNotFoundException if the WebsitePasswordEntry class cannot be found
+     */
     public static void addNewWebsitePasswordToDb(PasswordEntryFolder folder, String passwordName, String siteUrl,
                                                  String masterUsername, String passwordUsername, String currentDate,
                                                  String encryptedPassword) throws ClassNotFoundException {
@@ -126,6 +167,18 @@ public class StoredPassSQLQueries extends SQLQueries {
         }
     }
 
+    /**
+     * Adds a new DatabasePasswordEntry object to its parent folder, and then updates that folder in the database
+     * @param folder PasswordEntryFolder which the WebsitePasswordEntry object belongs to
+     * @param passwordName Name of the password
+     * @param hostname hostname of the database server
+     * @param databaseName name of the database
+     * @param masterUsername Username of the user in this application
+     * @param databaseUsername Username of the user in the database password entry
+     * @param currentDate Current date of the update
+     * @param encryptedPassword Encrypted password of the database password entry
+     * @throws ClassNotFoundException Throws ClassNotFoundException if the DatabasePasswordEntry class cannot be found
+     */
     public static void addNewDatabasePasswordToDb(PasswordEntryFolder folder, String passwordName, String hostname,
                                                   String masterUsername, String databaseName, String databaseUsername,
                                                   String currentDate, String encryptedPassword) throws ClassNotFoundException {
@@ -153,6 +206,12 @@ public class StoredPassSQLQueries extends SQLQueries {
         }
     }
 
+    /**
+     * Updates an already existing WebsitePasswordEntry object in the database in its parent folder
+     * @param entry WebsitePasswordEntry object to be updated
+     * @param folder PasswordEntryFolder the website password entry belongs to
+     * @throws ClassNotFoundException Throws ClassNotFoundException if the WebsitePasswordEntry class cannot be found
+     */
     public static void updateWebsitePasswordInDb(WebsitePasswordEntry entry, PasswordEntryFolder folder) throws ClassNotFoundException {
         logger.info("Updating password in database...");
         Class<?> passwordEntryClass = Class.forName("com.jamesd.passwordmanager.Models.Passwords.WebsitePasswordEntry");
@@ -178,6 +237,12 @@ public class StoredPassSQLQueries extends SQLQueries {
         }
     }
 
+    /**
+     * Updates an already existing DatabasePasswordEntry object in the database in its parent folder
+     * @param entry DatabasePasswordEntry object to be updated
+     * @param folder PasswordEntryFolder the database password entry belongs to
+     * @throws ClassNotFoundException Throws ClassNotFoundException if the DatabasePasswordEntry class cannot be found
+     */
     public static void updateDatabasePasswordInDb(DatabasePasswordEntry entry, PasswordEntryFolder folder) throws ClassNotFoundException {
         logger.info("Updating password in database...");
         Class<?> passwordEntryClass = Class.forName("com.jamesd.passwordmanager.Models.Passwords.DatabasePasswordEntry");
@@ -204,6 +269,12 @@ public class StoredPassSQLQueries extends SQLQueries {
         }
     }
 
+    /**
+     * Deletes an already existing PasswordEntry object in the database in its parent folder
+     * @param entry PasswordEntry object to be deleted
+     * @param folder PasswordEntryFolder the password entry belongs to
+     * @throws ClassNotFoundException Throws ClassNotFoundException if a subclass of PasswordEntry cannot be found
+     */
     public static void deletePasswordInDb(Object entry, PasswordEntryFolder folder) throws ClassNotFoundException {
         logger.info("Deleting password in database...");
         Class<?> websiteEntryClass = Class.forName("com.jamesd.passwordmanager.Models.Passwords.WebsitePasswordEntry");
@@ -242,29 +313,50 @@ public class StoredPassSQLQueries extends SQLQueries {
         }
     }
 
+    /**
+     * Deletes an entire PasswordEntryFolder, including all passwords contained within, from the password database
+     * @param folder PasswordEntryFolder to delete
+     */
     public static void deletePasswordFolderInDb(PasswordEntryFolder folder) {
         logger.info("Deleting password folder in database...");
         getUserPasswordsContainer().deleteItem(folder, new CosmosItemRequestOptions());
         logger.info("Password folder deleted successfully.");
     }
 
-    private static List<PasswordEntryFolder> queryPasswordFolderContainer(String sql) {
+    /**
+     * Sends a Kusto query to the logged-in user's container in the password database and returns a List of
+     * PasswordEntryFolder objects as a response
+     * @param kql Kusto query to send to the database
+     * @return List of PasswordEntryFolder objects retrieved from the password database
+     */
+    private static List<PasswordEntryFolder> queryPasswordFolderContainer(String kql) {
         List<PasswordEntryFolder> passwordList = new ArrayList<>();
         CosmosPagedIterable<PasswordEntryFolder> passwords =
-                getUserPasswordsContainer().queryItems(sql, new CosmosQueryRequestOptions(), PasswordEntryFolder.class);
-        passwords.forEach(password -> {
-            passwordList.add(password);
-        });
+                getUserPasswordsContainer().queryItems(kql, new CosmosQueryRequestOptions(), PasswordEntryFolder.class);
+        passwords.forEach(passwordList::add);
         logger.info("Query complete.");
         return passwordList;
     }
 
+    /**
+     * Queries the logged-in user's container in the password database by checking for PasswordEntryFolder objects which
+     * match the user's username
+     * @param username Username of the currently logged-in user
+     * @return List of PasswordEntryFolder objects which belong to the logged-in user
+     */
     public static List<PasswordEntryFolder> queryPasswordFolderContainerByUsername(String username) {
         logger.info("Querying " + getUserPasswordsContainer().getId() + " container in " + getStoredPassDb().getId() + " database...");
         String sql =  "SELECT * FROM c WHERE c.masterUsername = '" + username + "'";
         return queryPasswordFolderContainer(sql);
     }
 
+    /**
+     * Queries the logged-in user's container in the password database by checking for PasswordEntryFolder objects which
+     * match specified folder name and folder type
+     * @param folderName Name of the folder
+     * @param type Type of folder the PasswordEntryFolder object is
+     * @return List of PasswordEntryFolder objects which contain the folderName and type parameters
+     */
     public static List<PasswordEntryFolder> queryPasswordFolderContainerByNameAndType(String folderName, String type) {
         logger.info("Querying " + getUserPasswordsContainer().getId() + " container in " + getStoredPassDb().getId() + " database...");
         logger.info("Obtaining password folders named " + folderName + " with type " + type + "...");
@@ -273,12 +365,43 @@ public class StoredPassSQLQueries extends SQLQueries {
     }
 
     //TODO: Ensure this functionality only occurs as part of a user account deletion.
+    /**
+     * Completely removes the currently logged-in user's container from the database. Should only ever be called as part
+     * of a full account deletion
+     */
     protected static void deleteUserPasswordContainer() {
         logger.info("Deleting user's passwords container...");
         getUserPasswordsContainer().delete();
         logger.info("Container deleted successfully.");
     }
 
+    /**
+     * Retrieves the CosmosClient object which is connected to the password database server
+     * @return CosmosClient object connected to password database server
+     */
+    public static CosmosClient getStoredPassClient() {
+        return storedPassClient;
+    }
+
+    /**
+     * Retrieves the CosmosDatabase object which contains the password database
+     * @return CosmosDatabase object containing the password database
+     */
+    public static CosmosDatabase getStoredPassDb() {
+        return storedPassDb;
+    }
+
+    /**
+     * Retrieves the CosmosContainer object which holds the currently logged-in user's container from the database
+     * @return CosmosContainer object contaiting a user container
+     */
+    public static CosmosContainer getUserPasswordsContainer() {
+        return storedPassUserPasswordsContainer;
+    }
+
+    /**
+     * Closes the connection to the password database server
+     */
     public static void close() {
         storedPassClient.close();
     }

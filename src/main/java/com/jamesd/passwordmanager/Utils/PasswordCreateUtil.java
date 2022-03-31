@@ -8,12 +8,24 @@ import javafx.scene.control.TextFormatter;
 import javafx.scene.paint.Color;
 import org.apache.commons.lang3.StringUtils;
 
+/**
+ * Utility class which generates a new password and checks the overall strength of a password
+ */
 public abstract class PasswordCreateUtil {
 
+    /**
+     * Constructor throws UnsupportedOperationException - class is abstract
+     */
     public PasswordCreateUtil() {
         throw new UnsupportedOperationException("Cannot instantiate an abstract utility class.");
     }
 
+    /**
+     * Populates a list of Integers between the bottom and top parameters
+     * @param bottom Lowest Integer to add to List
+     * @param top Highest Integer to add to List
+     * @return List of Integer objects
+     */
     public static List<Integer> populateList(int bottom, int top) {
         List<Integer> list = new ArrayList<>();
         for(int i = bottom; i < top; i++) {
@@ -22,6 +34,11 @@ public abstract class PasswordCreateUtil {
         return list;
     }
 
+    /**
+     * Picks four random Integers from a List of Integers and returns them as their own List
+     * @param list List of Integers to choose random numbers from
+     * @return List of four random Integer objects
+     */
     public static List<Integer> fourRandomCharacters(List<Integer> list) {
         List<Integer> randomList = new ArrayList<>();
         for(int i = 0; i < 4; i ++) {
@@ -31,6 +48,11 @@ public abstract class PasswordCreateUtil {
         return randomList;
     }
 
+    /**
+     * Generates a new password which conforms to the maximum strength criteria. Should be 16 characters long with four
+     * uppercase letters, four lowercase letters, four numerals and four special characters
+     * @return Randomly generated password String
+     */
     public static String generatePassword() {
 
         //Length of password
@@ -67,6 +89,11 @@ public abstract class PasswordCreateUtil {
         return buffer.toString();
     }
 
+    /**
+     * Checks all uppercase characters in a String and returns them as a List of Integers
+     * @param password String to check for uppercase characters
+     * @return List of Integers which correspond to uppercase characters
+     */
     private static Integer upperCaseChars(String password) {
         List<Integer> results = new ArrayList<>();
         List<Integer> capitalLetters = password.chars()
@@ -85,6 +112,11 @@ public abstract class PasswordCreateUtil {
         return results.size();
     }
 
+    /**
+     * Checks all lowercase characters in a String and returns them as a List of Integers
+     * @param password String to check for lowercase characters
+     * @return List of Integers which correspond to lowercase characters
+     */
     private static Integer lowerCaseChars(String password) {
         List<Integer> results = new ArrayList<>();
         List<Integer> lowerCaseLetters = password.chars()
@@ -103,14 +135,24 @@ public abstract class PasswordCreateUtil {
         return results.size();
     }
 
-    private static Integer numericals(String password) {
-        List<Integer> numericals = password.chars()
+    /**
+     * Checks all numeral characters in a String and returns them as a List of Integers
+     * @param password String to check for numeral characters
+     * @return List of Integers which correspond to numeral characters
+     */
+    private static Integer numerals(String password) {
+        List<Integer> numerals = password.chars()
                 .filter(o -> StringUtils.containsAny(String.valueOf((char) o), "0123456789"))
                 .boxed()
                 .collect(Collectors.toList());
-        return numericals.size();
+        return numerals.size();
     }
 
+    /**
+     * Checks all special characters in a String and returns them as a List of Integers
+     * @param password String to check for special characters
+     * @return List of Integers which correspond to special characters
+     */
     private static Integer specialChars(String password) {
         List<Integer> specialChars = password.chars()
                 .filter(o -> String.valueOf((char) o)
@@ -120,6 +162,11 @@ public abstract class PasswordCreateUtil {
         return specialChars.size();
     }
 
+    /**
+     * Takes a number and returns a strength marker based on how large the number is with four being the maximum
+     * @param content Integer to check
+     * @return Strength marker Integer
+     */
     private static Integer characterContentStrength(int content) {
         Integer maxStrength = 4;
         switch (content) {
@@ -138,24 +185,44 @@ public abstract class PasswordCreateUtil {
         }
     }
 
+    /**
+     * Returns the password strength from 0 to 16
+     * @param password Password String to check strength of
+     * @return Total strength of password String
+     */
     public static Integer passwordStrength(String password) {
         Integer upperCaseChars = upperCaseChars(password);
         Integer lowerCaseChars = lowerCaseChars(password);
-        Integer numericals = numericals(password);
+        Integer numerals = numerals(password);
         Integer specialChars = specialChars(password);
 
         Integer upperCaseStrength = characterContentStrength(upperCaseChars);
         Integer lowerCaseStrength = characterContentStrength(lowerCaseChars);
-        Integer numericalStrength = characterContentStrength(numericals);
+        Integer numericalStrength = characterContentStrength(numerals);
         Integer specialCharStrength = characterContentStrength(specialChars);
 
         return upperCaseStrength + lowerCaseStrength + numericalStrength + specialCharStrength;
     }
 
+    /**
+     * Checks if an integer is between two numbers
+     * @param x Integer to check
+     * @param bottom Lowest number to be between
+     * @param top Highest number to be between
+     * @return Boolean true if between the two numbers, else false
+     */
     public static boolean isBetween (int x, int bottom, int top) {
         return bottom <= x && x <= top;
     }
 
+    /**
+     * Checks password strength and returns a boolean ascertaining whether the password is strong enough. Also provides
+     * feedback to the user on how strong their password is.
+     * @param enteredPassword Password String to have its strength checked
+     * @param passwordLabel Label which feeds back strength level to user
+     * @param initialText Initial message for the Label to read
+     * @return Boolean true if strength is acceptable, else false
+     */
     public static Boolean checkPasswordStrength(String enteredPassword, Label passwordLabel, String initialText) {
         boolean passwordIsAcceptable = false;
         int strength = passwordStrength(enteredPassword);
@@ -183,6 +250,11 @@ public abstract class PasswordCreateUtil {
         return passwordIsAcceptable;
     }
 
+    /**
+     * Returns a text formatter preventing additional text from being entered after the length parameter has been met
+     * @param length Maximum length of allowed text
+     * @return TextFormatter object
+     */
     public static TextFormatter<String> createTextFormatter(Integer length) {
         return new TextFormatter<>(change -> {
             String newText = change.getControlNewText();

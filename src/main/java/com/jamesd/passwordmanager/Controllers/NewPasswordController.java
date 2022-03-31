@@ -14,11 +14,21 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.security.GeneralSecurityException;
 
+/**
+ * Abstract class which provides implementations of ModifyPasswordController methods, as well as its own abstract
+ * methods for adding new password entries to the password database
+ */
 public abstract class NewPasswordController extends ModifyPasswordController {
 
+    /**
+     * FXML fields
+     */
     @FXML
     VBox passwordVbox = new VBox();
 
+    /**
+     * Default constructor
+     */
     public NewPasswordController() {
         super();
     }
@@ -89,7 +99,24 @@ public abstract class NewPasswordController extends ModifyPasswordController {
         hiddenConfirmPasswordField.getRight().setOnMousePressed(this::togglePassword);
     }
 
+    /**
+     * Once validation is passed, this method is called to add a new
+     * database password to the selected folder in the password database using the user-inputted fields.
+     * @throws GeneralSecurityException Throws GeneralSecurityException if the password encryption process fails
+     * @throws UnsupportedEncodingException Throws UnsupportedEncodingException if a character has been entered which
+     * cannot be encoded in UTF-8
+     * @throws ClassNotFoundException Throws ClassNotFoundException if the DatabasePasswordEntry class cannot be found
+     */
     protected abstract void addNewPassword() throws GeneralSecurityException, UnsupportedEncodingException, ClassNotFoundException;
 
+    /**
+     * Performs validation checks on the user-input fields and proceeds
+     * to call addNewPassword once validation passes. If validation passes, but the password is too weak, a further error
+     * will be given to the user.
+     * @throws GeneralSecurityException Throws GeneralSecurityException if the password encryption process fails
+     * @throws UnsupportedEncodingException Throws UnsupportedEncodingException if a character has been entered which
+     * cannot be encoded in UTF-8
+     * @throws ClassNotFoundException Throws ClassNotFoundException if the DatabasePasswordEntry class cannot be found
+     */
     protected abstract void confirmAndAddNewPassword() throws GeneralSecurityException, UnsupportedEncodingException, ClassNotFoundException;
 }

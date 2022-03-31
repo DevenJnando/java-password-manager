@@ -31,13 +31,22 @@ import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Class which builds and returns a TableView containing DatabasePasswordEntryWrapper objects
+ */
 public class DatabasePasswordTable extends BasePasswordTable<DatabasePasswordEntryWrapper, DatabasePasswordEntry> {
 
+    /**
+     * FXML field
+     */
     @FXML
     private TableView<DatabasePasswordEntryWrapper> passwordTableView = new TableView<>();
 
     private static Logger logger = LoggerFactory.getLogger(DatabasePasswordTable.class);
 
+    /**
+     * Default constructor
+     */
     public DatabasePasswordTable() {
 
     }

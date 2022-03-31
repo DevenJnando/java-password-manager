@@ -24,8 +24,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
 
+/**
+ * Class which is responsible for adding a new folder into the password database once validation has passed
+ */
 public class AddFolderController extends ErrorChecker implements Initializable {
 
+    /**
+     * FXML fields
+     */
     @FXML
     private VBox addFolderVbox = new VBox();
     @FXML
@@ -39,9 +45,15 @@ public class AddFolderController extends ErrorChecker implements Initializable {
     @FXML
     private Button addNewFolderButton = new Button();
 
+    /**
+     * Validation flags
+     */
     private boolean folderNameEmptyFlag = false;
     private boolean folderTypeEmptyFlag = false;
 
+    /**
+     * IDs of error labels and the error messages they should display
+     */
     private final String FOLDER_NAME_EMPTY_ID = "folderNameEmptyLabel";
     private final String FOLDER_NAME_EMPTY_ERROR_MSG = "Folder name cannot be empty!";
     private final String FOLDER_TYPE_EMPTY_ID = "folderTypeEmptyLabel";
@@ -49,6 +61,18 @@ public class AddFolderController extends ErrorChecker implements Initializable {
 
     private static final Logger logger = LoggerFactory.getLogger(AddFolderController.class);
 
+    /**
+     * Default constructor
+     */
+    public AddFolderController() {
+
+    }
+
+    /**
+     * Initialize method which sets labels, the folder name text field, the folder type combo box and buttons on screen.
+     * @param url
+     * @param resourceBundle
+     */
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         setLabels();
@@ -62,6 +86,9 @@ public class AddFolderController extends ErrorChecker implements Initializable {
         addFolderVbox.getChildren().add(addNewFolderButton);
     }
 
+    /**
+     * Method to set the labels which display the folder name and folder type
+     */
     private void setLabels() {
         Label folderNameLabel = new Label("Folder Name: ");
         Insets folderNameLabelInsets = new Insets(20, 0, 0, 0);
@@ -79,6 +106,9 @@ public class AddFolderController extends ErrorChecker implements Initializable {
         this.folderTypeLabel = folderTypeLabel;
     }
 
+    /**
+     * Method which creates the add folder button
+     */
     private void setButtons() {
         Button addNewFolderButton = new Button("Add Folder");
         addNewFolderButton.setId("addNewFolderButton");
@@ -86,7 +116,7 @@ public class AddFolderController extends ErrorChecker implements Initializable {
         VBox.setMargin(addNewFolderButton, insets);
         addNewFolderButton.setOnAction(e -> {
             try {
-                confirmAndAddNewFolder(e);
+                confirmAndAddNewFolder();
             } catch (GeneralSecurityException | ClassNotFoundException ex) {
                 ex.printStackTrace();
             }
@@ -94,12 +124,19 @@ public class AddFolderController extends ErrorChecker implements Initializable {
         this.addNewFolderButton = addNewFolderButton;
     }
 
+    /**
+     * Method which creates the input field for the folder name
+     */
     private void setTextField() {
         JFXTextField folderNameTextField = new JFXTextField();
         folderNameTextField.setId("folderNameTextField");
         this.folderNameTextField = folderNameTextField;
     }
 
+    /**
+     * Method which creates the dropdown combo box containing all potential folder types. These being web password,
+     * database password, credit/debit card, passport and uploaded documents
+     */
     private void setComboBox() {
         List<String> types = Arrays.asList(
                 "WebPassword",
@@ -115,6 +152,7 @@ public class AddFolderController extends ErrorChecker implements Initializable {
         this.folderTypeComboBox = folderTypeComboBox;
     }
 
+    @Override
     protected void checkAndResetLabels() {
         if(isFolderNameEmptyFlag() || retrieveNode(FOLDER_NAME_EMPTY_ID, addFolderVbox) != null) {
             resetLabel(FOLDER_NAME_EMPTY_ID, addFolderVbox);
@@ -126,6 +164,7 @@ public class AddFolderController extends ErrorChecker implements Initializable {
         }
     }
 
+    @Override
     protected Boolean hasErroneousFields() {
         boolean erroneousFields = false;
         if (folderNameTextField.getText().isEmpty()) {
@@ -142,8 +181,15 @@ public class AddFolderController extends ErrorChecker implements Initializable {
         return erroneousFields;
     }
 
+    /**
+     * Method which performs validation checks on the user's inputs and calls the addFolder method if validation
+     * passes to add a new folder to the password database
+     * @throws GeneralSecurityException Throws a LoginException if the user attempts to call this method whilst not
+     * logged in
+     * @throws ClassNotFoundException Throws a ClassNotFoundException if the PasswordEntryFolder class cannot be found
+     */
     @FXML
-    public void confirmAndAddNewFolder(Event event) throws GeneralSecurityException, ClassNotFoundException {
+    public void confirmAndAddNewFolder() throws GeneralSecurityException, ClassNotFoundException {
         if(PasswordManagerApp.getLoggedInUser() != null) {
             checkAndResetLabels();
             if(hasErroneousFields()) {
@@ -156,6 +202,11 @@ public class AddFolderController extends ErrorChecker implements Initializable {
         }
     }
 
+    /**
+     * Method for adding a new folder to the database. Only called once validation has passed.
+     * @throws LoginException Throws LoginException if the user attempts to call whilst not logged in
+     * @throws ClassNotFoundException Throws ClassNotFoundException if the PasswordEntryFolder class cannot be found
+     */
     private void addNewFolder() throws LoginException, ClassNotFoundException {
         PasswordEntryFolder newFolder = new PasswordEntryFolder(folderTypeComboBox.getSelectionModel().getSelectedItem(),
                 folderNameTextField.getText());
@@ -166,18 +217,34 @@ public class AddFolderController extends ErrorChecker implements Initializable {
         PasswordHomeController.getStage().close();
     }
 
+    /**
+     * Retrieves the flag for when the folder name is not set
+     * @return true if not set, else false
+     */
     public boolean isFolderNameEmptyFlag() {
         return folderNameEmptyFlag;
     }
 
+    /**
+     * Sets the flag for when the folder name is not set
+     * @param folderNameEmptyFlag true if not set, else false
+     */
     public void setFolderNameEmptyFlag(boolean folderNameEmptyFlag) {
         this.folderNameEmptyFlag = folderNameEmptyFlag;
     }
 
+    /**
+     * Retrieves the flag for when the folder type is not set
+     * @return true if not set, else false
+     */
     public boolean isFolderTypeEmptyFlag() {
         return folderTypeEmptyFlag;
     }
 
+    /**
+     * Sets the flag for when the folder type is not set
+     * @param folderTypeEmptyFlag true if not set, else false
+     */
     public void setFolderTypeEmptyFlag(boolean folderTypeEmptyFlag) {
         this.folderTypeEmptyFlag = folderTypeEmptyFlag;
     }

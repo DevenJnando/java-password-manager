@@ -20,10 +20,17 @@ import java.security.GeneralSecurityException;
 import java.time.LocalDate;
 import java.util.ResourceBundle;
 
+/**
+ * Class responsible for adding a new website password entry into a specified folder in the password database.
+ * Only adds a new password once validation has passed.
+ */
 public class AddWebsitePasswordController extends NewPasswordController implements Initializable {
 
     public static Logger logger = LoggerFactory.getLogger(AddWebsitePasswordController.class);
 
+    /**
+     * FXML fields
+     */
     @FXML
     VBox passwordVbox = new VBox();
     @FXML
@@ -35,11 +42,17 @@ public class AddWebsitePasswordController extends NewPasswordController implemen
     @FXML
     Button confirmNewPasswordButton;
 
+    /**
+     * Validation flags
+     */
     private Boolean folderNotSelectedFlag = false;
     private Boolean missingPasswordNameFlag = false;
     private Boolean missingUrlFlag = false;
     private Boolean missingUsernameFlag = false;
 
+    /**
+     * IDs of error labels and the error messages they should display
+     */
     private final String PASSWORD_FOLDER_NOT_SELECTED_ID = "passwordFolderNotSelected";
     private final String PASSWORD_NAME_EMPTY_ID = "passwordNameEmptyLabel";
     private final String URL_EMPTY_ID = "urlFieldEmptyLabel";
@@ -49,11 +62,19 @@ public class AddWebsitePasswordController extends NewPasswordController implemen
     private final String URL_EMPTY_ERROR_MSG = "Please enter the URL this password belongs to.";
     private final String SITE_USERNAME_EMPTY_ERROR_MSG = "Please enter the username/email address for this website.";
 
-
+    /**
+     * Default constructor
+     */
     public AddWebsitePasswordController() {
 
     }
 
+    /**
+     * Initialize method which sets text formatters on all input fields, sets icons and adds a strength listener for
+     * the password input field
+     * @param url
+     * @param resourceBundle
+     */
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         setTextFormatters();
@@ -76,34 +97,6 @@ public class AddWebsitePasswordController extends NewPasswordController implemen
         visiblePasswordField.setTextFormatter(passwordFormatter3);
         visibleConfirmPasswordField.setTextFormatter(passwordFormatter4);
     }
-
-    private boolean getFolderNotSelectedFlag() {
-        return folderNotSelectedFlag;
-    }
-
-    private boolean getMissingUrlFlag() {
-        return missingUrlFlag;
-    }
-
-    private boolean getMissingUsernameFlag() { return missingUsernameFlag; }
-
-    private boolean isMissingPasswordNameFlag() {
-        return missingPasswordNameFlag;
-    }
-
-    private void setFolderNotSelectedFlag(boolean folderNotSelectedFlag) {
-        this.folderNotSelectedFlag = folderNotSelectedFlag;
-    }
-
-    private void setMissingPasswordNameFlag(boolean missingPasswordNameFlag) {
-        this.missingPasswordNameFlag = missingPasswordNameFlag;
-    }
-
-    private void setMissingUrlFlag(boolean missingUrl) {
-        this.missingUrlFlag = missingUrl;
-    }
-
-    private void setMissingUsernameFlag(boolean missingUsername) { this.missingUsernameFlag = missingUsername; }
 
     @Override
     protected void checkAndResetLabels() {
@@ -213,4 +206,64 @@ public class AddWebsitePasswordController extends NewPasswordController implemen
         PasswordHomeController.getStage().close();
         PasswordManagerApp.getPasswordHomeController().viewNewlyAddedPassword();
     }
+
+    /**
+     * Method which retrieves the flag for when a folder has not been selected
+     * @return true if not selected, else false
+     */
+    private boolean getFolderNotSelectedFlag() {
+        return folderNotSelectedFlag;
+    }
+
+    /**
+     * Method which retrieves the flag for when the website url has not been set
+     * @return true if not set, else false
+     */
+    private boolean getMissingUrlFlag() {
+        return missingUrlFlag;
+    }
+
+    /**
+     * Method which retrieves the flag for when the username has not been set
+     * @return true if not set, else false
+     */
+    private boolean getMissingUsernameFlag() { return missingUsernameFlag; }
+
+    /**
+     * Method which retrieves the flag for when the password name has not been set
+     * @return true if not set, else false
+     */
+    private boolean isMissingPasswordNameFlag() {
+        return missingPasswordNameFlag;
+    }
+
+    /**
+     * Method which sets the flag for when a folder has not been selected
+     * @param folderNotSelectedFlag true if not selected, else false
+     */
+    private void setFolderNotSelectedFlag(boolean folderNotSelectedFlag) {
+        this.folderNotSelectedFlag = folderNotSelectedFlag;
+    }
+
+    /**
+     * Method which sets the flag for when the password name has not been set
+     * @param missingPasswordNameFlag true if not selected, else false
+     */
+    private void setMissingPasswordNameFlag(boolean missingPasswordNameFlag) {
+        this.missingPasswordNameFlag = missingPasswordNameFlag;
+    }
+
+    /**
+     * Method which sets the flag for when the website url has not been set
+     * @param missingUrl true if not set, else false
+     */
+    private void setMissingUrlFlag(boolean missingUrl) {
+        this.missingUrlFlag = missingUrl;
+    }
+
+    /**
+     * Method which sets the flag for when the username has not been set
+     * @param missingUsername true if not set, else false
+     */
+    private void setMissingUsernameFlag(boolean missingUsername) { this.missingUsernameFlag = missingUsername; }
 }

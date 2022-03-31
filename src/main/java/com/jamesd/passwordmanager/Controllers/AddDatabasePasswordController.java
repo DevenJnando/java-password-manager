@@ -18,8 +18,15 @@ import java.security.GeneralSecurityException;
 import java.time.LocalDate;
 import java.util.ResourceBundle;
 
+/**
+ * Class which is responsible for adding a new Database Password entry to the password database. Once validation
+ * passes, the database password should be added to the specified folder in the user's CosmosDB container.
+ */
 public class AddDatabasePasswordController extends NewPasswordController implements Initializable {
 
+    /**
+     * FXML fields
+     */
     @FXML
     VBox passwordVbox = new VBox();
     @FXML
@@ -33,12 +40,18 @@ public class AddDatabasePasswordController extends NewPasswordController impleme
     @FXML
     Button confirmNewPasswordButton;
 
+    /**
+     * Validation flags
+     */
     private Boolean folderNotSelectedFlag = false;
     private Boolean missingPasswordNameFlag = false;
     private Boolean missingHostnameFlag = false;
     private Boolean missingDatabaseNameFlag = false;
     private Boolean missingDatabaseUsernameFlag = false;
 
+    /**
+     * IDs of error labels and error messages they should display
+     */
     private final String PASSWORD_FOLDER_NOT_SELECTED_ID = "passwordFolderNotSelected";
     private final String PASSWORD_NAME_EMPTY_ID = "passwordNameEmptyLabel";
     private final String HOSTNAME_EMPTY_ID = "hostnameEmptyLabel";
@@ -50,10 +63,19 @@ public class AddDatabasePasswordController extends NewPasswordController impleme
     private final String DATABASE_NAME_EMPTY_ERROR_MSG = "Please enter the name of this database.";
     private final String DATABASE_USERNAME_EMPTY_ERROR_MSG = "Please enter the username this password belongs to.";
 
+    /**
+     * Default constructor
+     */
     public AddDatabasePasswordController() {
 
     }
 
+    /**
+     * Overrides Initialize method which sets the text formatters, icons and a listener which determines the strength of the
+     * user-inputted password
+     * @param url
+     * @param resourceBundle
+     */
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         setTextFormatters();
@@ -199,42 +221,81 @@ public class AddDatabasePasswordController extends NewPasswordController impleme
         visibleConfirmPasswordField.setTextFormatter(passwordFormatter4);
     }
 
+    /**
+     * Retrieves the flag for when a folder has not been selected
+     * @return true if not selected, else false
+     */
     private boolean getFolderNotSelectedFlag() {
         return folderNotSelectedFlag;
     }
 
+    /**
+     * Retrieves the flag for when the password name is not set
+     * @return true if not set, else false
+     */
     private boolean isMissingPasswordNameFlag() {
         return missingPasswordNameFlag;
     }
 
+    /**
+     * Retrieves the flag for when the hostname is not set
+     * @return true if not set, else false
+     */
     private boolean getMissingHostnameFlag() {
         return missingHostnameFlag;
     }
 
+    /**
+     * Retrieves the flag for when the database name is not set
+     * @return true if not set, else false
+     */
     private boolean getMissingDatabaseNameFlag() {
         return missingDatabaseNameFlag;
     }
-
+    /**
+     * Retrieves the flag for when the database username is not set
+     * @return true if not set, else false
+     */
     private boolean getMissingDatabaseUsernameFlag() {
         return missingDatabaseUsernameFlag;
     }
 
+    /**
+     * Sets the flag for when the folder is not selected
+     * @param folderNotSelectedFlag true if not selected, else false
+     */
     private void setFolderNotSelectedFlag(boolean folderNotSelectedFlag) {
         this.folderNotSelectedFlag = folderNotSelectedFlag;
     }
 
+    /**
+     * Sets the flag for when the password name is not set
+     * @param missingPasswordNameFlag true if not set, else false
+     */
     private void setMissingPasswordNameFlag(boolean missingPasswordNameFlag) {
         this.missingPasswordNameFlag = missingPasswordNameFlag;
     }
 
+    /**
+     * Sets the flag for when the hostname is not set
+     * @param missingHostnameFlag true if not set, else false
+     */
     private void setMissingHostnameFlag(boolean missingHostnameFlag) {
         this.missingHostnameFlag = missingHostnameFlag;
     }
 
+    /**
+     * Sets the flag for when the database name is not set
+     * @param missingDatabaseNameFlag true if not set, else false
+     */
     private void setMissingDatabaseNameFlag(boolean missingDatabaseNameFlag) {
         this.missingDatabaseNameFlag = missingDatabaseNameFlag;
     }
 
+    /**
+     * Sets the flag for when the database username is not set
+     * @param missingDatabaseUsernameFlag true if not set, else false
+     */
     private void setMissingDatabaseUsernameFlag(boolean missingDatabaseUsernameFlag) {
         this.missingDatabaseUsernameFlag = missingDatabaseUsernameFlag;
     }

@@ -28,8 +28,14 @@ import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.util.ResourceBundle;
 
+/**
+ * Controller responsible for changing/updating a User's master password for the application
+ */
 public class MasterPasswordController extends UpdatePasswordController implements Initializable {
 
+    /**
+     * FXML fields
+     */
     @FXML
     VBox passwordVbox = new VBox();
     @FXML
@@ -39,18 +45,33 @@ public class MasterPasswordController extends UpdatePasswordController implement
     @FXML
     CustomTextField visibleOldMasterPassword = new CustomTextField();
 
-
+    /**
+     * Validation flags and error messages
+     */
     private final String OLD_PASSWORD_MISMATCH_ID = "oldPasswordNotMatchLabel";
     private final String OLD_PASSWORD_MISMATCH_ERROR_MSG = "Old password is incorrect!";
-
     private boolean mismatchedOldPasswordFlag = false;
+
+    /**
+     * Password toggler
+     */
     private Toggler oldPasswordToggler = new Toggler("hiddenOldMasterPassword", "visibleOldMasterPassword");
+
     private static final Logger logger = LoggerFactory.getLogger(MasterPasswordController.class);
 
+    /**
+     * Default constructor
+     */
     public MasterPasswordController() {
 
     }
 
+    /**
+     * Initializes the controller by setting text formatters for all input fields, setting icons for all input fields
+     * and attaching a listener to check password strength to the password input field
+     * @param url
+     * @param resourceBundle
+     */
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         setTextFormatters();
@@ -58,10 +79,18 @@ public class MasterPasswordController extends UpdatePasswordController implement
         attachStrengthListener("New Master Password: ");
     }
 
+    /**
+     * Retrieves the mismatched password flag for the old master password which is to be updated
+     * @return Boolean true if inputted old master password is incorrect, else false
+     */
     public boolean getMismatchedOldPasswordFlag() {
         return mismatchedOldPasswordFlag;
     }
 
+    /**
+     * Sets the mismatched password flag for the old master password which is to be updated
+     * @param mismatchedOldPasswordFlag Boolean true if inputted old master password is incorrect, else false
+     */
     public void setMismatchedOldPasswordFlag(boolean mismatchedOldPasswordFlag) {
         this.mismatchedOldPasswordFlag = mismatchedOldPasswordFlag;
     }
@@ -171,7 +200,7 @@ public class MasterPasswordController extends UpdatePasswordController implement
     }
 
     @Override
-    public void confirmAndUpdatePassword() throws GeneralSecurityException, IOException {
+    public void confirmAndUpdatePassword() throws LoginException, IOException {
         if (PasswordManagerApp.getLoggedInUser() != null) {
             checkAndResetLabels();
 

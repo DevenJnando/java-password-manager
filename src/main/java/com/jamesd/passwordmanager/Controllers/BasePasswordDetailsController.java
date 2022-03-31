@@ -39,8 +39,15 @@ import javax.security.auth.login.LoginException;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
+/**
+ * Abstract class for populating password entry details.
+ * Contains common fields methods for all password details classes
+ */
 public abstract class BasePasswordDetailsController<T extends BaseWrapper> extends ModifyPasswordController {
 
+    /**
+     * FXML fields
+     */
     @FXML
     VBox passwordVbox = new VBox();
     @FXML
@@ -62,14 +69,21 @@ public abstract class BasePasswordDetailsController<T extends BaseWrapper> exten
     @FXML
     protected JFXButton generateNewPasswordButton = new JFXButton();
 
-    protected static PasswordEntryFolder parentFolder = new PasswordEntryFolder();
+
+    protected PasswordEntryFolder parentFolder = new PasswordEntryFolder();
     protected T wrapper = null;
     protected static Stage stage;
 
+    /**
+     * Default constructor
+     */
     public BasePasswordDetailsController() {
 
     }
 
+    /**
+     * Method for setting icons for password input fields only
+     */
     protected void setPasswordIcons() {
         Text hiddenPasswordIcon = GlyphsDude.createIcon(FontAwesomeIcon.EYE);
         Text shownPasswordIcon = GlyphsDude.createIcon(FontAwesomeIcon.EYE_SLASH);
@@ -96,6 +110,9 @@ public abstract class BasePasswordDetailsController<T extends BaseWrapper> exten
         hiddenPasswordField.getRight().setOnMousePressed(this::togglePassword);
     }
 
+    /**
+     * Method for setting text formatters for password input fields only
+     */
     protected void setPasswordFormatters() {
         TextFormatter<String> passwordFormatter1 = PasswordCreateUtil.createTextFormatter(24);
         TextFormatter<String> passwordFormatter2 = PasswordCreateUtil.createTextFormatter(24);
@@ -103,6 +120,10 @@ public abstract class BasePasswordDetailsController<T extends BaseWrapper> exten
         visiblePasswordField.setTextFormatter(passwordFormatter2);
     }
 
+    /**
+     * Loads the "delete single password" modal. From here, a selected password entry can be deleted.
+     * @throws IOException Throws an IOException if the "delete single password" modal cannot be loaded
+     */
     protected void loadDeletePasswordModal() throws IOException {
         Stage deletePasswordStage = new Stage();
         FXMLLoader deletePasswordLoader = new FXMLLoader(BasePasswordDetailsController.class
@@ -117,6 +138,10 @@ public abstract class BasePasswordDetailsController<T extends BaseWrapper> exten
         stage.showAndWait();
     }
 
+    /**
+     * Displays the "Saved!" label to alert the user that their attempt to save changes to their password entry has
+     * been successful.
+     */
     protected void showSavedLabel() {
         FadeTransition fader = TransitionUtil.createFader(savedLabel);
         SequentialTransition fade = new SequentialTransition(
@@ -128,18 +153,34 @@ public abstract class BasePasswordDetailsController<T extends BaseWrapper> exten
         fade.play();
     }
 
+    /**
+     * Disables the details pane
+     */
     protected void disable() {
         detailsPane.setDisable(true);
     }
 
+    /**
+     * Retrieves the wrapper object for the specified password entry
+     * @return Returns a wrapper which extends the BaseWrapper class
+     */
     protected T getEntryWrapper() {
         return wrapper;
     }
 
+    /**
+     * Sets the wrapper object for the specified password entry
+     * @param wrapper The wrapper for the password entry which extends the BaseWrapper class
+     */
     protected void setEntryWrapper(T wrapper) {
         this.wrapper = wrapper;
     }
 
+    /**
+     * Calls the loadDeletePasswordModal method upon click
+     * @throws LoginException Throws LoginException if the user calls this method whilst not logged in
+     * @throws IOException Throws IOException if the "delete single password" modal cannot be loaded
+     */
     @FXML
     public void deletePassword() throws LoginException, IOException {
         if(PasswordManagerApp.getLoggedInUser() != null) {
@@ -153,9 +194,16 @@ public abstract class BasePasswordDetailsController<T extends BaseWrapper> exten
     @Override
     public void togglePassword(Event event){
         try {
+            // Defines the classes for a CustomTextField and CustomPasswordField
             Class<?> customTextFieldClass = Class.forName("org.controlsfx.control.textfield.CustomTextField");
             Class<?> customPasswordFieldClass = Class.forName("org.controlsfx.control.textfield.CustomPasswordField");
+
+            // Toggles the password using the passwordToggler object and retrieves either a CustomTextField object
+            // or a CustomPasswordField object
             Object passwordState = passwordToggler.togglePassword(passwordVbox, getEntryWrapper());
+
+            // If the new state of the password is "visible", the visible password is formatted, has its icons added
+            // and is set as the new password field in the passwordVbox
             if(customTextFieldClass.isInstance(passwordState)) {
                 CustomTextField passwordShow = (CustomTextField) passwordState;
                 Insets insets = new Insets(10, 0, 0, 0);
@@ -165,7 +213,11 @@ public abstract class BasePasswordDetailsController<T extends BaseWrapper> exten
                 setPasswordIcons();
                 setTextFormatters();
                 passwordVbox.getChildren().set(1, visiblePasswordField);
-            } else if(customPasswordFieldClass.isInstance(passwordState)) {
+            }
+
+            // If the new state of the password is "hidden", the hidden password is formatted, has its icons added
+            // and is set as the new password field in the passwordVbox
+            else if(customPasswordFieldClass.isInstance(passwordState)) {
                 CustomPasswordField passwordHide = (CustomPasswordField) passwordState;
                 Insets insets = new Insets(10, 0, 0, 0);
                 VBox.setMargin(passwordHide, insets);
@@ -174,11 +226,19 @@ public abstract class BasePasswordDetailsController<T extends BaseWrapper> exten
                 setPasswordIcons();
                 setTextFormatters();
                 passwordVbox.getChildren().set(1, hiddenPasswordField);
-            } else {
+            }
+
+            // Throws a ClassCastException if the toggled password is not of either a CustomTextField or a
+            // CustomPasswordField type
+            else {
                 throw new ClassCastException("Cannot cast object of type " + passwordState.getClass() + " to type " +
                         CustomTextField.class + " or type " + CustomPasswordField.class);
             }
-        } catch(NoSuchMethodException
+        }
+
+        // Catches a NoSuchMethodException, InvocationTargetException or IllegalAccessException if the password cannot
+        // be toggled, or a ClassNotFoundException if the CustomTextField or CustomPasswordField classes cannot be found
+        catch(NoSuchMethodException
                 | InvocationTargetException
                 | IllegalAccessException
                 | ClassNotFoundException e) {
@@ -187,11 +247,20 @@ public abstract class BasePasswordDetailsController<T extends BaseWrapper> exten
         }
     }
 
+    /**
+     * Closes the "delete single password" modal without deleting anything
+     */
     @FXML
     protected void cancelDelete() {
         getStage().close();
     }
 
+    /**
+     * Called when the user confirms their decision to delete a password entry. Checks which type of entry should be
+     * deleted and then removes the entry using the appropriate method.
+     * @throws ClassNotFoundException Throws a ClassNotFoundException if the WebsitePasswordEntryWrapper or the
+     * DatabasePasswordEntryWrapper classes cannot be found
+     */
     @FXML
     protected void confirmDelete() throws ClassNotFoundException {
         System.out.println(getEntryWrapper());
@@ -206,27 +275,50 @@ public abstract class BasePasswordDetailsController<T extends BaseWrapper> exten
         }
     }
 
+    /**
+     * Deletes a WebsitePasswordEntry from its parent folder in the password database
+     * @param entry The selected WebsitePasswordEntry to be deleted
+     * @throws ClassNotFoundException Throws a ClassNotFoundException if the WebsitePasswordEntry class cannot be found
+     */
     private void deleteWebsitePasswordEntry(WebsitePasswordEntry entry) throws ClassNotFoundException {
         DeletePasswordController deletePasswordController = new DeletePasswordController();
         deletePasswordController.deleteSingleEntry(entry, getParentFolder());
+
+        // Details screen is cleared once the password is deleted
         PasswordManagerApp.getPasswordDetailsController().setNoDetailsLoaded();
+        // List of website password entries in the parent folder is repopulated once the password is deleted
         PasswordManagerApp.getPasswordHomeController().populateWebsiteEntryPasswords(getParentFolder());
     }
 
+    /**
+     * Deletes a DatabasePasswordEntry from its parent folder in the password database
+     * @param entry The selected DatabasePasswordEntry to be deleted
+     * @throws ClassNotFoundException
+     */
     private void deleteDatabasePasswordEntry(DatabasePasswordEntry entry) throws ClassNotFoundException {
         DeletePasswordController deletePasswordController = new DeletePasswordController();
         deletePasswordController.deleteSingleEntry(entry, getParentFolder());
+
+        // Details screen is cleard once the password is deleted
         PasswordManagerApp.getPasswordDetailsController().setNoDetailsLoaded();
+        // List of database password entries in the parent folder is repopulated once the password is deleted
         PasswordManagerApp.getPasswordHomeController().populateDatabaseEntryPasswords(getParentFolder());
     }
 
+    /**
+     * Copies the password name to the clipboard
+     */
     @FXML
     protected void copyPasswordNameButton() {
         copyToClipboard(passwordNameField.getText());
     }
 
+    /**
+     * Copies the password to the clipboard
+     */
     @FXML
     protected void copyPasswordToClipboard() {
+        // Determines if the password is visible or hidden
         if(passwordToggler.getShowPassword()) {
             CustomTextField password = (CustomTextField) passwordVbox.getChildren().get(1);
             copyToClipboard(password.getText());
@@ -236,14 +328,26 @@ public abstract class BasePasswordDetailsController<T extends BaseWrapper> exten
         }
     }
 
+    /**
+     * Retrieves the stage containing any modals for this class
+     * @return the Stage object where any modals will be stored
+     */
     protected static Stage getStage() {
         return stage;
     }
 
+    /**
+     * Sets the parent folder where password entries will be loaded from
+     * @param folder selected PasswordEntryFolder object
+     */
     protected void setParentFolder(PasswordEntryFolder folder) {
         parentFolder = folder;
     }
 
+    /**
+     * Retrieves the parent folder where password entries will be laoded from
+     * @return selected PasswordEntryFolder object
+     */
     protected PasswordEntryFolder getParentFolder() {
         return parentFolder;
     }
