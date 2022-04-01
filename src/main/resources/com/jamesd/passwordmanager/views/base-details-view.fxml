@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+
+
+<VBox prefHeight="500" prefWidth="830.0"
+      fx:id="baseDetailsVbox"
+      fx:controller="com.jamesd.passwordmanager.Controllers.BaseDetailsController"
+      xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1">
+    <children>
+    </children>
+</VBox>

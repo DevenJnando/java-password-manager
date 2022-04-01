@@ -5,33 +5,32 @@ import com.jamesd.passwordmanager.Utils.EncryptDecryptPasswordsUtil;
 import com.jamesd.passwordmanager.PasswordManagerApp;
 import com.jamesd.passwordmanager.Utils.PasswordCreateUtil;
 import com.jfoenix.controls.JFXTextField;
-import de.jensd.fx.glyphs.GlyphsDude;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
-import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.Cursor;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextFormatter;
 import javafx.scene.layout.VBox;
-import javafx.scene.text.Text;
-import org.controlsfx.control.textfield.CustomPasswordField;
-import org.controlsfx.control.textfield.CustomTextField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.security.auth.login.LoginException;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.time.LocalDate;
 import java.util.ResourceBundle;
 
-public class AddPasswordController extends NewPasswordController implements Initializable {
+/**
+ * Class responsible for adding a new website password entry into a specified folder in the password database.
+ * Only adds a new password once validation has passed.
+ */
+public class AddWebsitePasswordController extends NewPasswordController implements Initializable {
 
-    public static Logger logger = LoggerFactory.getLogger(AddPasswordController.class);
+    public static Logger logger = LoggerFactory.getLogger(AddWebsitePasswordController.class);
 
+    /**
+     * FXML fields
+     */
     @FXML
     VBox passwordVbox = new VBox();
     @FXML
@@ -43,51 +42,44 @@ public class AddPasswordController extends NewPasswordController implements Init
     @FXML
     Button confirmNewPasswordButton;
 
+    /**
+     * Validation flags
+     */
+    private Boolean folderNotSelectedFlag = false;
     private Boolean missingPasswordNameFlag = false;
     private Boolean missingUrlFlag = false;
     private Boolean missingUsernameFlag = false;
 
+    /**
+     * IDs of error labels and the error messages they should display
+     */
+    private final String PASSWORD_FOLDER_NOT_SELECTED_ID = "passwordFolderNotSelected";
     private final String PASSWORD_NAME_EMPTY_ID = "passwordNameEmptyLabel";
     private final String URL_EMPTY_ID = "urlFieldEmptyLabel";
-    private final String SITE_USERNAME_ID = "siteUsernameEmpty";
+    private final String SITE_USERNAME_EMPTY_ID = "siteUsernameEmptyLabel";
+    private final String PASSWORD_FOLDER_NOT_SELECTED_ERROR_MSG = "Please select a folder to save this password in.";
     private final String PASSWORD_NAME_EMPTY_ERROR_MSG = "Please enter the name of this password.";
     private final String URL_EMPTY_ERROR_MSG = "Please enter the URL this password belongs to.";
-    private final String SITE_USERNAME_ERROR_MSG = "Please enter the username/email address for this website.";
+    private final String SITE_USERNAME_EMPTY_ERROR_MSG = "Please enter the username/email address for this website.";
 
-
-    public AddPasswordController() {
+    /**
+     * Default constructor
+     */
+    public AddWebsitePasswordController() {
 
     }
 
+    /**
+     * Initialize method which sets text formatters on all input fields, sets icons and adds a strength listener for
+     * the password input field
+     * @param url
+     * @param resourceBundle
+     */
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         setTextFormatters();
         setIcons();
         attachStrengthListener("Enter Password: ");
-    }
-
-    @Override
-    public void setIcons() {
-        Text eye1 = GlyphsDude.createIcon(FontAwesomeIcon.EYE);
-        Text eye2 = GlyphsDude.createIcon(FontAwesomeIcon.EYE);
-        Text eyeSlash1 = GlyphsDude.createIcon(FontAwesomeIcon.EYE_SLASH);
-        Text eyeSlash2 = GlyphsDude.createIcon(FontAwesomeIcon.EYE_SLASH);
-        visiblePasswordField.setRight(eyeSlash1);
-        visiblePasswordField.getRight().setCursor(Cursor.HAND);
-        visibleConfirmPasswordField.setRight(eyeSlash2);
-        visibleConfirmPasswordField.getRight().setCursor(Cursor.HAND);
-        hiddenPasswordField.setRight(eye1);
-        hiddenPasswordField.getRight().setCursor(Cursor.HAND);
-        hiddenConfirmPasswordField.setRight(eye2);
-        hiddenConfirmPasswordField.getRight().setCursor(Cursor.HAND);
-        visiblePasswordField.getRight().setOnMouseClicked(this::togglePassword);
-        visiblePasswordField.getRight().setOnMousePressed(this::togglePassword);
-        visibleConfirmPasswordField.getRight().setOnMouseClicked(this::togglePassword);
-        visibleConfirmPasswordField.getRight().setOnMousePressed(this::togglePassword);
-        hiddenPasswordField.getRight().setOnMouseClicked(this::togglePassword);
-        hiddenPasswordField.getRight().setOnMousePressed(this::togglePassword);
-        hiddenConfirmPasswordField.getRight().setOnMouseClicked(this::togglePassword);
-        hiddenConfirmPasswordField.getRight().setOnMousePressed(this::togglePassword);
     }
 
     @Override
@@ -107,70 +99,13 @@ public class AddPasswordController extends NewPasswordController implements Init
     }
 
     @Override
-    public void togglePassword(Event event) {
-        try {
-            Class<?> customTextFieldClass = Class.forName("org.controlsfx.control.textfield.CustomTextField");
-            Class<?> customPasswordFieldClass = Class.forName("org.controlsfx.control.textfield.CustomPasswordField");
-            Object passwordState = passwordToggler.togglePassword(passwordVbox);
-            Object confirmPasswordState = confirmPasswordToggler.togglePassword(passwordVbox);
-            if(customTextFieldClass.isInstance(passwordState)
-                    && customTextFieldClass.isInstance(confirmPasswordState)) {
-                CustomTextField passwordShow = (CustomTextField) passwordState;
-                CustomTextField confirmPasswordShow = (CustomTextField) confirmPasswordState;
-                visiblePasswordField = passwordShow;
-                visibleConfirmPasswordField = confirmPasswordShow;
-                setTextFormatters();
-                setIcons();
-                attachStrengthListener("Enter Password: ");
-                passwordVbox.getChildren().set(7, visiblePasswordField);
-                passwordVbox.getChildren().set(9, visibleConfirmPasswordField);
-            } else if(customPasswordFieldClass.isInstance(passwordState)
-                    && customPasswordFieldClass.isInstance(confirmPasswordState)) {
-                CustomPasswordField passwordHide = (CustomPasswordField) passwordState;
-                CustomPasswordField confirmPasswordHide = (CustomPasswordField) confirmPasswordState;
-                hiddenPasswordField = passwordHide;
-                hiddenConfirmPasswordField = confirmPasswordHide;
-                setTextFormatters();
-                setIcons();
-                attachStrengthListener("Enter Password: ");
-                passwordVbox.getChildren().set(7, hiddenPasswordField);
-                passwordVbox.getChildren().set(9, hiddenConfirmPasswordField);
-            } else {
-                throw new ClassCastException("Cannot cast object of type " + passwordState.getClass() + " to type " +
-                        CustomTextField.class + " or type " + CustomPasswordField.class);
-            }
-        } catch(NoSuchMethodException
-                | InvocationTargetException
-                | IllegalAccessException
-                | ClassNotFoundException e) {
-            e.printStackTrace();
-            logger.error("Toggler failed...");
-        }
-    }
-
-    public boolean getMissingUrlFlag() {
-        return missingUrlFlag;
-    }
-
-    public boolean getMissingUsernameFlag() { return missingUsernameFlag; }
-
-    public boolean isMissingPasswordNameFlag() {
-        return missingPasswordNameFlag;
-    }
-
-    public void setMissingPasswordNameFlag(boolean missingPasswordNameFlag) {
-        this.missingPasswordNameFlag = missingPasswordNameFlag;
-    }
-
-    public void setMissingUrlFlag(boolean missingUrl) {
-        this.missingUrlFlag = missingUrl;
-    }
-
-    public void setMissingUsernameFlag(boolean missingUsername) { this.missingUsernameFlag = missingUsername; }
-
     protected void checkAndResetLabels() {
         if(retrieveNode(PASSWORD_TOO_WEAK_ID, passwordVbox) != null) {
             resetLabel(PASSWORD_TOO_WEAK_ID, passwordVbox);
+        }
+        if(getFolderNotSelectedFlag() || retrieveNode(PASSWORD_FOLDER_NOT_SELECTED_ID, passwordVbox) != null) {
+            resetLabel(PASSWORD_FOLDER_NOT_SELECTED_ID, passwordVbox);
+            setFolderNotSelectedFlag(false);
         }
         if(getMismatchedPasswordsFlag() || retrieveNode(PASSWORD_MISMATCH_ID, passwordVbox) != null) {
             resetLabel(PASSWORD_MISMATCH_ID, passwordVbox);
@@ -184,30 +119,35 @@ public class AddPasswordController extends NewPasswordController implements Init
             resetLabel(URL_EMPTY_ID, passwordVbox);
             setMissingUrlFlag(false);
         }
-        if(getMissingUsernameFlag() || retrieveNode(SITE_USERNAME_ID, passwordVbox) != null) {
-            resetLabel(SITE_USERNAME_ID, passwordVbox);
+        if(getMissingUsernameFlag() || retrieveNode(SITE_USERNAME_EMPTY_ID, passwordVbox) != null) {
+            resetLabel(SITE_USERNAME_EMPTY_ID, passwordVbox);
             setMissingUsernameFlag(false);
         }
     }
 
+    @Override
     protected Boolean hasErroneousFields() {
         boolean erroneousFields = false;
-        if (passwordName.getText().isEmpty()) {
+        if(PasswordManagerApp.getPasswordHomeController().getBaseAddPasswordController().getSelectedFolder() == null) {
+            setErrorLabel(PASSWORD_FOLDER_NOT_SELECTED_ID, PASSWORD_FOLDER_NOT_SELECTED_ERROR_MSG, passwordVbox);
+            setFolderNotSelectedFlag(true);
+            erroneousFields = true;
+        } if(passwordName.getText().isEmpty()) {
             setErrorLabel(PASSWORD_NAME_EMPTY_ID, PASSWORD_NAME_EMPTY_ERROR_MSG, passwordVbox);
             setMissingPasswordNameFlag(true);
             erroneousFields = true;
             logger.error("Password name is empty");
-        } if (urlField.getText().isEmpty()) {
+        } if(urlField.getText().isEmpty()) {
             setErrorLabel(URL_EMPTY_ID, URL_EMPTY_ERROR_MSG, passwordVbox);
             setMissingUrlFlag(true);
             erroneousFields = true;
             logger.error("Website url is missing.");
-        } if (siteUsername.getText().isEmpty()) {
-            setErrorLabel(SITE_USERNAME_ID, SITE_USERNAME_ERROR_MSG, passwordVbox);
+        } if(siteUsername.getText().isEmpty()) {
+            setErrorLabel(SITE_USERNAME_EMPTY_ID, SITE_USERNAME_EMPTY_ERROR_MSG, passwordVbox);
             setMissingUsernameFlag(true);
             erroneousFields = true;
             logger.error("Username is missing.");
-        } if (!hiddenPasswordField.getText().equals(hiddenConfirmPasswordField.getText())
+        } if(!hiddenPasswordField.getText().equals(hiddenConfirmPasswordField.getText())
         || !visiblePasswordField.getText().equals(visibleConfirmPasswordField.getText())) {
             setErrorLabel(PASSWORD_MISMATCH_ID, PASSWORD_MISMATCH_ERROR_MSG, passwordVbox);
             setMismatchedPasswordsFlag(true);
@@ -218,14 +158,14 @@ public class AddPasswordController extends NewPasswordController implements Init
     }
 
     @Override
-    public void confirmAndAddNewPassword() throws GeneralSecurityException, UnsupportedEncodingException {
+    public void confirmAndAddNewPassword() throws GeneralSecurityException, UnsupportedEncodingException, ClassNotFoundException {
         if (PasswordManagerApp.getLoggedInUser() != null) {
             checkAndResetLabels();
-
             if (hasErroneousFields()) {
                 logger.info("Erroneous fields are present. Fix them!");
             }
-            else if(!passwordName.getText().isEmpty()
+            else if(PasswordManagerApp.getPasswordHomeController().getBaseAddPasswordController().getSelectedFolder() != null
+            && !passwordName.getText().isEmpty()
             && !urlField.getText().isEmpty()
             && !siteUsername.getText().isEmpty()
             && (hiddenPasswordField.getText().equals(hiddenConfirmPasswordField.getText()))
@@ -245,7 +185,7 @@ public class AddPasswordController extends NewPasswordController implements Init
     }
 
     @Override
-    public void addNewPassword() throws GeneralSecurityException, UnsupportedEncodingException {
+    public void addNewPassword() throws GeneralSecurityException, UnsupportedEncodingException, ClassNotFoundException {
         String currentDate = LocalDate.now().toString();
         String hashedPassword = "";
         if(confirmPasswordToggler.getShowPassword()) {
@@ -253,7 +193,9 @@ public class AddPasswordController extends NewPasswordController implements Init
         } else {
             hashedPassword = EncryptDecryptPasswordsUtil.encryptPassword(hiddenConfirmPasswordField.getText());
         }
-        StoredPassSQLQueries.addNewPasswordToDb(passwordName.getText(),
+        StoredPassSQLQueries.addNewWebsitePasswordToDb(PasswordManagerApp.getPasswordHomeController()
+                        .getBaseAddPasswordController().getSelectedFolder(),
+                passwordName.getText(),
                 urlField.getText(),
                 PasswordManagerApp.getLoggedInUser().getUsername(),
                 siteUsername.getText(),
@@ -261,7 +203,67 @@ public class AddPasswordController extends NewPasswordController implements Init
                 hashedPassword);
         setMissingUrlFlag(false);
         setMismatchedPasswordsFlag(false);
-        PasswordHomeController.setLoadedPasswords(null);
         PasswordHomeController.getStage().close();
+        PasswordManagerApp.getPasswordHomeController().viewNewlyAddedPassword();
     }
+
+    /**
+     * Method which retrieves the flag for when a folder has not been selected
+     * @return true if not selected, else false
+     */
+    private boolean getFolderNotSelectedFlag() {
+        return folderNotSelectedFlag;
+    }
+
+    /**
+     * Method which retrieves the flag for when the website url has not been set
+     * @return true if not set, else false
+     */
+    private boolean getMissingUrlFlag() {
+        return missingUrlFlag;
+    }
+
+    /**
+     * Method which retrieves the flag for when the username has not been set
+     * @return true if not set, else false
+     */
+    private boolean getMissingUsernameFlag() { return missingUsernameFlag; }
+
+    /**
+     * Method which retrieves the flag for when the password name has not been set
+     * @return true if not set, else false
+     */
+    private boolean isMissingPasswordNameFlag() {
+        return missingPasswordNameFlag;
+    }
+
+    /**
+     * Method which sets the flag for when a folder has not been selected
+     * @param folderNotSelectedFlag true if not selected, else false
+     */
+    private void setFolderNotSelectedFlag(boolean folderNotSelectedFlag) {
+        this.folderNotSelectedFlag = folderNotSelectedFlag;
+    }
+
+    /**
+     * Method which sets the flag for when the password name has not been set
+     * @param missingPasswordNameFlag true if not selected, else false
+     */
+    private void setMissingPasswordNameFlag(boolean missingPasswordNameFlag) {
+        this.missingPasswordNameFlag = missingPasswordNameFlag;
+    }
+
+    /**
+     * Method which sets the flag for when the website url has not been set
+     * @param missingUrl true if not set, else false
+     */
+    private void setMissingUrlFlag(boolean missingUrl) {
+        this.missingUrlFlag = missingUrl;
+    }
+
+    /**
+     * Method which sets the flag for when the username has not been set
+     * @param missingUsername true if not set, else false
+     */
+    private void setMissingUsernameFlag(boolean missingUsername) { this.missingUsernameFlag = missingUsername; }
 }
