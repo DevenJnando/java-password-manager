@@ -6,6 +6,9 @@ Password manager app in Java
 <br/>
 For running from source, add the following vm option to the java build configuration: `--add-opens=java.base/java.lang.reflect=com.jfoenix` 
 Java 11 and JavaFX are required for this application to work.
+<br/>
+<br/>
+The entry point to the application is in PasswordManagerApp.java
 
 ## Brief breakdown of how it works
 
