@@ -44,9 +44,7 @@ For presentation and processing of business logic and MVC architecture has been 
 ## Features to come
 
 <br/>
-*Unit tests need written for utility classes and controller methods (Shame on me! Should have written those much sooner!) - dev benefit
-<br/>
-*Code needs much better documentation (Again, shame on me!) - dev benefit
+*Unit tests need written for controller methods (Shame on me! Should have written those much sooner!) - dev benefit
 <br/>
 *Add/remove/view/edit credit/debit card entries
 <br/>
