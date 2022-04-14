@@ -162,8 +162,8 @@ public class BaseAddPasswordController implements Initializable {
                 break;
             case "Credit/Debit card":
                 //TODO: replace with actual view + controller once finished
-                viewToLoad = "/com/jamesd/passwordmanager/views/add-website-password-modal.fxml";
-                controllerClass = AddWebsitePasswordController.class;
+                viewToLoad = "/com/jamesd/passwordmanager/views/add-credit-debit-card-view.fxml";
+                controllerClass = AddCreditDebitCardController.class;
                 break;
             case "Passport":
                 //TODO: replace with actual view + controller once finished

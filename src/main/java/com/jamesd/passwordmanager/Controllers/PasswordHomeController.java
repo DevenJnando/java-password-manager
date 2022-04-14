@@ -3,9 +3,11 @@ package com.jamesd.passwordmanager.Controllers;
 import com.jamesd.passwordmanager.DAO.StoredPassSQLQueries;
 import com.jamesd.passwordmanager.Models.HierarchyModels.PasswordEntryFolder;
 import com.jamesd.passwordmanager.PasswordManagerApp;
+import com.jamesd.passwordmanager.Tables.CreditDebitCardTable;
 import com.jamesd.passwordmanager.Tables.DatabasePasswordTable;
 import com.jamesd.passwordmanager.Tables.WebsitePasswordTable;
 import com.jamesd.passwordmanager.Utils.TreeViewIteratorUtil;
+import com.jamesd.passwordmanager.Wrappers.CreditDebitCardEntryWrapper;
 import com.jamesd.passwordmanager.Wrappers.DatabasePasswordEntryWrapper;
 import com.jamesd.passwordmanager.Wrappers.WebsitePasswordEntryWrapper;
 import com.jfoenix.controls.JFXButton;
@@ -377,6 +379,7 @@ public class PasswordHomeController implements Initializable {
             // Establishes the PasswordEntry subclasses
             Class<?> websiteEntryClass = Class.forName("com.jamesd.passwordmanager.Models.Passwords.WebsitePasswordEntry");
             Class<?> databaseEntryClass = Class.forName("com.jamesd.passwordmanager.Models.Passwords.DatabasePasswordEntry");
+            Class<?> creditDebitCardEntryClass = Class.forName("com.jamesd.passwordmanager.Models.Passwords.CreditDebitCardEntry");
 
             // Root node of the TreeView
             TreeItem<String> folderNavigationRoot = new TreeItem<>("Root Folder");
@@ -413,6 +416,8 @@ public class PasswordHomeController implements Initializable {
                         icon = GlyphsDude.createIcon(FontAwesomeIcon.INTERNET_EXPLORER, "1.5em");
                     } else if(databaseEntryClass.equals(classOfEntry)) {
                         icon = GlyphsDude.createIcon(FontAwesomeIcon.DATABASE, "1.5em");
+                    } else if(creditDebitCardEntryClass.equals(classOfEntry)) {
+                        icon = GlyphsDude.createIcon(FontAwesomeIcon.CREDIT_CARD, "1.5em");
                     }
                     TreeItem<String> folderNode = new TreeItem<>(folderType, icon);
                     folderNavigationRoot.getChildren().add(folderNode);
@@ -434,6 +439,8 @@ public class PasswordHomeController implements Initializable {
                                 populateWebsiteEntryPasswords(folder);
                             } else if(databaseEntryClass.equals(classOfEntry)) {
                                 populateDatabaseEntryPasswords(folder);
+                            } else if(creditDebitCardEntryClass.equals(classOfEntry)) {
+                                populateCreditDebitCardEntryPasswords(folder);
                             }
                         }
                     }
@@ -455,11 +462,11 @@ public class PasswordHomeController implements Initializable {
                     .collect(Collectors.toList());
             if(navViews.isEmpty()) {
                 sidebar.getChildren().add(folderNavigationTreeView);
-                PasswordManagerApp.getPasswordHomeController().setSidebar(sidebar);
+                setSidebar(sidebar);
             } else {
                 folderNavigationTreeView.getRoot().setExpanded(true);
                 sidebar.getChildren().set(7, folderNavigationTreeView);
-                PasswordManagerApp.getPasswordHomeController().setSidebar(sidebar);
+                setSidebar(sidebar);
             }
 
         } else {
@@ -517,6 +524,35 @@ public class PasswordHomeController implements Initializable {
                 PasswordManagerApp.getPasswordHomeController().getPasswordTableVbox().getChildren().add(databasePasswordEntryTableView);
             } else {
                 PasswordManagerApp.getPasswordHomeController().getPasswordTableVbox().getChildren().set(1, databasePasswordEntryTableView);
+            }
+        } catch (MalformedURLException
+                | LoginException
+                | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Triggered when a "credit card" folder is selected by the user. A new CreditDebitCardTable is generated,
+     * which contains all the CreditDebitCardEntry objects located within the selected PasswordEntryFolder
+     * @param folder PasswordEntryFolder selected by the user. Contains only CreditDebitCardEntry objects
+     */
+    public void populateCreditDebitCardEntryPasswords(PasswordEntryFolder folder) {
+        PasswordManagerApp.getPasswordHomeController().setSelectedFolder(folder);
+        CreditDebitCardTable creditDebitCardTable = new CreditDebitCardTable();
+        try {
+            List<Node> tableViewList = PasswordManagerApp.getPasswordHomeController().getPasswordTableVbox().getChildren();
+            TableView<CreditDebitCardEntryWrapper> creditDebitCardEntryTableView =
+                    creditDebitCardTable.createTableView(folder);
+            creditDebitCardEntryTableView.setId("creditDebitCardEntryTableView");
+            creditDebitCardEntryTableView.setMinHeight(210.0);
+            creditDebitCardEntryTableView.setPrefHeight(210.0);
+            creditDebitCardEntryTableView.setPrefWidth(1085.0);
+            creditDebitCardEntryTableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+            if(tableViewList.size() < 2) {
+                PasswordManagerApp.getPasswordHomeController().getPasswordTableVbox().getChildren().add(creditDebitCardEntryTableView);
+            } else {
+                PasswordManagerApp.getPasswordHomeController().getPasswordTableVbox().getChildren().set(1, creditDebitCardEntryTableView);
             }
         } catch (MalformedURLException
                 | LoginException
@@ -609,6 +645,7 @@ public class PasswordHomeController implements Initializable {
                     // cast to that Wrapper type and added to the list of passwords to be deleted
                     Class<?> websitePasswordEntryWrapperClass = Class.forName("com.jamesd.passwordmanager.Wrappers.WebsitePasswordEntryWrapper");
                     Class<?> databasePasswordEntryWrapperClass = Class.forName("com.jamesd.passwordmanager.Wrappers.DatabasePasswordEntryWrapper");
+                    Class<?> creditDebitCardEntryWrapperClass = Class.forName("com.jamesd.passwordmanager.Wrappers.CreditDebitCardEntryWrapper");
                     if(websitePasswordEntryWrapperClass.isInstance(o)) {
                         WebsitePasswordEntryWrapper websitePasswordEntryWrapper = (WebsitePasswordEntryWrapper) o;
                         if(websitePasswordEntryWrapper.isChecked().getValue()) {
@@ -618,6 +655,11 @@ public class PasswordHomeController implements Initializable {
                         DatabasePasswordEntryWrapper databasePasswordEntryWrapper = (DatabasePasswordEntryWrapper) o;
                         if(databasePasswordEntryWrapper.isChecked().getValue()) {
                             passwordsToBeDeleted.add(databasePasswordEntryWrapper);
+                        }
+                    } if(creditDebitCardEntryWrapperClass.isInstance(o)) {
+                        CreditDebitCardEntryWrapper creditDebitCardEntryWrapper = (CreditDebitCardEntryWrapper) o;
+                        if(creditDebitCardEntryWrapper.isChecked().getValue()) {
+                            passwordsToBeDeleted.add(creditDebitCardEntryWrapper);
                         }
                     }
                 } catch (ClassNotFoundException e) {
@@ -731,6 +773,7 @@ public class PasswordHomeController implements Initializable {
                 TreeItem<String> childNode = new TreeItem<>();
                 while(treeViewIteratorUtil.hasNext()) {
                     TreeItem<String> currentNode = treeViewIteratorUtil.next();
+                    System.out.println(currentNode.getValue());
                     if(currentNode.getValue().equals(selectedFolder.getPasswordFolder())) {
                         childNode = currentNode;
                         break;
@@ -743,6 +786,7 @@ public class PasswordHomeController implements Initializable {
                 // then selected from this TableView
                 Class<?> websitePasswordEntryClass = Class.forName("com.jamesd.passwordmanager.Models.Passwords.WebsitePasswordEntry");
                 Class<?> databasePasswordEntryClass = Class.forName("com.jamesd.passwordmanager.Models.Passwords.DatabasePasswordEntry");
+                Class<?> creditDebitCardEntryClass = Class.forName("com.jamesd.passwordmanager.Models.Passwords.CreditDebitCardEntry");
                 if(websitePasswordEntryClass.equals(PasswordEntryFolder.EntryFactory.determineEntryType(selectedFolder))) {
                     populateWebsiteEntryPasswords(selectedFolder);
                     TableView<WebsitePasswordEntryWrapper> tableView = (TableView<WebsitePasswordEntryWrapper>)
@@ -752,6 +796,12 @@ public class PasswordHomeController implements Initializable {
                 if(databasePasswordEntryClass.equals(PasswordEntryFolder.EntryFactory.determineEntryType(selectedFolder))) {
                     populateDatabaseEntryPasswords(selectedFolder);
                     TableView<DatabasePasswordEntryWrapper> tableView = (TableView<DatabasePasswordEntryWrapper>)
+                            PasswordManagerApp.getPasswordHomeController().getPasswordTableVbox().getChildren().get(1);
+                    tableView.getSelectionModel().select(tableView.getItems().size() - 1, tableView.getColumns().get(1));
+                }
+                if(creditDebitCardEntryClass.equals(PasswordEntryFolder.EntryFactory.determineEntryType(selectedFolder))) {
+                    populateCreditDebitCardEntryPasswords(selectedFolder);
+                    TableView<CreditDebitCardEntryWrapper> tableView = (TableView<CreditDebitCardEntryWrapper>)
                             PasswordManagerApp.getPasswordHomeController().getPasswordTableVbox().getChildren().get(1);
                     tableView.getSelectionModel().select(tableView.getItems().size() - 1, tableView.getColumns().get(1));
                 }

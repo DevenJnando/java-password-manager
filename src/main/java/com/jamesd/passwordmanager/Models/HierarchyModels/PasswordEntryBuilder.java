@@ -262,6 +262,7 @@ public class PasswordEntryBuilder {
         private String id;
         private String passwordName;
         private String creditDebitCardNumber;
+        private String creditDebitCardType;
         private String masterUsername;
         private String expiryDate;
         private String securityCode;
@@ -304,6 +305,16 @@ public class PasswordEntryBuilder {
          */
         public CreditDebitCardEntryBuilder withCreditDebitCardNumber(String creditDebitCardNumber) {
             this.creditDebitCardNumber = creditDebitCardNumber;
+            return this;
+        }
+
+        /**
+         * Sets the credit/debit card type for the CreditDebitCardEntry object to have
+         * @param creditDebitCardType Credit/debit card type of the CreditDebitCardEntry
+         * @return This CreditDebitCardEntryBuilder object
+         */
+        public CreditDebitCardEntryBuilder withCreditDebitCardType(String creditDebitCardType) {
+            this.creditDebitCardType = creditDebitCardType;
             return this;
         }
 
@@ -372,19 +383,11 @@ public class PasswordEntryBuilder {
          * @return New CreditDebitCardEntry object
          */
         public CreditDebitCardEntry build() {
-            if(id == null &&
-            accountNumber == null && sortCode == null) {
+            if(id == null) {
                 return new CreditDebitCardEntry(
                         this.passwordName,
                         this.creditDebitCardNumber,
-                        this.masterUsername,
-                        this.dateSet,
-                        this.expiryDate,
-                        this.securityCode);
-            } else if(id == null) {
-                return new CreditDebitCardEntry(
-                        this.passwordName,
-                        this.creditDebitCardNumber,
+                        this.creditDebitCardType,
                         this.masterUsername,
                         this.dateSet,
                         this.expiryDate,
@@ -396,6 +399,7 @@ public class PasswordEntryBuilder {
                         this.id,
                         this.passwordName,
                         this.creditDebitCardNumber,
+                        this.creditDebitCardType,
                         this.masterUsername,
                         this.dateSet,
                         this.expiryDate,

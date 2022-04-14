@@ -1,5 +1,7 @@
 package com.jamesd.passwordmanager.Controllers;
 
+import com.jamesd.passwordmanager.Utils.EncryptDecryptPasswordsUtil;
+import com.jamesd.passwordmanager.Wrappers.CreditDebitCardEntryWrapper;
 import com.jamesd.passwordmanager.Wrappers.DatabasePasswordEntryWrapper;
 import com.jamesd.passwordmanager.Wrappers.WebsitePasswordEntryWrapper;
 import javafx.scene.Node;
@@ -161,9 +163,14 @@ public class Toggler {
                 if(wrapper instanceof WebsitePasswordEntryWrapper) {
                     WebsitePasswordEntryWrapper websiteWrapper = (WebsitePasswordEntryWrapper) wrapper;
                     passwordHide.setText(websiteWrapper.getWebsitePasswordEntry().getDecryptedPassword());
-                } if(wrapper instanceof DatabasePasswordEntryWrapper) {
+                }
+                if(wrapper instanceof DatabasePasswordEntryWrapper) {
                     DatabasePasswordEntryWrapper databaseWrapper = (DatabasePasswordEntryWrapper) wrapper;
                     passwordHide.setText(databaseWrapper.getDatabasePasswordEntry().getDecryptedPassword());
+                }
+                if(wrapper instanceof CreditDebitCardEntryWrapper) {
+                    CreditDebitCardEntryWrapper creditDebitCardWrapper = (CreditDebitCardEntryWrapper) wrapper;
+                    passwordHide.setText(creditDebitCardWrapper.getCreditDebitCardEntry().getDecryptedPassword());
                 }
                 passwordHide.setId(hidePasswordTextFieldId);
                 showPassword = false;
@@ -180,9 +187,14 @@ public class Toggler {
                 if(wrapper instanceof WebsitePasswordEntryWrapper) {
                     WebsitePasswordEntryWrapper websiteWrapper = (WebsitePasswordEntryWrapper) wrapper;
                     passwordShow.setText(websiteWrapper.getWebsitePasswordEntry().getDecryptedPassword());
-                } if(wrapper instanceof DatabasePasswordEntryWrapper) {
+                }
+                if(wrapper instanceof DatabasePasswordEntryWrapper) {
                     DatabasePasswordEntryWrapper databaseWrapper = (DatabasePasswordEntryWrapper) wrapper;
                     passwordShow.setText(databaseWrapper.getDatabasePasswordEntry().getDecryptedPassword());
+                }
+                if(wrapper instanceof CreditDebitCardEntryWrapper) {
+                    CreditDebitCardEntryWrapper creditDebitCardWrapper = (CreditDebitCardEntryWrapper) wrapper;
+                    passwordShow.setText(creditDebitCardWrapper.getCreditDebitCardEntry().getDecryptedPassword());
                 }
                 passwordShow.setId(showPasswordTextFieldId);
                 showPassword = true;

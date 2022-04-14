@@ -265,4 +265,22 @@ public abstract class PasswordCreateUtil {
             }
         });
     }
+
+    public static TextFormatter<String> createTextNumberFormatter(Integer length) {
+        return new TextFormatter<>(change -> {
+            String newText = change.getControlNewText();
+            boolean illegalCharacter = false;
+            List<Integer> numeralChars = newText.chars().boxed().collect(Collectors.toList());
+            for(int charAsInt : numeralChars) {
+                if(!Character.isDigit(charAsInt)) {
+                    illegalCharacter = true;
+                }
+            }
+            if(newText.length() > length || illegalCharacter) {
+                return null;
+            } else {
+                return change;
+            }
+        });
+    }
 }

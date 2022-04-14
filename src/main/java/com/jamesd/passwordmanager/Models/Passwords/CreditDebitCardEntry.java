@@ -5,6 +5,7 @@ package com.jamesd.passwordmanager.Models.Passwords;
  */
 public class CreditDebitCardEntry extends PasswordEntry {
     private String cardNumber;
+    private String cardType;
     private String masterUsername;
     private String expiryDate;
     private String securityCode;
@@ -17,29 +18,10 @@ public class CreditDebitCardEntry extends PasswordEntry {
     public CreditDebitCardEntry() {
         super();
         this.cardNumber = "";
+        this.cardType = "";
         this.masterUsername = "";
         this.expiryDate = "";
         this.securityCode = "";
-        this.accountNumber = "";
-        this.sortCode = "";
-    }
-
-    /**
-     * Constructor which takes the password name, card number, last updated date in the database, card expiry date and
-     * security code as parameters
-     * @param passwordName String of the password name
-     * @param cardNumber String of the card number
-     * @param dateSet String of the last updated date in the database
-     * @param expiryDate String of the card's expiry date
-     * @param securityCode String of the card's security code
-     */
-    public CreditDebitCardEntry(String passwordName, String cardNumber, String masterUsername, String dateSet, String expiryDate,
-                                String securityCode) {
-        super(passwordName, cardNumber, dateSet);
-        this.cardNumber = cardNumber;
-        this.masterUsername = masterUsername;
-        this.expiryDate = expiryDate;
-        this.securityCode = securityCode;
         this.accountNumber = "";
         this.sortCode = "";
     }
@@ -55,10 +37,11 @@ public class CreditDebitCardEntry extends PasswordEntry {
      * @param accountNumber String of the account number this card belongs to
      * @param sortCode String of the sort code this card belongs to
      */
-    public CreditDebitCardEntry(String passwordName, String cardNumber, String masterUsername, String dateSet,
+    public CreditDebitCardEntry(String passwordName, String cardNumber, String cardType, String masterUsername, String dateSet,
                                 String expiryDate, String securityCode, String accountNumber, String sortCode) {
         super(passwordName, cardNumber, dateSet);
         this.cardNumber = cardNumber;
+        this.cardType = cardType;
         this.masterUsername = masterUsername;
         this.expiryDate = expiryDate;
         this.securityCode = securityCode;
@@ -78,10 +61,11 @@ public class CreditDebitCardEntry extends PasswordEntry {
      * @param accountNumber String of the account number this card belongs to
      * @param sortCode String of the sort code this card belongs to
      */
-    public CreditDebitCardEntry(String id, String passwordName, String cardNumber, String masterUsername,  String dateSet,
+    public CreditDebitCardEntry(String id, String passwordName, String cardNumber, String cardType, String masterUsername,  String dateSet,
                                 String expiryDate, String securityCode, String accountNumber, String sortCode) {
         super(id, passwordName, cardNumber, dateSet);
         this.cardNumber = cardNumber;
+        this.cardType = cardType;
         this.masterUsername = masterUsername;
         this.expiryDate = expiryDate;
         this.securityCode = securityCode;
@@ -96,6 +80,12 @@ public class CreditDebitCardEntry extends PasswordEntry {
     public String getCardNumber() {
         return cardNumber;
     }
+
+    /**
+     * Retrieves the card type
+     * @return Card type String
+     */
+    public String getCardType() { return cardType; }
 
     /**
      * Retrieves the username in this application
@@ -119,6 +109,12 @@ public class CreditDebitCardEntry extends PasswordEntry {
     public void setCardNumber(String cardNumber) {
         this.cardNumber = cardNumber;
     }
+
+    /**
+     * Sets the card type
+     * @param cardType Card type String
+     */
+    public void setCardType(String cardType) { this.cardType = cardType; }
 
     /**
      * Retrieves the card's expiry date

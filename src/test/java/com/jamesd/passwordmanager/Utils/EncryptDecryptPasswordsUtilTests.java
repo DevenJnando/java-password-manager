@@ -14,12 +14,12 @@ public class EncryptDecryptPasswordsUtilTests {
 
     @BeforeAll
     public static void initialise() throws InvalidKeySpecException, NoSuchAlgorithmException {
-        EncryptDecryptPasswordsUtil.initialise("TestKeyNotReal");
+        EncryptDecryptPasswordsUtil.initialise("N6EHALQT3KiBhB4AAAAAAA");
     }
 
     @Test
     public void encryptAndDecryptString() throws GeneralSecurityException, IOException {
-        String toBeEncrypted = "Extended warranty? How can I lose!";
+        String toBeEncrypted = "0zkphfw8AL2ET6OVsaXM7YcfVtqjPEfjUgKqFTJxzPP74HrTwMdrnZAdSAyADjO0sssA5AVwYGGNgS046j3jhQ==";
         String encryptedString = EncryptDecryptPasswordsUtil.encryptPassword(toBeEncrypted);
         System.out.println("Encrypted string: " + encryptedString);
         String decryptedString = EncryptDecryptPasswordsUtil.decryptPassword(encryptedString);

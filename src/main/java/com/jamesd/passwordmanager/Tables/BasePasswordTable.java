@@ -1,6 +1,7 @@
 package com.jamesd.passwordmanager.Tables;
 
 import com.jamesd.passwordmanager.Models.HierarchyModels.PasswordEntryFolder;
+import com.jamesd.passwordmanager.Models.Passwords.CreditDebitCardEntry;
 import com.jamesd.passwordmanager.Models.Passwords.PasswordEntry;
 import com.jamesd.passwordmanager.Wrappers.BaseWrapper;
 import com.jamesd.passwordmanager.Wrappers.WebsitePasswordEntryWrapper;
@@ -9,6 +10,7 @@ import javafx.scene.control.TableView;
 import javax.security.auth.login.LoginException;
 import java.net.MalformedURLException;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -54,14 +56,25 @@ public abstract class BasePasswordTable<T extends BaseWrapper, K extends Passwor
      * is set for that PasswordEntry subclass object
      * @param passwordEntries List of PasswordEntry subclass objects
      */
-    protected void checkIfPasswordNeedsUpdated(List<K> passwordEntries) {
+    protected void checkIfPasswordNeedsUpdated(List<K> passwordEntries) throws ClassNotFoundException {
         for(K entry : passwordEntries) {
-            if(passwordNeedsUpdated(entry.getDateSet())) {
-                long daysOutOfDate = daysSinceLastUpdate(entry.getDateSet());
-                String outOfDateMessage = daysOutOfDate > 1
-                        ? "Password is " + daysOutOfDate + " days out of date!"
-                        : "Password is " + daysOutOfDate + " day out of date!";
-                entry.setNeedsUpdatedMessage(outOfDateMessage);
+            Class<?> creditDebitCardClass = Class.forName("com.jamesd.passwordmanager.Models.Passwords.CreditDebitCardEntry");
+            if(creditDebitCardClass.isInstance(entry)) {
+                CreditDebitCardEntry creditDebitCardEntry = (CreditDebitCardEntry) entry;
+                if(!creditDebitCardEntry.getExpiryDate().isEmpty()) {
+                    if (isCreditDebitCardExpired(creditDebitCardEntry.getExpiryDate())) {
+                        String expiredCardMessage = "Credit/Debit card has expired!";
+                        creditDebitCardEntry.setNeedsUpdatedMessage(expiredCardMessage);
+                    }
+                }
+            } else {
+                if (passwordNeedsUpdated(entry.getDateSet())) {
+                    long daysOutOfDate = daysSinceLastUpdate(entry.getDateSet());
+                    String outOfDateMessage = daysOutOfDate > 1
+                            ? "Password is " + daysOutOfDate + " days out of date!"
+                            : "Password is " + daysOutOfDate + " day out of date!";
+                    entry.setNeedsUpdatedMessage(outOfDateMessage);
+                }
             }
         }
     }
@@ -75,8 +88,15 @@ public abstract class BasePasswordTable<T extends BaseWrapper, K extends Passwor
         LocalDate currentDate = LocalDate.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDate dateSet = LocalDate.parse(passwordEntryDateSet, formatter);
-        long daysSinceLastUpdate = dateSet.until(currentDate, ChronoUnit.DAYS);
-        return daysSinceLastUpdate;
+        return dateSet.until(currentDate, ChronoUnit.DAYS);
+    }
+
+    protected Boolean isCreditDebitCardExpired(String expiryDate) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM-yy");
+        YearMonth expiryYearMonth = YearMonth.parse(expiryDate, formatter);
+        LocalDate expiryLocalDate = expiryYearMonth.atDay(1);
+        LocalDate currentDate = LocalDate.now();
+        return expiryLocalDate.isBefore(currentDate);
     }
 
     /**

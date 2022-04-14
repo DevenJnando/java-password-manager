@@ -305,6 +305,7 @@ public class PasswordEntryFolder {
                         .withPasswordName((String) data.get("passwordName"))
                         .withMasterUsername((String) data.get("masterUsername"))
                         .withCreditDebitCardNumber((String) data.get("cardNumber"))
+                        .withCreditDebitCardType((String) data.get("cardType"))
                         .withExpiryDate((String) data.get("expiryDate"))
                         .withSecurityCode((String) data.get("securityCode"))
                         .withAccountNumber((String) data.get("accountNumber"))
@@ -326,11 +327,14 @@ public class PasswordEntryFolder {
         public static List<?> generateEntries(PasswordEntryFolder folder) throws ClassNotFoundException {
             Class<?> passwordEntryClass = Class.forName("com.jamesd.passwordmanager.Models.Passwords.WebsitePasswordEntry");
             Class<?> databaseEntryClass = Class.forName("com.jamesd.passwordmanager.Models.Passwords.DatabasePasswordEntry");
+            Class<?> creditCardEntryClass = Class.forName("com.jamesd.passwordmanager.Models.Passwords.CreditDebitCardEntry");
             Class<?> classOfEntry = determineEntryType(folder);
             if(passwordEntryClass.equals(classOfEntry)) {
                 return getListOfWebPasswords(folder);
             } if(databaseEntryClass.equals(classOfEntry)) {
                 return getListOfDatabasePasswords(folder);
+            } if(creditCardEntryClass.equals(classOfEntry)) {
+                return getListOfCreditDebitCards(folder);
             }
             else {
                 return new ArrayList<>();

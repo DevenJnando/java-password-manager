@@ -1,6 +1,7 @@
 package com.jamesd.passwordmanager.Controllers;
 
 import com.jamesd.passwordmanager.Models.HierarchyModels.PasswordEntryFolder;
+import com.jamesd.passwordmanager.Wrappers.CreditDebitCardEntryWrapper;
 import com.jamesd.passwordmanager.Wrappers.DatabasePasswordEntryWrapper;
 import com.jamesd.passwordmanager.Wrappers.WebsitePasswordEntryWrapper;
 import javafx.fxml.FXML;
@@ -118,6 +119,26 @@ public class BaseDetailsController implements Initializable {
     }
 
     /**
+     * Populates the baseDetailsVbox with the "Credit/Debit card details" view. Called when a credit/debit card entry is
+     * selected by the user
+     * @param cardEntry Card selected by user
+     * @param parentFolder Parent folder the selected card belongs to
+     * @throws IOException Throws IOException if the specified view cannot be loaded
+     * @throws GeneralSecurityException Throws a GeneralSecurityException if the user calls this method whilst not logged
+     * in, or if the card number retrieved from the database cannot successfully be decrypted.
+     */
+    public void setCreditDebitCardDetailsBorderPane(CreditDebitCardEntryWrapper cardEntry, PasswordEntryFolder parentFolder)
+            throws IOException, GeneralSecurityException {
+        prepareDetailsVbox();
+        FXMLLoader detailsLoader = new FXMLLoader(CreditDebitCardDetailsController.class
+                .getResource("/com/jamesd/passwordmanager/views/credit-debit-card-details.fxml"));
+        detailsBorderPane = detailsLoader.load();
+        CreditDebitCardDetailsController creditDebitCardDetailsController = detailsLoader.getController();
+        loadCreditDebitCardDetailsView(cardEntry, parentFolder, creditDebitCardDetailsController);
+        baseDetailsVbox.getChildren().set(0, detailsBorderPane);
+    }
+
+    /**
      * Initialises the WebPasswordDetailsController by first clearing anything which may have been loaded already,
      * setting the selected password and parent folder, and displaying the website password entry details to the user
      * @param passwordEntry Password selected by user
@@ -151,6 +172,24 @@ public class BaseDetailsController implements Initializable {
         databaseDetailsController.setEntryWrapper(databaseEntry);
         databaseDetailsController.setParentFolder(parentFolder);
         databaseDetailsController.populatePasswordLayout();
+    }
+
+    /**
+     * Initialises the CreditDebitCardDetailsController by first clearing anything which may have been loaded already,
+     * setting the selected password and parent folder, and displaying the database password entry details to the user
+     * @param cardEntry Card selected by user
+     * @param parentFolder Parent folder the selected card belongs to
+     * @throws IOException Throws IOException if the specified view cannot be loaded
+     * @throws GeneralSecurityException Throws a GeneralSecurityException if the user calls this method whilst not logged
+     * in, or if the card number retrieved from the database cannot successfully be decrypted.
+     */
+    public static void loadCreditDebitCardDetailsView(CreditDebitCardEntryWrapper cardEntry, PasswordEntryFolder parentFolder,
+                                                      CreditDebitCardDetailsController creditDebitCardDetailsController)
+            throws IOException, GeneralSecurityException {
+        creditDebitCardDetailsController.clear();
+        creditDebitCardDetailsController.setEntryWrapper(cardEntry);
+        creditDebitCardDetailsController.setParentFolder(parentFolder);
+        creditDebitCardDetailsController.populatePasswordLayout();
     }
 
 }

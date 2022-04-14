@@ -118,5 +118,6 @@ public abstract class NewPasswordController extends ModifyPasswordController {
      * cannot be encoded in UTF-8
      * @throws ClassNotFoundException Throws ClassNotFoundException if the DatabasePasswordEntry class cannot be found
      */
+    @FXML
     protected abstract void confirmAndAddNewPassword() throws GeneralSecurityException, UnsupportedEncodingException, ClassNotFoundException;
 }
