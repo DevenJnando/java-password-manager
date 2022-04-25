@@ -142,7 +142,6 @@ public class AddFolderController extends ErrorChecker implements Initializable {
                 "WebPassword",
                 "DatabasePassword",
                 "CreditCard",
-                "Passport",
                 "Document");
         ObservableList<String> oTypes = FXCollections.observableList(types);
         ComboBox<String> folderTypeComboBox = new ComboBox<>(oTypes);

@@ -65,7 +65,6 @@ public class BaseAddPasswordController implements Initializable {
         List<String> passwordTypes = List.of("Website password",
                 "Database password",
                 "Credit/Debit card",
-                "Passport",
                 "Document");
         ChoiceBox<String> passwordTypeChoiceBox = new ChoiceBox<>(FXCollections.observableList(passwordTypes));
 
@@ -99,7 +98,6 @@ public class BaseAddPasswordController implements Initializable {
             case "Credit/Debit card":
                 typeToReturn = "CreditCard";
                 break;
-            case "Passport":
             case "Document":
                 typeToReturn = passwordType;
                 break;
@@ -164,11 +162,6 @@ public class BaseAddPasswordController implements Initializable {
                 //TODO: replace with actual view + controller once finished
                 viewToLoad = "/com/jamesd/passwordmanager/views/add-credit-debit-card-view.fxml";
                 controllerClass = AddCreditDebitCardController.class;
-                break;
-            case "Passport":
-                //TODO: replace with actual view + controller once finished
-                viewToLoad = "/com/jamesd/passwordmanager/views/add-website-password-modal.fxml";
-                controllerClass = AddWebsitePasswordController.class;
                 break;
             case "Document":
                 //TODO: replace with actual view + controller once finished
