@@ -1,9 +1,11 @@
 package com.jamesd.passwordmanager.DAO;
 
 import com.azure.cosmos.models.CosmosItemRequestOptions;
+import com.jamesd.passwordmanager.Models.HierarchyModels.PasswordEntryBuilder;
 import com.jamesd.passwordmanager.Models.HierarchyModels.PasswordEntryFolder;
 import com.jamesd.passwordmanager.Models.Passwords.CreditDebitCardEntry;
 import com.jamesd.passwordmanager.Models.Passwords.DatabasePasswordEntry;
+import com.jamesd.passwordmanager.Models.Passwords.DocumentEntry;
 import com.jamesd.passwordmanager.Models.Users.User;
 import com.jamesd.passwordmanager.Models.Passwords.WebsitePasswordEntry;
 import com.azure.cosmos.CosmosClient;
@@ -149,8 +151,14 @@ public class StoredPassSQLQueries extends SQLQueries {
         Class<?> passwordEntryClass = Class.forName("com.jamesd.passwordmanager.Models.Passwords.WebsitePasswordEntry");
         Class<?> classOfEntry = PasswordEntryFolder.EntryFactory.determineEntryType(folder);
         if(passwordEntryClass.equals(classOfEntry)) {
-            WebsitePasswordEntry entry = new WebsitePasswordEntry(passwordName, siteUrl, masterUsername, passwordUsername,
-                    currentDate, encryptedPassword);
+            WebsitePasswordEntry entry = PasswordEntryBuilder.WebsitePasswordEntryBuilder.newInstance()
+                    .withPasswordName(passwordName)
+                    .withSiteUrl(siteUrl)
+                    .withMasterUsername(masterUsername)
+                    .withPasswordUsername(passwordUsername)
+                    .withEncryptedPassword(encryptedPassword)
+                    .withDateSet(currentDate)
+                    .build();
             HashMap<Object, Object> passwordMap = new HashMap<>();
             passwordMap.put("id", entry.getId());
             passwordMap.put("passwordName", entry.getPasswordName());
@@ -170,7 +178,7 @@ public class StoredPassSQLQueries extends SQLQueries {
 
     /**
      * Adds a new DatabasePasswordEntry object to its parent folder, and then updates that folder in the database
-     * @param folder PasswordEntryFolder which the WebsitePasswordEntry object belongs to
+     * @param folder PasswordEntryFolder which the DatabasePasswordEntry object belongs to
      * @param passwordName Name of the password
      * @param hostname hostname of the database server
      * @param databaseName name of the database
@@ -187,8 +195,15 @@ public class StoredPassSQLQueries extends SQLQueries {
         Class<?> passwordEntryClass = Class.forName("com.jamesd.passwordmanager.Models.Passwords.DatabasePasswordEntry");
         Class<?> classOfEntry = PasswordEntryFolder.EntryFactory.determineEntryType(folder);
         if(passwordEntryClass.equals(classOfEntry)) {
-            DatabasePasswordEntry entry = new DatabasePasswordEntry(passwordName, hostname, databaseName, masterUsername,
-                    databaseUsername, currentDate, encryptedPassword);
+            DatabasePasswordEntry entry = PasswordEntryBuilder.DatabasePasswordEntryBuilder.newInstance()
+                    .withPasswordName(passwordName)
+                    .withHostName(hostname)
+                    .withMasterUsername(masterUsername)
+                    .withDatabaseName(databaseName)
+                    .withDatabaseUsername(databaseUsername)
+                    .withEncryptedPassword(encryptedPassword)
+                    .withDateSet(currentDate)
+                    .build();
             HashMap<Object, Object> passwordMap = new HashMap<>();
             passwordMap.put("id", entry.getId());
             passwordMap.put("passwordName", entry.getPasswordName());
@@ -209,26 +224,36 @@ public class StoredPassSQLQueries extends SQLQueries {
 
     /**
      * Adds a new CreditDebitCardEntry object to its parent folder, and then updates that folder in the database
-     * @param folder PasswordEntryFolder which the WebsitePasswordEntry object belongs to
+     * @param folder PasswordEntryFolder which the CreditDebitCardEntry object belongs to
      * @param passwordName Name of the password
      * @param cardNumber Card number on the credit/debit card
      * @param expiryDate Expiry date of the credit/debit card
      * @param securityCode CCV on the back of the card
      * @param accountNumber Account number for the account the card is associated with
      * @param sortCode Sort code for the account the card is associated with
+     * @param masterUsername Username of the user in this application
      * @param currentDate Current date of the update
-     * @throws ClassNotFoundException Throws ClassNotFoundException if the DatabasePasswordEntry class cannot be found
+     * @throws ClassNotFoundException Throws ClassNotFoundException if the CreditDebitCardEntry class cannot be found
      */
     public static void addNewCreditDebitCardToDb(PasswordEntryFolder folder, String passwordName, String cardNumber,
                                                   String cardType, String expiryDate, String securityCode, String accountNumber,
                                                   String sortCode, String masterUsername, String currentDate)
             throws ClassNotFoundException {
-        logger.info("Adding new database password to database...");
+        logger.info("Adding new credit card password to database...");
         Class<?> passwordEntryClass = Class.forName("com.jamesd.passwordmanager.Models.Passwords.CreditDebitCardEntry");
         Class<?> classOfEntry = PasswordEntryFolder.EntryFactory.determineEntryType(folder);
         if(passwordEntryClass.equals(classOfEntry)) {
-            CreditDebitCardEntry entry = new CreditDebitCardEntry(passwordName, cardNumber, cardType, masterUsername,
-                    currentDate, expiryDate, securityCode, accountNumber, sortCode);
+            CreditDebitCardEntry entry = PasswordEntryBuilder.CreditDebitCardEntryBuilder.newInstance()
+                    .withPasswordName(passwordName)
+                    .withCreditDebitCardNumber(cardNumber)
+                    .withCreditDebitCardType(cardType)
+                    .withExpiryDate(expiryDate)
+                    .withSecurityCode(securityCode)
+                    .withAccountNumber(accountNumber)
+                    .withSortCode(sortCode)
+                    .withMasterUsername(masterUsername)
+                    .withDateSet(currentDate)
+                    .build();
             HashMap<Object, Object> passwordMap = new HashMap<>();
             passwordMap.put("id", entry.getId());
             passwordMap.put("passwordName", entry.getPasswordName());
@@ -243,9 +268,49 @@ public class StoredPassSQLQueries extends SQLQueries {
             folder.getData().add(passwordMap);
             updateInMemoryPasswordFolderData(folder);
             getUserPasswordsContainer().upsertItem(folder);
-            logger.info("Database password entry created successfully.");
+            logger.info("Credit/Debit card entry created successfully.");
         } else {
             logger.error("Class cast exception occurred! " + classOfEntry + " is not of type " + passwordEntryClass);
+        }
+    }
+
+    /**
+     * Adds a new DocumentEntry object to its parent folder, and then updates that folder in the database
+     * @param folder PasswordEntryFolder which the DocumentEntry object belongs to
+     * @param documentName Name of the document
+     * @param documentDescription Description of what the document is/what it's for
+     * @param masterUsername Username of the user in this application
+     * @param documentStorageReference Reference to the actual document stored in the user's storage container
+     * @param currentDate Current date of the update
+     * @throws ClassNotFoundException Throws ClassNotFoundException if the DocumentEntry class cannot be found
+     */
+    public static void addNewDocumentToDb(PasswordEntryFolder folder, String documentName, String documentDescription,
+                                          String masterUsername, String documentStorageReference, String currentDate)
+        throws ClassNotFoundException {
+        logger.info("Adding new document to database...");
+        Class<?> documentEntryClass = Class.forName("com.jamesd.passwordmanager.Models.Passwords.DocumentEntry");
+        Class<?> classOfEntry = PasswordEntryFolder.EntryFactory.determineEntryType(folder);
+        if(documentEntryClass.equals(classOfEntry)) {
+            DocumentEntry entry = PasswordEntryBuilder.DocumentEntryBuilder.newInstance()
+                    .withName(documentName)
+                    .withDescription(documentDescription)
+                    .withMasterUsername(masterUsername)
+                    .withStorageReference(documentStorageReference)
+                    .withDateSet(currentDate)
+                    .build();
+            HashMap<Object, Object> documentMap = new HashMap<>();
+            documentMap.put("id", entry.getId());
+            documentMap.put("passwordName", entry.getPasswordName());
+            documentMap.put("documentDescription", entry.getDocumentDescription());
+            documentMap.put("masterUsername", entry.getMasterUsername());
+            documentMap.put("documentStorageReference", entry.getDocumentStorageReference());
+            documentMap.put("dateSet", entry.getDateSet());
+            folder.getData().add(documentMap);
+            updateInMemoryPasswordFolderData(folder);
+            getUserPasswordsContainer().upsertItem(folder);
+            logger.info("Document entry created successfully.");
+        } else {
+            logger.error("Class cast exception occurred! " + classOfEntry + " is not of type " + documentEntryClass);
         }
     }
 
@@ -319,7 +384,7 @@ public class StoredPassSQLQueries extends SQLQueries {
      * @throws ClassNotFoundException Throws ClassNotFoundException if the CreditDebitCardEntry class cannot be found
      */
     public static void updateCreditDebitCardInDb(CreditDebitCardEntry entry, PasswordEntryFolder folder) throws ClassNotFoundException {
-        logger.info("Updating password in database...");
+        logger.info("Updating card in database...");
         Class<?> passwordEntryClass = Class.forName("com.jamesd.passwordmanager.Models.Passwords.CreditDebitCardEntry");
         Class<?> classOfEntry = PasswordEntryFolder.EntryFactory.determineEntryType(folder);
         if(passwordEntryClass.equals(classOfEntry)) {
@@ -340,9 +405,33 @@ public class StoredPassSQLQueries extends SQLQueries {
             });
             updateInMemoryPasswordFolderData(folder);
             getUserPasswordsContainer().upsertItem(folder);
-            logger.info("Password updated successfully.");
+            logger.info("Card updated successfully.");
         } else {
             logger.error("Class cast exception occurred! " + classOfEntry + " is not of type " + passwordEntryClass);
+        }
+    }
+
+    public static void updateDocumentInDb(DocumentEntry entry, PasswordEntryFolder folder) throws ClassNotFoundException {
+        logger.info("Updating document in database...");
+        Class<?> documentEntryClass = Class.forName("com.jamesd.passwordmanager.Models.Passwords.DocumentEntry");
+        Class<?> classOfEntry = PasswordEntryFolder.EntryFactory.determineEntryType(folder);
+        if(documentEntryClass.equals(classOfEntry)) {
+            folder.getData().forEach(data -> {
+                if(data.get("id").equals(entry.getId())) {
+                    data.clear();
+                    data.put("id", entry.getId());
+                    data.put("passwordName", entry.getPasswordName());
+                    data.put("documentDescription", entry.getDocumentDescription());
+                    data.put("masterUsername", entry.getMasterUsername());
+                    data.put("documentStorageReference", entry.getDocumentStorageReference());
+                    data.put("dateSet", entry.getDateSet());
+                }
+            });
+            updateInMemoryPasswordFolderData(folder);
+            getUserPasswordsContainer().upsertItem(folder);
+            logger.info("Document updated successfully.");
+        } else {
+            logger.error("Class cast exception occurred! " + classOfEntry + " is not of type " + documentEntryClass);
         }
     }
 
@@ -357,6 +446,7 @@ public class StoredPassSQLQueries extends SQLQueries {
         Class<?> websiteEntryClass = Class.forName("com.jamesd.passwordmanager.Models.Passwords.WebsitePasswordEntry");
         Class<?> databaseEntryClass = Class.forName("com.jamesd.passwordmanager.Models.Passwords.DatabasePasswordEntry");
         Class<?> creditDebitCardEntryClass = Class.forName("com.jamesd.passwordmanager.Models.Passwords.CreditDebitCardEntry");
+        Class<?> documentEntryClass = Class.forName("com.jamesd.passwordmanager.Models.Passwords.DocumentEntry");
         Class<?> classOfEntry = PasswordEntryFolder.EntryFactory.determineEntryType(folder);
         int indexToRemove = -1;
         boolean classFound = false;
@@ -382,6 +472,14 @@ public class StoredPassSQLQueries extends SQLQueries {
             CreditDebitCardEntry creditDebitCardEntry = (CreditDebitCardEntry) entry;
             for(HashMap<Object, Object> data : folder.getData()) {
                 if(data.get("id").equals(creditDebitCardEntry.getId())) {
+                    indexToRemove = folder.getData().indexOf(data);
+                }
+            }
+            classFound = true;
+        } else if(documentEntryClass.equals(classOfEntry)) {
+            DocumentEntry documentEntry = (DocumentEntry) entry;
+            for(HashMap<Object, Object> data : folder.getData()) {
+                if(data.get("id").equals(documentEntry.getId())) {
                     indexToRemove = folder.getData().indexOf(data);
                 }
             }

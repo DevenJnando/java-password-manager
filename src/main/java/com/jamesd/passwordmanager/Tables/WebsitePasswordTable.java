@@ -18,16 +18,11 @@ import javafx.scene.control.TablePosition;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.security.auth.login.LoginException;
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -44,7 +39,7 @@ public class WebsitePasswordTable extends BasePasswordTable<WebsitePasswordEntry
      * FXML field
      */
     @FXML
-private final TableView<WebsitePasswordEntryWrapper> passwordTableView = new TableView<>();
+    private final TableView<WebsitePasswordEntryWrapper> passwordTableView = new TableView<>();
 
     private static final Logger logger = LoggerFactory.getLogger(WebsitePasswordTable.class);
 

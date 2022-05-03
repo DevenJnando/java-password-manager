@@ -4,7 +4,6 @@ import com.jamesd.passwordmanager.DAO.StoredPassSQLQueries;
 import com.jamesd.passwordmanager.Models.HierarchyModels.PasswordEntryFolder;
 import com.jamesd.passwordmanager.PasswordManagerApp;
 import javafx.collections.FXCollections;
-import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
@@ -19,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.security.auth.login.LoginException;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -150,7 +150,7 @@ public class DeleteFolderController implements Initializable {
                 confirmAndDeleteFolder();
                 confirmationStage.close();
                 PasswordHomeController.getStage().close();
-            } catch (LoginException | ClassNotFoundException ex) {
+            } catch (LoginException | ClassNotFoundException | IOException ex) {
                 ex.printStackTrace();
             }
         });
@@ -171,7 +171,7 @@ public class DeleteFolderController implements Initializable {
      * @throws LoginException
      * @throws ClassNotFoundException
      */
-    public void confirmAndDeleteFolder() throws LoginException, ClassNotFoundException {
+    public void confirmAndDeleteFolder() throws LoginException, ClassNotFoundException, IOException {
         if(PasswordManagerApp.getLoggedInUser() != null) {
             StoredPassSQLQueries.deletePasswordFolderInDb(getSelectedFolder());
             logger.info("Folder " + getSelectedFolder().getPasswordFolder() + " deleted successfully");

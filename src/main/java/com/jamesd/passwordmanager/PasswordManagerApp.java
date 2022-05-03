@@ -185,6 +185,14 @@ public class PasswordManagerApp extends Application {
     }
 
     /**
+     * Sets the rootLayout BorderPane field
+     * @param root BorderPane object to be set
+     */
+    public static void setRootLayout(BorderPane root) {
+        rootLayout = root;
+    }
+
+    /**
      * Retrieves the currently logged-in User object
      * @return User object currently logged-in
      */

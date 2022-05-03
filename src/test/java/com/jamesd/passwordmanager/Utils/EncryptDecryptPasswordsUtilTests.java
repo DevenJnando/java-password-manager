@@ -19,7 +19,7 @@ public class EncryptDecryptPasswordsUtilTests {
 
     @Test
     public void encryptAndDecryptString() throws GeneralSecurityException, IOException {
-        String toBeEncrypted = "0zkphfw8AL2ET6OVsaXM7YcfVtqjPEfjUgKqFTJxzPP74HrTwMdrnZAdSAyADjO0sssA5AVwYGGNgS046j3jhQ==";
+        String toBeEncrypted = "0hMQzrtrhGkLfbJB+nSMi0sfwXhij/OJJBfZn7GQDaOHpFVsrWcfK+SkUUE53qcZEDlUhxlGyXt7Oi269LiSAw==";
         String encryptedString = EncryptDecryptPasswordsUtil.encryptPassword(toBeEncrypted);
         System.out.println("Encrypted string: " + encryptedString);
         String decryptedString = EncryptDecryptPasswordsUtil.decryptPassword(encryptedString);

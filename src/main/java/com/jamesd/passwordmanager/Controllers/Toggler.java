@@ -1,6 +1,5 @@
 package com.jamesd.passwordmanager.Controllers;
 
-import com.jamesd.passwordmanager.Utils.EncryptDecryptPasswordsUtil;
 import com.jamesd.passwordmanager.Wrappers.CreditDebitCardEntryWrapper;
 import com.jamesd.passwordmanager.Wrappers.DatabasePasswordEntryWrapper;
 import com.jamesd.passwordmanager.Wrappers.WebsitePasswordEntryWrapper;

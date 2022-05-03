@@ -2,6 +2,7 @@ package com.jamesd.passwordmanager.Models.HierarchyModels;
 
 import com.jamesd.passwordmanager.Models.Passwords.CreditDebitCardEntry;
 import com.jamesd.passwordmanager.Models.Passwords.DatabasePasswordEntry;
+import com.jamesd.passwordmanager.Models.Passwords.DocumentEntry;
 import com.jamesd.passwordmanager.Models.Passwords.WebsitePasswordEntry;
 
 /**
@@ -411,16 +412,108 @@ public class PasswordEntryBuilder {
     }
 
     /**
-     * Static class which builds a new PassportEntry object
-     */
-    public static class PassportEntryBuilder {
-
-    }
-
-    /**
      * Static class which builds a new DocumentEntry object
      */
     public static class DocumentEntryBuilder {
+        private String id;
+        private String documentName;
+        private String documentDescription;
+        private String masterUsername;
+        private String dateSet;
+        private String documentStorageReference;
 
+        /**
+         * Creates a new instance of a DocumentEntryBuilder object
+         * @return DocumentEntryBuilder object to be populated
+         */
+        public static DocumentEntryBuilder newInstance() {
+            return new DocumentEntryBuilder();
+        }
+
+        /**
+         * Sets the ID to use when building the DocumentEntry object
+         * @param id Assigned ID
+         * @return DocumentEntryBuilder object
+         */
+        public DocumentEntryBuilder withId(String id) {
+            this.id = id;
+            return this;
+        }
+
+        /**
+         * Sets the name to use when building the DocumentEntry object
+         * @param documentName Assigned name
+         * @return DocumentEntryBuilder object
+         */
+        public DocumentEntryBuilder withName(String documentName) {
+            this.documentName = documentName;
+            return this;
+        }
+
+        /**
+         * Sets the description to use when building the DocumentEntry object
+         * @param documentDescription Assigned description
+         * @return DocumentEntryBuilder object
+         */
+        public DocumentEntryBuilder withDescription(String documentDescription) {
+            this.documentDescription = documentDescription;
+            return this;
+        }
+
+        /**
+         * Sets the master username to use when building the DocumentEntry object
+         * @param masterUsername Assigned master username
+         * @return DocumentEntryBuilder object
+         */
+        public DocumentEntryBuilder withMasterUsername(String masterUsername) {
+            this.masterUsername = masterUsername;
+            return this;
+        }
+
+        /**
+         * Sets the creation/last modification date to use when building the DocumentEntry object
+         * @param dateSet Assigned creation/last modified date
+         * @return DocumentEntryBuilder object
+         */
+        public DocumentEntryBuilder withDateSet(String dateSet) {
+            this.dateSet = dateSet;
+            return this;
+        }
+
+        /**
+         * Sets the storage reference for the document in the user's storage container to use when building the
+         * DocumentEntry object
+         * @param documentStorageReference Assigned storage reference
+         * @return DocumentEntryBuilder object
+         */
+        public DocumentEntryBuilder withStorageReference(String documentStorageReference) {
+            this.documentStorageReference = documentStorageReference;
+            return this;
+        }
+
+        /**
+         * Builds the DocumentEntry object using the fields assigned to the DocumentEntryBuilder object
+         * @return The fully built DocumentEntry object
+         */
+        public DocumentEntry build() {
+            if(id == null) {
+                return new DocumentEntry(
+                        this.documentName,
+                        this.documentDescription,
+                        this.masterUsername,
+                        this.dateSet,
+                        this.documentStorageReference
+                );
+            } else {
+                return new DocumentEntry(
+                        this.id,
+                        this.documentName,
+                        this.documentDescription,
+                        this.masterUsername,
+                        this.dateSet,
+                        this.documentStorageReference
+                );
+            }
+        }
     }
 }

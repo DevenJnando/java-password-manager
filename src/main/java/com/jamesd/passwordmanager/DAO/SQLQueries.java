@@ -1,6 +1,10 @@
 package com.jamesd.passwordmanager.DAO;
 
-import com.azure.cosmos.*;
+import com.azure.cosmos.ConsistencyLevel;
+import com.azure.cosmos.CosmosClient;
+import com.azure.cosmos.CosmosClientBuilder;
+import com.azure.cosmos.CosmosDatabase;
+import com.azure.cosmos.CosmosContainer;
 import com.azure.cosmos.models.CosmosContainerProperties;
 import com.azure.cosmos.models.CosmosContainerResponse;
 import com.azure.cosmos.models.CosmosDatabaseResponse;

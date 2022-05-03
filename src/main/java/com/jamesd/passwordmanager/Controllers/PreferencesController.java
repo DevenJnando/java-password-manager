@@ -6,7 +6,6 @@ import com.jamesd.passwordmanager.Utils.TransitionUtil;
 import com.jfoenix.controls.JFXDrawer;
 import javafx.animation.FadeTransition;
 import javafx.animation.SequentialTransition;
-import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
