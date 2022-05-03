@@ -2,6 +2,7 @@ package com.jamesd.passwordmanager.Authentication;
 
 import com.jamesd.passwordmanager.Controllers.LoginController;
 import com.jamesd.passwordmanager.DAO.MasterSQLQueries;
+import com.jamesd.passwordmanager.DAO.StorageAccountManager;
 import com.jamesd.passwordmanager.DAO.StoredPassSQLQueries;
 import com.jamesd.passwordmanager.Utils.EncryptDecryptPasswordsUtil;
 import com.jamesd.passwordmanager.Utils.HashMasterPasswordUtil;
@@ -32,6 +33,7 @@ import java.util.List;
 public class LoginAuthentication extends Authenticator{
 
     protected static Logger logger = LoggerFactory.getLogger(LoginAuthentication.class);
+    private StoredPassDbKey storedPassDbKey;
 
     /**
      * Constructor which sets the LoginController field.
@@ -42,27 +44,12 @@ public class LoginAuthentication extends Authenticator{
     }
 
     /**
-     * Returns the LoginController
-     * @return LoginController field
+     * Returns the StoredPassDbKey object which contains the encrypted key for the stored passwords database as well
+     * as the encrypted key to the application's storage account.
+     * @return StoredPassDbKey object
      */
-    public LoginController getLoginController() {
-        return loginController;
-    }
-
-    /**
-     * Sets the LoginController field
-     * @param loginController contains user-input fields (username/email, password)
-     */
-    public void setLoginController(LoginController loginController) {
-        this.loginController = loginController;
-    }
-
-    /**
-     * Returns an object of the currently logged in User
-     * @return the currently logged in User object
-     */
-    public User getLoggedInUser() {
-        return this.user;
+    public StoredPassDbKey getStoredPassDbKey() {
+        return storedPassDbKey;
     }
 
     /**
@@ -102,13 +89,14 @@ public class LoginAuthentication extends Authenticator{
      * @throws IOException Throws an IO exception if the response from CosmosDB cannot be read
      * @throws SQLException Throws an SQLException if the CosmosDB query has an incorrect formatting/syntax
      */
-    private static void unlockStoredPassDb(List<StoredPassDbKey> storedPassKeys, String loginId, String loginMethod)
+    private void unlockStoredPassDb(List<StoredPassDbKey> storedPassKeys, String loginId, String loginMethod)
             throws GeneralSecurityException,
             IOException,
             SQLException {
         for(StoredPassDbKey entry : storedPassKeys) {
             EncryptDecryptPasswordsUtil.initialise(entry.getDecryptionKey());
             entry.decryptMasterPassword();
+            storedPassDbKey = entry;
             if(loginMethod.equals("username")) {
                 StoredPassSQLQueries.initialiseWithUsername(entry.getDecryptedPassword(), loginId);
             }

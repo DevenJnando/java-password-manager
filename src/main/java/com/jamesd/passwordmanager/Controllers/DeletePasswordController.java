@@ -1,13 +1,15 @@
 package com.jamesd.passwordmanager.Controllers;
 
+import com.jamesd.passwordmanager.DAO.StorageAccountManager;
 import com.jamesd.passwordmanager.DAO.StoredPassSQLQueries;
 import com.jamesd.passwordmanager.Models.HierarchyModels.PasswordEntryFolder;
 import com.jamesd.passwordmanager.PasswordManagerApp;
+import com.jamesd.passwordmanager.Wrappers.CreditDebitCardEntryWrapper;
 import com.jamesd.passwordmanager.Wrappers.DatabasePasswordEntryWrapper;
+import com.jamesd.passwordmanager.Wrappers.DocumentWrapper;
 import com.jamesd.passwordmanager.Wrappers.WebsitePasswordEntryWrapper;
-import javafx.scene.control.TableView;
 
-import javax.security.auth.login.LoginException;
+import javafx.scene.control.TableView;
 import java.util.HashSet;
 
 /**
@@ -46,6 +48,8 @@ public class DeletePasswordController {
             throws ClassNotFoundException {
         Class<?> websitePasswordEntryWrapperClass = Class.forName("com.jamesd.passwordmanager.Wrappers.WebsitePasswordEntryWrapper");
         Class<?> databasePasswordEntryWrapperClass = Class.forName("com.jamesd.passwordmanager.Wrappers.DatabasePasswordEntryWrapper");
+        Class<?> creditDebitCardEntryWrapperClass = Class.forName("com.jamesd.passwordmanager.Wrappers.CreditDebitCardEntryWrapper");
+        Class<?> documentEntryWrapperClass = Class.forName("com.jamesd.passwordmanager.Wrappers.DocumentWrapper");
         HashSet<Object> toBeDeleted = new HashSet<>();
         for(Object o : tableView.getItems()) {
             if(websitePasswordEntryWrapperClass.isInstance(o)) {
@@ -58,16 +62,40 @@ public class DeletePasswordController {
                 if(databasePasswordEntryWrapper.isChecked().getValue()) {
                     toBeDeleted.add(databasePasswordEntryWrapper);
                 }
+            } if(creditDebitCardEntryWrapperClass.isInstance(o)) {
+                CreditDebitCardEntryWrapper creditDebitCardEntryWrapper = (CreditDebitCardEntryWrapper) o;
+                if(creditDebitCardEntryWrapper.isChecked().getValue()) {
+                    toBeDeleted.add(creditDebitCardEntryWrapper);
+                }
+            } if(documentEntryWrapperClass.isInstance(o)) {
+                DocumentWrapper documentWrapper = (DocumentWrapper) o;
+                if(documentWrapper.isChecked().getValue()) {
+                    toBeDeleted.add(documentWrapper);
+                }
             }
         }
         for(Object o : toBeDeleted) {
             if(websitePasswordEntryWrapperClass.isInstance(o)) {
                 WebsitePasswordEntryWrapper wrapper = (WebsitePasswordEntryWrapper) o;
                 StoredPassSQLQueries.deletePasswordInDb(wrapper.getWebsitePasswordEntry(), selectedFolder);
+                PasswordManagerApp.getPasswordHomeController().populateWebsiteEntryPasswords(selectedFolder);
             } if(databasePasswordEntryWrapperClass.isInstance(o)) {
                 DatabasePasswordEntryWrapper wrapper = (DatabasePasswordEntryWrapper) o;
                 StoredPassSQLQueries.deletePasswordInDb(wrapper.getDatabasePasswordEntry(), selectedFolder);
+                PasswordManagerApp.getPasswordHomeController().populateDatabaseEntryPasswords(selectedFolder);
+            } if(creditDebitCardEntryWrapperClass.isInstance(o)) {
+                CreditDebitCardEntryWrapper wrapper = (CreditDebitCardEntryWrapper) o;
+                StoredPassSQLQueries.deletePasswordInDb(wrapper.getCreditDebitCardEntry(), selectedFolder);
+                PasswordManagerApp.getPasswordHomeController().populateCreditDebitCardEntryPasswords(selectedFolder);
+            } if(documentEntryWrapperClass.isInstance(o)) {
+                DocumentWrapper wrapper = (DocumentWrapper) o;
+                StorageAccountManager.deleteBlob(selectedFolder + "/" + wrapper.getDocumentEntry().getPasswordName());
+                StoredPassSQLQueries.deletePasswordInDb(wrapper.getDocumentEntry(), selectedFolder);
+                PasswordManagerApp.getPasswordHomeController().populateDocumentEntryPasswords(selectedFolder);
             }
+        }
+        if(PasswordManagerApp.getPasswordHomeController().getSelectedFolder().equals(selectedFolder)) {
+            PasswordManagerApp.getPasswordDetailsController().setNoDetailsLoaded();
         }
         PasswordHomeController.getStage().close();
     }

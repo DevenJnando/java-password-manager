@@ -12,12 +12,17 @@ import com.jfoenix.controls.JFXTextField;
 import de.jensd.fx.glyphs.GlyphsDude;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.control.TextFormatter;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.Text;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import org.controlsfx.control.textfield.CustomPasswordField;
 import org.controlsfx.control.textfield.CustomTextField;
 import org.slf4j.Logger;
@@ -90,6 +95,24 @@ public class WebPasswordDetailsController extends BasePasswordDetailsController<
         copyWebsiteUrlButton.setCursor(Cursor.HAND);
         copyUsernameButton.setGraphic(copy2);
         copyUsernameButton.setCursor(Cursor.HAND);
+    }
+
+    @Override
+    public void loadDeletePasswordModal() throws IOException {
+        Stage deletePasswordStage = new Stage();
+        FXMLLoader deletePasswordLoader = new FXMLLoader(BasePasswordDetailsController.class
+                .getResource("/com/jamesd/passwordmanager/views/delete-web-password-modal.fxml"));
+        AnchorPane deletePasswordPane = deletePasswordLoader.load();
+        WebPasswordDetailsController controller = deletePasswordLoader.getController();
+        controller.setEntryWrapper(getEntryWrapper());
+        controller.setParentFolder(getParentFolder());
+        Scene deletePasswordScene = new Scene(deletePasswordPane);
+        deletePasswordStage.setScene(deletePasswordScene);
+        deletePasswordStage.setTitle("Delete Password");
+        deletePasswordStage.initOwner(PasswordManagerApp.getMainStage());
+        deletePasswordStage.initModality(Modality.APPLICATION_MODAL);
+        stage = deletePasswordStage;
+        stage.showAndWait();
     }
 
     /**
@@ -215,6 +238,7 @@ public class WebPasswordDetailsController extends BasePasswordDetailsController<
         entry.setPasswordUsername(displayUsernameField.getText());
         entry.setDecryptedPassword(null);
         StoredPassSQLQueries.updateWebsitePasswordInDb(entry, parentFolder);
+        entry.setDecryptedPassword(EncryptDecryptPasswordsUtil.decryptPassword(entry.getEncryptedPassword()));
         PasswordManagerApp.getPasswordHomeController().populateWebsiteEntryPasswords(parentFolder);
     }
 

@@ -6,7 +6,6 @@ import com.jamesd.passwordmanager.PasswordManagerApp;
 import com.jfoenix.controls.JFXTextField;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
@@ -18,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.security.auth.login.LoginException;
+import java.io.IOException;
 import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
@@ -117,7 +117,7 @@ public class AddFolderController extends ErrorChecker implements Initializable {
         addNewFolderButton.setOnAction(e -> {
             try {
                 confirmAndAddNewFolder();
-            } catch (GeneralSecurityException | ClassNotFoundException ex) {
+            } catch (GeneralSecurityException | ClassNotFoundException | IOException ex) {
                 ex.printStackTrace();
             }
         });
@@ -142,7 +142,6 @@ public class AddFolderController extends ErrorChecker implements Initializable {
                 "WebPassword",
                 "DatabasePassword",
                 "CreditCard",
-                "Passport",
                 "Document");
         ObservableList<String> oTypes = FXCollections.observableList(types);
         ComboBox<String> folderTypeComboBox = new ComboBox<>(oTypes);
@@ -189,7 +188,7 @@ public class AddFolderController extends ErrorChecker implements Initializable {
      * @throws ClassNotFoundException Throws a ClassNotFoundException if the PasswordEntryFolder class cannot be found
      */
     @FXML
-    public void confirmAndAddNewFolder() throws GeneralSecurityException, ClassNotFoundException {
+    public void confirmAndAddNewFolder() throws GeneralSecurityException, ClassNotFoundException, IOException {
         if(PasswordManagerApp.getLoggedInUser() != null) {
             checkAndResetLabels();
             if(hasErroneousFields()) {
@@ -207,7 +206,7 @@ public class AddFolderController extends ErrorChecker implements Initializable {
      * @throws LoginException Throws LoginException if the user attempts to call whilst not logged in
      * @throws ClassNotFoundException Throws ClassNotFoundException if the PasswordEntryFolder class cannot be found
      */
-    private void addNewFolder() throws LoginException, ClassNotFoundException {
+    private void addNewFolder() throws LoginException, ClassNotFoundException, IOException {
         PasswordEntryFolder newFolder = new PasswordEntryFolder(folderTypeComboBox.getSelectionModel().getSelectedItem(),
                 folderNameTextField.getText());
         StoredPassSQLQueries.addNewPasswordFolderToDb(newFolder);

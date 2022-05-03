@@ -16,8 +16,18 @@
     <dependencies>
         <dependency>
             <groupId>com.azure</groupId>
+            <artifactId>azure-core</artifactId>
+            <version>1.26.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.azure</groupId>
             <artifactId>azure-cosmos</artifactId>
             <version>4.25.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.azure</groupId>
+            <artifactId>azure-storage-blob</artifactId>
+            <version>12.16.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>

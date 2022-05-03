@@ -40,9 +40,9 @@ public class DatabasePasswordTable extends BasePasswordTable<DatabasePasswordEnt
      * FXML field
      */
     @FXML
-    private TableView<DatabasePasswordEntryWrapper> passwordTableView = new TableView<>();
+    private final TableView<DatabasePasswordEntryWrapper> passwordTableView = new TableView<>();
 
-    private static Logger logger = LoggerFactory.getLogger(DatabasePasswordTable.class);
+    private static final Logger logger = LoggerFactory.getLogger(DatabasePasswordTable.class);
 
     /**
      * Default constructor
@@ -53,14 +53,14 @@ public class DatabasePasswordTable extends BasePasswordTable<DatabasePasswordEnt
 
     @Override
     protected void loadColumns() {
-        TableColumn<DatabasePasswordEntryWrapper, Boolean> checkMark = new TableColumn("Checkbox");
-        TableColumn<DatabasePasswordEntryWrapper, String> faviconCol = new TableColumn("");
-        TableColumn<DatabasePasswordEntryWrapper, String> passwordNameCol = new TableColumn("Password Name");
-        TableColumn<DatabasePasswordEntryWrapper, String> hostnameCol = new TableColumn("Hostname");
-        TableColumn<DatabasePasswordEntryWrapper, String> databaseNameCol = new TableColumn("Database Name");
-        TableColumn<DatabasePasswordEntryWrapper, String> databaseUsernameCol = new TableColumn("Database Username");
-        TableColumn<DatabasePasswordEntryWrapper, String> dateSetCol = new TableColumn("Last Updated On");
-        TableColumn<DatabasePasswordEntryWrapper, String> updateMessageCol = new TableColumn("");
+        TableColumn<DatabasePasswordEntryWrapper, Boolean> checkMark = new TableColumn<>("Checkbox");
+        TableColumn<DatabasePasswordEntryWrapper, String> faviconCol = new TableColumn<>("");
+        TableColumn<DatabasePasswordEntryWrapper, String> passwordNameCol = new TableColumn<>("Password Name");
+        TableColumn<DatabasePasswordEntryWrapper, String> hostnameCol = new TableColumn<>("Hostname");
+        TableColumn<DatabasePasswordEntryWrapper, String> databaseNameCol = new TableColumn<>("Database Name");
+        TableColumn<DatabasePasswordEntryWrapper, String> databaseUsernameCol = new TableColumn<>("Database Username");
+        TableColumn<DatabasePasswordEntryWrapper, String> dateSetCol = new TableColumn<>("Last Updated On");
+        TableColumn<DatabasePasswordEntryWrapper, String> updateMessageCol = new TableColumn<>("");
         faviconCol.setCellValueFactory(new PropertyValueFactory<>("favicon"));
         checkMark.setCellFactory(cell -> new CheckBoxTableCell<>());
         checkMark.setCellValueFactory(o -> {
@@ -70,19 +70,20 @@ public class DatabasePasswordTable extends BasePasswordTable<DatabasePasswordEnt
             });
             return checked;
         });
-        passwordNameCol.setCellValueFactory(o -> new ReadOnlyObjectWrapper(o.getValue().getDatabasePasswordEntry().getPasswordName()));
-        hostnameCol.setCellValueFactory(o -> new ReadOnlyObjectWrapper(o.getValue().getDatabasePasswordEntry().getHostName()));
-        databaseNameCol.setCellValueFactory(o -> new ReadOnlyObjectWrapper(o.getValue().getDatabasePasswordEntry().getDatabaseName()));
+        passwordNameCol.setCellValueFactory(o -> new ReadOnlyObjectWrapper<>(o.getValue().getDatabasePasswordEntry().getPasswordName()));
+        hostnameCol.setCellValueFactory(o -> new ReadOnlyObjectWrapper<>(o.getValue().getDatabasePasswordEntry().getHostName()));
+        databaseNameCol.setCellValueFactory(o -> new ReadOnlyObjectWrapper<>(o.getValue().getDatabasePasswordEntry().getDatabaseName()));
         databaseUsernameCol.setCellValueFactory(o -> new ReadOnlyObjectWrapper<>(o.getValue().getDatabasePasswordEntry().getDatabaseUsername()));
-        dateSetCol.setCellValueFactory(o -> new ReadOnlyObjectWrapper(o.getValue().getDatabasePasswordEntry().getDateSet()));
-        updateMessageCol.setCellValueFactory(o -> new ReadOnlyObjectWrapper(o.getValue().getDatabasePasswordEntry().getNeedsUpdatedMessage()));
+        dateSetCol.setCellValueFactory(o -> new ReadOnlyObjectWrapper<>(o.getValue().getDatabasePasswordEntry().getDateSet()));
+        updateMessageCol.setCellValueFactory(o -> new ReadOnlyObjectWrapper<>(o.getValue().getDatabasePasswordEntry().getNeedsUpdatedMessage()));
+        updateMessageCol.setStyle("-fx-text-fill: red");
         passwordTableView.getColumns().setAll(checkMark, faviconCol, passwordNameCol, hostnameCol, databaseNameCol, databaseUsernameCol,
                 dateSetCol, updateMessageCol);
     }
 
     @Override
     protected List<DatabasePasswordEntryWrapper> wrapPasswords(List<DatabasePasswordEntry> passwordEntries) {
-        List<DatabasePasswordEntryWrapper> passwordsWithFavicons = new ArrayList();
+        List<DatabasePasswordEntryWrapper> passwordsWithFavicons = new ArrayList<>();
         for(DatabasePasswordEntry entry : passwordEntries) {
             ImageView favicon = new ImageView();
             try {

@@ -1,14 +1,15 @@
 package com.jamesd.passwordmanager.Controllers;
 
+import com.jamesd.passwordmanager.DAO.StorageAccountManager;
 import com.jamesd.passwordmanager.Models.HierarchyModels.PasswordEntryFolder;
+import com.jamesd.passwordmanager.Models.Passwords.CreditDebitCardEntry;
 import com.jamesd.passwordmanager.Models.Passwords.DatabasePasswordEntry;
+import com.jamesd.passwordmanager.Models.Passwords.DocumentEntry;
 import com.jamesd.passwordmanager.Models.Passwords.WebsitePasswordEntry;
 import com.jamesd.passwordmanager.PasswordManagerApp;
 import com.jamesd.passwordmanager.Utils.PasswordCreateUtil;
 import com.jamesd.passwordmanager.Utils.TransitionUtil;
-import com.jamesd.passwordmanager.Wrappers.BaseWrapper;
-import com.jamesd.passwordmanager.Wrappers.DatabasePasswordEntryWrapper;
-import com.jamesd.passwordmanager.Wrappers.WebsitePasswordEntryWrapper;
+import com.jamesd.passwordmanager.Wrappers.*;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXTextField;
 import de.jensd.fx.glyphs.GlyphsDude;
@@ -17,20 +18,16 @@ import javafx.animation.FadeTransition;
 import javafx.animation.SequentialTransition;
 import javafx.event.Event;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.scene.Cursor;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextFormatter;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.controlsfx.control.textfield.CustomPasswordField;
 import org.controlsfx.control.textfield.CustomTextField;
@@ -121,22 +118,20 @@ public abstract class BasePasswordDetailsController<T extends BaseWrapper> exten
     }
 
     /**
+     * Method for setting text formatters for card numbers only
+     */
+    protected void setCardNumberFormatters() {
+        TextFormatter<String> cardNumberFormatter1 = PasswordCreateUtil.createTextNumberFormatter(16);
+        TextFormatter<String> cardNumberFormatter2 = PasswordCreateUtil.createTextNumberFormatter(16);
+        hiddenPasswordField.setTextFormatter(cardNumberFormatter1);
+        visiblePasswordField.setTextFormatter(cardNumberFormatter2);
+    }
+
+    /**
      * Loads the "delete single password" modal. From here, a selected password entry can be deleted.
      * @throws IOException Throws an IOException if the "delete single password" modal cannot be loaded
      */
-    protected void loadDeletePasswordModal() throws IOException {
-        Stage deletePasswordStage = new Stage();
-        FXMLLoader deletePasswordLoader = new FXMLLoader(BasePasswordDetailsController.class
-                .getResource("/com/jamesd/passwordmanager/views/delete-single-password-modal.fxml"));
-        AnchorPane deletePasswordPane = deletePasswordLoader.load();
-        Scene deletePasswordScene = new Scene(deletePasswordPane);
-        deletePasswordStage.setScene(deletePasswordScene);
-        deletePasswordStage.setTitle("Delete Password");
-        deletePasswordStage.initOwner(PasswordManagerApp.getMainStage());
-        deletePasswordStage.initModality(Modality.APPLICATION_MODAL);
-        stage = deletePasswordStage;
-        stage.showAndWait();
-    }
+    protected abstract void loadDeletePasswordModal() throws IOException;
 
     /**
      * Displays the "Saved!" label to alert the user that their attempt to save changes to their password entry has
@@ -263,15 +258,25 @@ public abstract class BasePasswordDetailsController<T extends BaseWrapper> exten
      */
     @FXML
     protected void confirmDelete() throws ClassNotFoundException {
-        System.out.println(getEntryWrapper());
         if(getEntryWrapper() instanceof WebsitePasswordEntryWrapper) {
             WebsitePasswordEntryWrapper websitePasswordEntryWrapper = (WebsitePasswordEntryWrapper) getEntryWrapper();
             WebsitePasswordEntry entry = websitePasswordEntryWrapper.getWebsitePasswordEntry();
             deleteWebsitePasswordEntry(entry);
-        } if(getEntryWrapper() instanceof DatabasePasswordEntryWrapper) {
+        }
+        if(getEntryWrapper() instanceof DatabasePasswordEntryWrapper) {
             DatabasePasswordEntryWrapper databasePasswordEntryWrapper = (DatabasePasswordEntryWrapper) getEntryWrapper();
             DatabasePasswordEntry entry = databasePasswordEntryWrapper.getDatabasePasswordEntry();
             deleteDatabasePasswordEntry(entry);
+        }
+        if(getEntryWrapper() instanceof CreditDebitCardEntryWrapper) {
+            CreditDebitCardEntryWrapper creditDebitCardEntryWrapper = (CreditDebitCardEntryWrapper) getEntryWrapper();
+            CreditDebitCardEntry entry = creditDebitCardEntryWrapper.getCreditDebitCardEntry();
+            deleteCreditDebitCardEntry(entry);
+        }
+        if(getEntryWrapper() instanceof DocumentWrapper) {
+            DocumentWrapper documentWrapper = (DocumentWrapper) getEntryWrapper();
+            DocumentEntry entry = documentWrapper.getDocumentEntry();
+            deleteDocumentEntry(entry);
         }
     }
 
@@ -299,10 +304,41 @@ public abstract class BasePasswordDetailsController<T extends BaseWrapper> exten
         DeletePasswordController deletePasswordController = new DeletePasswordController();
         deletePasswordController.deleteSingleEntry(entry, getParentFolder());
 
-        // Details screen is cleard once the password is deleted
+        // Details screen is cleared once the password is deleted
         PasswordManagerApp.getPasswordDetailsController().setNoDetailsLoaded();
         // List of database password entries in the parent folder is repopulated once the password is deleted
         PasswordManagerApp.getPasswordHomeController().populateDatabaseEntryPasswords(getParentFolder());
+    }
+
+    /**
+     * Deletes a CreditDebitCardEntry from its parent folder in the password database
+     * @param entry The selected CreditDebitCardEntry to be deleted
+     * @throws ClassNotFoundException
+     */
+    private void deleteCreditDebitCardEntry(CreditDebitCardEntry entry) throws ClassNotFoundException {
+        DeletePasswordController deletePasswordController = new DeletePasswordController();
+        deletePasswordController.deleteSingleEntry(entry, getParentFolder());
+
+        // Details screen is cleared once the password is deleted
+        PasswordManagerApp.getPasswordDetailsController().setNoDetailsLoaded();
+        // List of database password entries in the parent folder is repopulated once the password is deleted
+        PasswordManagerApp.getPasswordHomeController().populateCreditDebitCardEntryPasswords(getParentFolder());
+    }
+
+    /**
+     * Deletes a DocumentEntry from its parent folder in the password database
+     * @param entry The selected DocumentEntry to be deleted
+     * @throws ClassNotFoundException
+     */
+    private void deleteDocumentEntry(DocumentEntry entry) throws ClassNotFoundException {
+        StorageAccountManager.deleteBlob(getParentFolder().getPasswordFolder() + "/" + entry.getPasswordName());
+        DeletePasswordController deletePasswordController = new DeletePasswordController();
+        deletePasswordController.deleteSingleEntry(entry, getParentFolder());
+
+        // Details screen is cleared once the password is deleted
+        PasswordManagerApp.getPasswordDetailsController().setNoDetailsLoaded();
+        // List of database password entries in the parent folder is repopulated once the password is deleted
+        PasswordManagerApp.getPasswordHomeController().populateDocumentEntryPasswords(getParentFolder());
     }
 
     /**

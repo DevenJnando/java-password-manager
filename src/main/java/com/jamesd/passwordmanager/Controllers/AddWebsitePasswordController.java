@@ -211,7 +211,7 @@ public class AddWebsitePasswordController extends NewPasswordController implemen
      * Method which retrieves the flag for when a folder has not been selected
      * @return true if not selected, else false
      */
-    private boolean getFolderNotSelectedFlag() {
+    public boolean getFolderNotSelectedFlag() {
         return folderNotSelectedFlag;
     }
 
@@ -219,7 +219,7 @@ public class AddWebsitePasswordController extends NewPasswordController implemen
      * Method which retrieves the flag for when the website url has not been set
      * @return true if not set, else false
      */
-    private boolean getMissingUrlFlag() {
+    public boolean getMissingUrlFlag() {
         return missingUrlFlag;
     }
 
@@ -227,13 +227,13 @@ public class AddWebsitePasswordController extends NewPasswordController implemen
      * Method which retrieves the flag for when the username has not been set
      * @return true if not set, else false
      */
-    private boolean getMissingUsernameFlag() { return missingUsernameFlag; }
+    public boolean getMissingUsernameFlag() { return missingUsernameFlag; }
 
     /**
      * Method which retrieves the flag for when the password name has not been set
      * @return true if not set, else false
      */
-    private boolean isMissingPasswordNameFlag() {
+    public boolean isMissingPasswordNameFlag() {
         return missingPasswordNameFlag;
     }
 
@@ -241,7 +241,7 @@ public class AddWebsitePasswordController extends NewPasswordController implemen
      * Method which sets the flag for when a folder has not been selected
      * @param folderNotSelectedFlag true if not selected, else false
      */
-    private void setFolderNotSelectedFlag(boolean folderNotSelectedFlag) {
+    public void setFolderNotSelectedFlag(boolean folderNotSelectedFlag) {
         this.folderNotSelectedFlag = folderNotSelectedFlag;
     }
 
@@ -249,7 +249,7 @@ public class AddWebsitePasswordController extends NewPasswordController implemen
      * Method which sets the flag for when the password name has not been set
      * @param missingPasswordNameFlag true if not selected, else false
      */
-    private void setMissingPasswordNameFlag(boolean missingPasswordNameFlag) {
+    public void setMissingPasswordNameFlag(boolean missingPasswordNameFlag) {
         this.missingPasswordNameFlag = missingPasswordNameFlag;
     }
 
@@ -257,7 +257,7 @@ public class AddWebsitePasswordController extends NewPasswordController implemen
      * Method which sets the flag for when the website url has not been set
      * @param missingUrl true if not set, else false
      */
-    private void setMissingUrlFlag(boolean missingUrl) {
+    public void setMissingUrlFlag(boolean missingUrl) {
         this.missingUrlFlag = missingUrl;
     }
 
@@ -265,5 +265,5 @@ public class AddWebsitePasswordController extends NewPasswordController implemen
      * Method which sets the flag for when the username has not been set
      * @param missingUsername true if not set, else false
      */
-    private void setMissingUsernameFlag(boolean missingUsername) { this.missingUsernameFlag = missingUsername; }
+    public void setMissingUsernameFlag(boolean missingUsername) { this.missingUsernameFlag = missingUsername; }
 }

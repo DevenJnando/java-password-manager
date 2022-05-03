@@ -20,7 +20,7 @@ import java.util.Base64;
 public abstract class EncryptDecryptPasswordsUtil {
 
     private static SecretKeySpec key;
-    private static final byte[] SALT = "12345678".getBytes();
+    private static final byte[] SALT = "gIo9&pb3".getBytes();
     private static final int ITERATION_COUNT = 4000;
     private static final int KEY_LENGTH = 128;
 

@@ -25,7 +25,6 @@ import javax.security.auth.login.LoginException;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
-import java.security.GeneralSecurityException;
 import java.util.ResourceBundle;
 
 /**

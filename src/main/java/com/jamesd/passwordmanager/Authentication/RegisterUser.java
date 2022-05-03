@@ -26,22 +26,6 @@ public class RegisterUser extends Authenticator {
     }
 
     /**
-     * Retrieves this object's LoginController
-     * @return LoginController object
-     */
-    public LoginController getLoginController() {
-        return this.loginController;
-    }
-
-    /**
-     * Retrieves this object's User
-     * @return User object
-     */
-    public User getUser() {
-        return this.user;
-    }
-
-    /**
      * Validation method which ensures that the email, username and password are not empty, that the email and username
      * are unique, and that the "confirm password" field matches the "enter password" field.
      * @return Returns true if all fields are successfully validated, and false if there is an error anywhere

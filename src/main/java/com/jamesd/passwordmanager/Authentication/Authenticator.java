@@ -18,4 +18,28 @@ public abstract class Authenticator {
     public Authenticator(LoginController loginController) {
         this.loginController = loginController;
     }
+
+    /**
+     * Returns the LoginController
+     * @return LoginController field
+     */
+    public LoginController getLoginController() {
+        return loginController;
+    }
+
+    /**
+     * Sets the LoginController field
+     * @param loginController contains user-input fields (username/email, password)
+     */
+    public void setLoginController(LoginController loginController) {
+        this.loginController = loginController;
+    }
+
+    /**
+     * Returns an object of the User
+     * @return the User object
+     */
+    public User getUser() {
+        return this.user;
+    }
 }

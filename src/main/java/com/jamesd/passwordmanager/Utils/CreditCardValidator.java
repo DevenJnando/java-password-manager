@@ -24,7 +24,7 @@ public abstract class CreditCardValidator {
             case "Visa" :
                 valid = (size(cardNumber) >= 13 && size(cardNumber) <= 16) && firstNumber(cardNumber) == 4;
                 break;
-            case "Mastercard" :
+            case "MasterCard" :
                 valid = ((size(cardNumber) == 16) &&
                         (firstAndSecondNumber(cardNumber) >= 51 && firstAndSecondNumber(cardNumber) <= 55));
                 break;

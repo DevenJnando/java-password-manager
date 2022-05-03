@@ -11,6 +11,7 @@ import java.security.GeneralSecurityException;
 public class StoredPassDbKey extends PasswordEntry {
 
     private final String decryptionKey;
+    private final String encryptedStorage;
 
     /**
      * Default constructor
@@ -18,6 +19,7 @@ public class StoredPassDbKey extends PasswordEntry {
     public StoredPassDbKey() {
         super();
         this.decryptionKey = null;
+        this.encryptedStorage = null;
     }
 
     /**
@@ -28,6 +30,19 @@ public class StoredPassDbKey extends PasswordEntry {
     public StoredPassDbKey(String encryptedPassword, String decryptionKey) {
         super(encryptedPassword);
         this.decryptionKey = decryptionKey;
+        this.encryptedStorage = null;
+    }
+
+    /**
+     * Constructor which takes the encrypted password, decryption key and encrypted storage key as parameters
+     * @param encryptedPassword String of encrypted password
+     * @param decryptionKey String of decryption key
+     * @param encryptedStorage String of encrypted storage key
+     */
+    public StoredPassDbKey(String encryptedPassword, String decryptionKey, String encryptedStorage) {
+        super(encryptedPassword);
+        this.decryptionKey = decryptionKey;
+        this.encryptedStorage = encryptedStorage;
     }
 
     /**
@@ -37,6 +52,12 @@ public class StoredPassDbKey extends PasswordEntry {
     public String getDecryptionKey() {
         return this.decryptionKey;
     }
+
+    /**
+     * Retrieves the encrypted storage key
+     * @return Encrypted storage key
+     */
+    public String getEncryptedStorage() { return this.encryptedStorage; }
 
     /**
      * Decrypts the master password in the database

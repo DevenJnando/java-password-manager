@@ -65,6 +65,38 @@ public abstract class ModifyPasswordController extends PasswordController {
     }
 
     /**
+     * Retrieves the password Toggler object for the initial password input
+     * @return Toggler object for the initial password
+     */
+    protected Toggler getPasswordToggler() {
+        return passwordToggler;
+    }
+
+    /**
+     * Retrieves the password Toggler for the confirm password input
+     * @return Toggler object for the confirm password
+     */
+    protected Toggler getConfirmPasswordToggler() {
+        return confirmPasswordToggler;
+    }
+
+    /**
+     * Sets the password Toggler object for the initial password input
+     * @param passwordToggler Toggler object for the initial password
+     */
+    protected void setPasswordToggler(Toggler passwordToggler) {
+        this.passwordToggler = passwordToggler;
+    }
+
+    /**
+     * Sets the password Toggler object for the confirm password input
+     * @param confirmPasswordToggler Toggler object for the confirm password
+     */
+    protected void setConfirmPasswordToggler(Toggler confirmPasswordToggler) {
+        this.confirmPasswordToggler = confirmPasswordToggler;
+    }
+
+    /**
      * Sets the flag for when the password and confirm password fields are mismatched
      * @param mismatched Boolean true if password field does not match confirm password field, else false
      */

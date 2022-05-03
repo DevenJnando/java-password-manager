@@ -1,6 +1,11 @@
 package com.jamesd.passwordmanager.Utils;
 
-import java.util.*;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 import javafx.scene.control.Label;
@@ -259,6 +264,24 @@ public abstract class PasswordCreateUtil {
         return new TextFormatter<>(change -> {
             String newText = change.getControlNewText();
             if(newText.length() > length) {
+                return null;
+            } else {
+                return change;
+            }
+        });
+    }
+
+    public static TextFormatter<String> createTextNumberFormatter(Integer length) {
+        return new TextFormatter<>(change -> {
+            String newText = change.getControlNewText();
+            boolean illegalCharacter = false;
+            List<Integer> numeralChars = newText.chars().boxed().collect(Collectors.toList());
+            for(int charAsInt : numeralChars) {
+                if(!Character.isDigit(charAsInt)) {
+                    illegalCharacter = true;
+                }
+            }
+            if(newText.length() > length || illegalCharacter) {
                 return null;
             } else {
                 return change;

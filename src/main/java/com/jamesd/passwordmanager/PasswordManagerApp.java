@@ -38,8 +38,8 @@ public class PasswordManagerApp extends Application {
     // Abstract add/modification/deletion of passwords for more generic code - IN PROGRESS...
     // User preferences - reminder timings, change master password, two-factor settings - IN PROGRESS...
     // Check for insecurities or breaches
-    // Consider having a more organised hierarchy e.g. users > root password folder > work passwords > Google - IN PROGRESS...
-    // Consider allowing storage of other kinds of credential e.g. database passwords, credit cards, passports,
+    // Consider having a more organised hierarchy e.g. users > root password folder > work passwords > Google - DONE!!!!!!!
+    // Consider allowing storage of other kinds of credential e.g. database passwords, credit cards,
     // sensitive documents etc. - IN PROGRESS...
     // Implement query timeouts
     // Allow dynamic login for either email or username
@@ -182,6 +182,14 @@ public class PasswordManagerApp extends Application {
      */
     public static BorderPane getRootLayout() {
         return rootLayout;
+    }
+
+    /**
+     * Sets the rootLayout BorderPane field
+     * @param root BorderPane object to be set
+     */
+    public static void setRootLayout(BorderPane root) {
+        rootLayout = root;
     }
 
     /**

@@ -2,6 +2,7 @@ package com.jamesd.passwordmanager.Models.HierarchyModels;
 
 import com.jamesd.passwordmanager.Models.Passwords.CreditDebitCardEntry;
 import com.jamesd.passwordmanager.Models.Passwords.DatabasePasswordEntry;
+import com.jamesd.passwordmanager.Models.Passwords.DocumentEntry;
 import com.jamesd.passwordmanager.Models.Passwords.WebsitePasswordEntry;
 import com.jamesd.passwordmanager.PasswordManagerApp;
 
@@ -108,7 +109,6 @@ public class PasswordEntryFolder {
         List<String> types = List.of("WebPassword",
                                     "DatabasePassword",
                                     "CreditCard",
-                                    "Passport",
                                     "Document");
         for(String type : types) {
             if(getPasswordType().contentEquals(type)) {
@@ -119,8 +119,6 @@ public class PasswordEntryFolder {
                         return "Database Passwords";
                     case "CreditCard" :
                         return "Credit/Debit Cards";
-                    case "Passport" :
-                        return "Passports";
                     case "Document" :
                         return "Documents";
                 }
@@ -235,12 +233,8 @@ public class PasswordEntryFolder {
                     return DatabasePasswordEntry.class;
                 case "CreditCard":
                     return CreditDebitCardEntry.class;
-                case "Passport":
-                    //TODO: Implement Passport class
-                    return null;
                 case "Document":
-                    //TODO: Implement Document class
-                    return null;
+                    return DocumentEntry.class;
                 default:
                     return null;
 
@@ -305,11 +299,33 @@ public class PasswordEntryFolder {
                         .withPasswordName((String) data.get("passwordName"))
                         .withMasterUsername((String) data.get("masterUsername"))
                         .withCreditDebitCardNumber((String) data.get("cardNumber"))
+                        .withCreditDebitCardType((String) data.get("cardType"))
                         .withExpiryDate((String) data.get("expiryDate"))
                         .withSecurityCode((String) data.get("securityCode"))
                         .withAccountNumber((String) data.get("accountNumber"))
                         .withSortCode((String) data.get("sortCode"))
                         .withDateSet((String) data.get(("dateSet")))
+                        .build();
+                listOfEntries.add(entry);
+            });
+            return listOfEntries;
+        }
+
+        /**
+         * Builds each DocumentEntry object within the PasswordEntryFolder parameter
+         * @param folder PasswordEntryFolder to build DocumentEntry objects from
+         * @return List of DocumentEntry objects
+         */
+        private static List<DocumentEntry> getListOfDocuments(PasswordEntryFolder folder) {
+            List<DocumentEntry> listOfEntries = new ArrayList<>();
+            folder.getData().forEach((data) -> {
+                DocumentEntry entry = PasswordEntryBuilder.DocumentEntryBuilder.newInstance()
+                        .withId((String) data.get("id"))
+                        .withName((String) data.get("passwordName"))
+                        .withDescription((String) data.get("documentDescription"))
+                        .withMasterUsername((String) data.get("masterUsername"))
+                        .withDateSet((String) data.get(("dateSet")))
+                        .withStorageReference((String) data.get("documentStorageReference"))
                         .build();
                 listOfEntries.add(entry);
             });
@@ -326,11 +342,17 @@ public class PasswordEntryFolder {
         public static List<?> generateEntries(PasswordEntryFolder folder) throws ClassNotFoundException {
             Class<?> passwordEntryClass = Class.forName("com.jamesd.passwordmanager.Models.Passwords.WebsitePasswordEntry");
             Class<?> databaseEntryClass = Class.forName("com.jamesd.passwordmanager.Models.Passwords.DatabasePasswordEntry");
+            Class<?> creditCardEntryClass = Class.forName("com.jamesd.passwordmanager.Models.Passwords.CreditDebitCardEntry");
+            Class<?> documentEntryClass = Class.forName("com.jamesd.passwordmanager.Models.Passwords.DocumentEntry");
             Class<?> classOfEntry = determineEntryType(folder);
             if(passwordEntryClass.equals(classOfEntry)) {
                 return getListOfWebPasswords(folder);
             } if(databaseEntryClass.equals(classOfEntry)) {
                 return getListOfDatabasePasswords(folder);
+            } if(creditCardEntryClass.equals(classOfEntry)) {
+                return getListOfCreditDebitCards(folder);
+            } if(documentEntryClass.equals(classOfEntry)) {
+                return getListOfDocuments(folder);
             }
             else {
                 return new ArrayList<>();
