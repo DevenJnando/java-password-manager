@@ -1,14 +1,15 @@
 package com.jamesd.passwordmanager.Controllers;
 
+import com.jamesd.passwordmanager.DAO.StorageAccountManager;
 import com.jamesd.passwordmanager.DAO.StoredPassSQLQueries;
 import com.jamesd.passwordmanager.Models.HierarchyModels.PasswordEntryFolder;
 import com.jamesd.passwordmanager.PasswordManagerApp;
 import com.jamesd.passwordmanager.Wrappers.CreditDebitCardEntryWrapper;
 import com.jamesd.passwordmanager.Wrappers.DatabasePasswordEntryWrapper;
+import com.jamesd.passwordmanager.Wrappers.DocumentWrapper;
 import com.jamesd.passwordmanager.Wrappers.WebsitePasswordEntryWrapper;
-import javafx.scene.control.TableView;
 
-import javax.security.auth.login.LoginException;
+import javafx.scene.control.TableView;
 import java.util.HashSet;
 
 /**
@@ -48,6 +49,7 @@ public class DeletePasswordController {
         Class<?> websitePasswordEntryWrapperClass = Class.forName("com.jamesd.passwordmanager.Wrappers.WebsitePasswordEntryWrapper");
         Class<?> databasePasswordEntryWrapperClass = Class.forName("com.jamesd.passwordmanager.Wrappers.DatabasePasswordEntryWrapper");
         Class<?> creditDebitCardEntryWrapperClass = Class.forName("com.jamesd.passwordmanager.Wrappers.CreditDebitCardEntryWrapper");
+        Class<?> documentEntryWrapperClass = Class.forName("com.jamesd.passwordmanager.Wrappers.DocumentWrapper");
         HashSet<Object> toBeDeleted = new HashSet<>();
         for(Object o : tableView.getItems()) {
             if(websitePasswordEntryWrapperClass.isInstance(o)) {
@@ -65,6 +67,11 @@ public class DeletePasswordController {
                 if(creditDebitCardEntryWrapper.isChecked().getValue()) {
                     toBeDeleted.add(creditDebitCardEntryWrapper);
                 }
+            } if(documentEntryWrapperClass.isInstance(o)) {
+                DocumentWrapper documentWrapper = (DocumentWrapper) o;
+                if(documentWrapper.isChecked().getValue()) {
+                    toBeDeleted.add(documentWrapper);
+                }
             }
         }
         for(Object o : toBeDeleted) {
@@ -80,6 +87,11 @@ public class DeletePasswordController {
                 CreditDebitCardEntryWrapper wrapper = (CreditDebitCardEntryWrapper) o;
                 StoredPassSQLQueries.deletePasswordInDb(wrapper.getCreditDebitCardEntry(), selectedFolder);
                 PasswordManagerApp.getPasswordHomeController().populateCreditDebitCardEntryPasswords(selectedFolder);
+            } if(documentEntryWrapperClass.isInstance(o)) {
+                DocumentWrapper wrapper = (DocumentWrapper) o;
+                StorageAccountManager.deleteBlob(selectedFolder + "/" + wrapper.getDocumentEntry().getPasswordName());
+                StoredPassSQLQueries.deletePasswordInDb(wrapper.getDocumentEntry(), selectedFolder);
+                PasswordManagerApp.getPasswordHomeController().populateDocumentEntryPasswords(selectedFolder);
             }
         }
         if(PasswordManagerApp.getPasswordHomeController().getSelectedFolder().equals(selectedFolder)) {

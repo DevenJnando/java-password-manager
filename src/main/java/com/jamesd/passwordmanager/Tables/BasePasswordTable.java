@@ -4,7 +4,6 @@ import com.jamesd.passwordmanager.Models.HierarchyModels.PasswordEntryFolder;
 import com.jamesd.passwordmanager.Models.Passwords.CreditDebitCardEntry;
 import com.jamesd.passwordmanager.Models.Passwords.PasswordEntry;
 import com.jamesd.passwordmanager.Wrappers.BaseWrapper;
-import com.jamesd.passwordmanager.Wrappers.WebsitePasswordEntryWrapper;
 import javafx.scene.control.TableView;
 
 import javax.security.auth.login.LoginException;

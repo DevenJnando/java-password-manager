@@ -11,6 +11,9 @@ module com.jamesd.passwordmanager {
     requires org.kordamp.bootstrapfx.core;
     requires org.slf4j;
     requires com.azure.cosmos;
+    requires com.azure.storage.blob;
+    requires com.azure.storage.common;
+    requires com.azure.core;
     requires java.sql;
     requires java.base;
     requires java.desktop;

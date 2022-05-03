@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane prefHeight="494.0" prefWidth="824.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jamesd.passwordmanager.Controllers.DocumentDetailsController">
+    <center>
+        <BorderPane fx:id="detailsPane" disable="true" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+            <BorderPane.margin>
+                <Insets left="20" />
+            </BorderPane.margin>
+            <center>
+                <VBox prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER">
+                    <children>
+                        <HBox fx:id="logoHbox" prefHeight="80.0" prefWidth="825.0">
+                        </HBox>
+                        <HBox prefHeight="80.0" prefWidth="825.0">
+                            <children>
+                                <VBox prefHeight="80.0" prefWidth="655.0">
+                                    <children>
+                                        <Label prefHeight="25.0" prefWidth="149.0" text="Document Name:" />
+                                        <JFXTextField fx:id="passwordNameField">
+                                            <VBox.margin>
+                                                <Insets top="10.0" />
+                                            </VBox.margin>
+                                        </JFXTextField>
+                                    </children>
+                                </VBox>
+                                <VBox prefHeight="80.0" prefWidth="165.0">
+                                    <children>
+                                        <JFXButton fx:id="copyPasswordNameButton" mnemonicParsing="false" onAction="#copyPasswordNameButton" ripplerFill="#00d5ff" text=" ">
+                                            <VBox.margin>
+                                                <Insets left="10.0" top="40.0" />
+                                            </VBox.margin>
+                                        </JFXButton>
+                                    </children>
+                                </VBox>
+                            </children>
+                        </HBox>
+                        <HBox prefHeight="80.0" prefWidth="825.0">
+                            <children>
+                                <VBox prefHeight="80.0" prefWidth="655.0">
+                                    <children>
+                                        <Label prefHeight="16.0" prefWidth="180.0" text="Document Description:" />
+                                        <JFXTextArea fx:id="documentDescription">
+                                            <VBox.margin>
+                                                <Insets top="10.0" />
+                                            </VBox.margin>
+                                        </JFXTextArea>
+                                    </children>
+                                    <HBox.margin>
+                                        <Insets top="10.0" />
+                                    </HBox.margin>
+                                </VBox>
+                            </children></HBox>
+                        <HBox prefHeight="80.0" prefWidth="825.0">
+                            <children>
+                                <VBox fx:id="passwordVbox" prefHeight="80.0" prefWidth="655.0">
+                                    <children>
+                                        <JFXButton fx:id="downloadBlobButton" mnemonicParsing="false" onAction="#downloadBlob" ripplerFill="#00d5ff" text="Download file">
+                                            <VBox.margin>
+                                                <Insets top="10.0" />
+                                            </VBox.margin>
+                                        </JFXButton>
+                                    </children>
+                                    <HBox.margin>
+                                        <Insets top="10.0" bottom="20.0" />
+                                    </HBox.margin>
+                                </VBox>
+                            </children>
+                        </HBox>
+                        <HBox prefHeight="30.0" prefWidth="200.0">
+                            <children>
+                                <Button fx:id="deletePasswordButton" mnemonicParsing="false" onAction="#deletePassword" text="Delete Document" />
+                            </children>
+                        </HBox>
+                    </children>
+                </VBox>
+            </center>
+        </BorderPane>
+    </center>
+</BorderPane>

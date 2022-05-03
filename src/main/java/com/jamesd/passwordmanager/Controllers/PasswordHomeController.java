@@ -5,10 +5,12 @@ import com.jamesd.passwordmanager.Models.HierarchyModels.PasswordEntryFolder;
 import com.jamesd.passwordmanager.PasswordManagerApp;
 import com.jamesd.passwordmanager.Tables.CreditDebitCardTable;
 import com.jamesd.passwordmanager.Tables.DatabasePasswordTable;
+import com.jamesd.passwordmanager.Tables.DocumentTable;
 import com.jamesd.passwordmanager.Tables.WebsitePasswordTable;
 import com.jamesd.passwordmanager.Utils.TreeViewIteratorUtil;
 import com.jamesd.passwordmanager.Wrappers.CreditDebitCardEntryWrapper;
 import com.jamesd.passwordmanager.Wrappers.DatabasePasswordEntryWrapper;
+import com.jamesd.passwordmanager.Wrappers.DocumentWrapper;
 import com.jamesd.passwordmanager.Wrappers.WebsitePasswordEntryWrapper;
 import com.jfoenix.controls.JFXButton;
 import de.jensd.fx.glyphs.GlyphsDude;
@@ -21,6 +23,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
@@ -34,7 +37,9 @@ import javax.security.auth.login.LoginException;
 
 import javafx.scene.image.ImageView;
 
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -61,8 +66,6 @@ public class PasswordHomeController implements Initializable {
     private ImageView logo = new ImageView();
     @FXML
     private TitledPane folderMenuTitledPane = new TitledPane();
-    @FXML
-    private TreeView<String> folderNavigationTreeView = new TreeView<>();
     @FXML
     private Button homeButton = new Button();
     @FXML
@@ -121,7 +124,7 @@ public class PasswordHomeController implements Initializable {
         sidebar.getChildren().add(passwordFolderNavigationLabel);
         try {
             populatePasswordFolders();
-        } catch (LoginException | ClassNotFoundException e) {
+        } catch (LoginException | ClassNotFoundException | IOException e) {
             e.printStackTrace();
         }
     }
@@ -373,13 +376,14 @@ public class PasswordHomeController implements Initializable {
      * @throws ClassNotFoundException Throws ClassNotFoundException if one or more of the PasswordEntry subclasses
      * cannot be found
      */
-    public void populatePasswordFolders() throws LoginException, ClassNotFoundException {
+    public void populatePasswordFolders() throws LoginException, ClassNotFoundException, IOException {
         if(PasswordManagerApp.getLoggedInUser() != null) {
 
             // Establishes the PasswordEntry subclasses
             Class<?> websiteEntryClass = Class.forName("com.jamesd.passwordmanager.Models.Passwords.WebsitePasswordEntry");
             Class<?> databaseEntryClass = Class.forName("com.jamesd.passwordmanager.Models.Passwords.DatabasePasswordEntry");
             Class<?> creditDebitCardEntryClass = Class.forName("com.jamesd.passwordmanager.Models.Passwords.CreditDebitCardEntry");
+            Class<?> documentEntryClass = Class.forName("com.jamesd.passwordmanager.Models.Passwords.DocumentEntry");
 
             // Root node of the TreeView
             TreeItem<String> folderNavigationRoot = new TreeItem<>("Root Folder");
@@ -418,6 +422,8 @@ public class PasswordHomeController implements Initializable {
                         icon = GlyphsDude.createIcon(FontAwesomeIcon.DATABASE, "1.5em");
                     } else if(creditDebitCardEntryClass.equals(classOfEntry)) {
                         icon = GlyphsDude.createIcon(FontAwesomeIcon.CREDIT_CARD, "1.5em");
+                    } else if(documentEntryClass.equals(classOfEntry)) {
+                        icon = GlyphsDude.createIcon(FontAwesomeIcon.FILE, "1.5em");
                     }
                     TreeItem<String> folderNode = new TreeItem<>(folderType, icon);
                     folderNavigationRoot.getChildren().add(folderNode);
@@ -441,6 +447,8 @@ public class PasswordHomeController implements Initializable {
                                 populateDatabaseEntryPasswords(folder);
                             } else if(creditDebitCardEntryClass.equals(classOfEntry)) {
                                 populateCreditDebitCardEntryPasswords(folder);
+                            } else if(documentEntryClass.equals(classOfEntry)) {
+                                populateDocumentEntryPasswords(folder);
                             }
                         }
                     }
@@ -455,18 +463,19 @@ public class PasswordHomeController implements Initializable {
             // Assigns the TreeView object to the folderNavigationTreeView field and determines whether to add it as a
             // new child to the sidebar VBox, or whether to replace an already existing TreeView object in the sidebar
             // VBox
-            folderNavigationTreeView = navView;
             List<Node> navViews = sidebar.getChildren()
                     .stream()
                     .filter(o -> o.getId().equals("folderNavigationTreeView"))
                     .collect(Collectors.toList());
             if(navViews.isEmpty()) {
-                sidebar.getChildren().add(folderNavigationTreeView);
+                sidebar.getChildren().add(navView);
                 setSidebar(sidebar);
             } else {
-                folderNavigationTreeView.getRoot().setExpanded(true);
-                sidebar.getChildren().set(7, folderNavigationTreeView);
-                setSidebar(sidebar);
+                FXMLLoader sideBarLoader = new FXMLLoader(PasswordHomeController.class
+                        .getResource("/com/jamesd/passwordmanager/views/sidebar-menu.fxml"));
+                BorderPane homePane = (BorderPane) PasswordManagerApp.getRootLayout().getCenter();
+                homePane.setLeft(sideBarLoader.load());
+                PasswordManagerApp.setRootLayout(homePane);
             }
 
         } else {
@@ -562,6 +571,34 @@ public class PasswordHomeController implements Initializable {
     }
 
     /**
+     * Triggered when a "document" folder is selected by the user. A new DocumentTable is generated,
+     * which contains all the DocumentEntry objects located within the selected PasswordEntryFolder
+     * @param folder PasswordEntryFolder selected by the user. Contains only DocumentEntry objects
+     */
+    public void populateDocumentEntryPasswords(PasswordEntryFolder folder) {
+        PasswordManagerApp.getPasswordHomeController().setSelectedFolder(folder);
+        DocumentTable documentTable = new DocumentTable();
+        try {
+            List<Node> tableViewList = PasswordManagerApp.getPasswordHomeController().getPasswordTableVbox().getChildren();
+            TableView<DocumentWrapper> documentEntryTableView =
+                    documentTable.createTableView(folder);
+            documentEntryTableView.setId("documentEntryTableView");
+            documentEntryTableView.setMinHeight(210.0);
+            documentEntryTableView.setPrefHeight(210.0);
+            documentEntryTableView.setPrefWidth(1085.0);
+            documentEntryTableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+            if(tableViewList.size() < 2) {
+                PasswordManagerApp.getPasswordHomeController().getPasswordTableVbox().getChildren().add(documentEntryTableView);
+            } else {
+                PasswordManagerApp.getPasswordHomeController().getPasswordTableVbox().getChildren().set(1, documentEntryTableView);
+            }
+        } catch (LoginException
+                | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
      * Triggered by the "add new folder" button. Calls the method to load the "add new folder" modal
      * @throws LoginException Throws LoginException if this method is called whilst the user is not logged in
      * @throws IOException Throws IOException if the "add new password" modal cannot be loaded
@@ -646,6 +683,7 @@ public class PasswordHomeController implements Initializable {
                     Class<?> websitePasswordEntryWrapperClass = Class.forName("com.jamesd.passwordmanager.Wrappers.WebsitePasswordEntryWrapper");
                     Class<?> databasePasswordEntryWrapperClass = Class.forName("com.jamesd.passwordmanager.Wrappers.DatabasePasswordEntryWrapper");
                     Class<?> creditDebitCardEntryWrapperClass = Class.forName("com.jamesd.passwordmanager.Wrappers.CreditDebitCardEntryWrapper");
+                    Class<?> documentEntryWrapperClass = Class.forName("com.jamesd.passwordmanager.Wrappers.DocumentWrapper");
                     if(websitePasswordEntryWrapperClass.isInstance(o)) {
                         WebsitePasswordEntryWrapper websitePasswordEntryWrapper = (WebsitePasswordEntryWrapper) o;
                         if(websitePasswordEntryWrapper.isChecked().getValue()) {
@@ -660,6 +698,11 @@ public class PasswordHomeController implements Initializable {
                         CreditDebitCardEntryWrapper creditDebitCardEntryWrapper = (CreditDebitCardEntryWrapper) o;
                         if(creditDebitCardEntryWrapper.isChecked().getValue()) {
                             passwordsToBeDeleted.add(creditDebitCardEntryWrapper);
+                        }
+                    } if(documentEntryWrapperClass.isInstance(o)) {
+                        DocumentWrapper documentWrapper = (DocumentWrapper) o;
+                        if(documentWrapper.isChecked().getValue()) {
+                            passwordsToBeDeleted.add(documentWrapper);
                         }
                     }
                 } catch (ClassNotFoundException e) {
@@ -684,10 +727,12 @@ public class PasswordHomeController implements Initializable {
      * @throws ClassNotFoundException Throws ClassNotFoundException if any subclass of PasswordEntry cannot be found
      */
     @FXML
-    private void confirmDelete() throws LoginException, ClassNotFoundException {
+    private void confirmDelete() throws LoginException, ClassNotFoundException, IOException {
         if(PasswordManagerApp.getLoggedInUser() != null) {
             Class<?> websitePasswordEntryClass = Class.forName("com.jamesd.passwordmanager.Models.Passwords.WebsitePasswordEntry");
             Class<?> databasePasswordEntryClass = Class.forName("com.jamesd.passwordmanager.Models.Passwords.DatabasePasswordEntry");
+            Class<?> creditDebitCardEntryClass = Class.forName("com.jamesd.passwordmanager.Models.Passwords.CreditDebitCardEntry");
+            Class<?> documentEntryClass = Class.forName("com.jamesd.passwordmanager.Models.Passwords.DocumentEntry");
             TableView<Object> tableView =
                     (TableView<Object>)
                             PasswordManagerApp.getPasswordHomeController().getPasswordTableVbox().getChildren().get(1);
@@ -702,6 +747,12 @@ public class PasswordHomeController implements Initializable {
             } if(PasswordEntryFolder.EntryFactory.determineEntryType(PasswordManagerApp.getPasswordHomeController().getSelectedFolder())
                     .equals(databasePasswordEntryClass)) {
                 PasswordManagerApp.getPasswordHomeController().populateDatabaseEntryPasswords(PasswordManagerApp.getPasswordHomeController().getSelectedFolder());
+            } if(PasswordEntryFolder.EntryFactory.determineEntryType(PasswordManagerApp.getPasswordHomeController().getSelectedFolder())
+                    .equals(creditDebitCardEntryClass)) {
+                PasswordManagerApp.getPasswordHomeController().populateCreditDebitCardEntryPasswords(PasswordManagerApp.getPasswordHomeController().getSelectedFolder());
+            } if(PasswordEntryFolder.EntryFactory.determineEntryType(PasswordManagerApp.getPasswordHomeController().getSelectedFolder())
+                    .equals(documentEntryClass)) {
+                PasswordManagerApp.getPasswordHomeController().populateDocumentEntryPasswords(PasswordManagerApp.getPasswordHomeController().getSelectedFolder());
             }
         } else {
             throw new LoginException("User is not logged in. Aborting process.");
@@ -787,6 +838,7 @@ public class PasswordHomeController implements Initializable {
                 Class<?> websitePasswordEntryClass = Class.forName("com.jamesd.passwordmanager.Models.Passwords.WebsitePasswordEntry");
                 Class<?> databasePasswordEntryClass = Class.forName("com.jamesd.passwordmanager.Models.Passwords.DatabasePasswordEntry");
                 Class<?> creditDebitCardEntryClass = Class.forName("com.jamesd.passwordmanager.Models.Passwords.CreditDebitCardEntry");
+                Class<?> documentEntryClass = Class.forName("com.jamesd.passwordmanager.Models.Passwords.DocumentEntry");
                 if(websitePasswordEntryClass.equals(PasswordEntryFolder.EntryFactory.determineEntryType(selectedFolder))) {
                     populateWebsiteEntryPasswords(selectedFolder);
                     TableView<WebsitePasswordEntryWrapper> tableView = (TableView<WebsitePasswordEntryWrapper>)
@@ -802,6 +854,12 @@ public class PasswordHomeController implements Initializable {
                 if(creditDebitCardEntryClass.equals(PasswordEntryFolder.EntryFactory.determineEntryType(selectedFolder))) {
                     populateCreditDebitCardEntryPasswords(selectedFolder);
                     TableView<CreditDebitCardEntryWrapper> tableView = (TableView<CreditDebitCardEntryWrapper>)
+                            PasswordManagerApp.getPasswordHomeController().getPasswordTableVbox().getChildren().get(1);
+                    tableView.getSelectionModel().select(tableView.getItems().size() - 1, tableView.getColumns().get(1));
+                }
+                if(documentEntryClass.equals(PasswordEntryFolder.EntryFactory.determineEntryType(selectedFolder))) {
+                    populateDocumentEntryPasswords(selectedFolder);
+                    TableView<DocumentWrapper> tableView = (TableView<DocumentWrapper>)
                             PasswordManagerApp.getPasswordHomeController().getPasswordTableVbox().getChildren().get(1);
                     tableView.getSelectionModel().select(tableView.getItems().size() - 1, tableView.getColumns().get(1));
                 }

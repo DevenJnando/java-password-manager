@@ -1,7 +1,6 @@
 package com.jamesd.passwordmanager.Wrappers;
 
 import com.jamesd.passwordmanager.Models.Passwords.DatabasePasswordEntry;
-import javafx.beans.property.BooleanProperty;
 import javafx.scene.image.ImageView;
 
 /**

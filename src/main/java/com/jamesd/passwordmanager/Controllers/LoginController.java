@@ -3,7 +3,9 @@ package com.jamesd.passwordmanager.Controllers;
 import com.jamesd.passwordmanager.Authentication.LoginAuthentication;
 import com.jamesd.passwordmanager.Authentication.RegisterUser;
 import com.jamesd.passwordmanager.DAO.MasterSQLQueries;
+import com.jamesd.passwordmanager.DAO.StorageAccountManager;
 import com.jamesd.passwordmanager.PasswordManagerApp;
+import com.jamesd.passwordmanager.Utils.EncryptDecryptPasswordsUtil;
 import com.jamesd.passwordmanager.Utils.HashMasterPasswordUtil;
 import com.jamesd.passwordmanager.Utils.PasswordCreateUtil;
 import com.jfoenix.controls.JFXPasswordField;
@@ -144,8 +146,9 @@ public class LoginController implements Initializable {
 
         //TODO: Make this dynamically detect whether user is using E-mail or Username for login.
         if(authentication.login("username")) {
-            PasswordManagerApp.setLoggedInUser(authentication.getLoggedInUser());
-            logger.info("User " + authentication.getLoggedInUser().getUsername() + " set as current logged in user.");
+            PasswordManagerApp.setLoggedInUser(authentication.getUser());
+            StorageAccountManager.connect(EncryptDecryptPasswordsUtil.decryptPassword(authentication.getStoredPassDbKey().getEncryptedStorage()));
+            logger.info("User " + authentication.getUser().getUsername() + " set as current logged in user.");
             redirectToPasswordsHome();
             logger.info("Switched context to PasswordHomeController.");
         }

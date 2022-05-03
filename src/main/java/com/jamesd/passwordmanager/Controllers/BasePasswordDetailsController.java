@@ -1,16 +1,15 @@
 package com.jamesd.passwordmanager.Controllers;
 
+import com.jamesd.passwordmanager.DAO.StorageAccountManager;
 import com.jamesd.passwordmanager.Models.HierarchyModels.PasswordEntryFolder;
 import com.jamesd.passwordmanager.Models.Passwords.CreditDebitCardEntry;
 import com.jamesd.passwordmanager.Models.Passwords.DatabasePasswordEntry;
+import com.jamesd.passwordmanager.Models.Passwords.DocumentEntry;
 import com.jamesd.passwordmanager.Models.Passwords.WebsitePasswordEntry;
 import com.jamesd.passwordmanager.PasswordManagerApp;
 import com.jamesd.passwordmanager.Utils.PasswordCreateUtil;
 import com.jamesd.passwordmanager.Utils.TransitionUtil;
-import com.jamesd.passwordmanager.Wrappers.BaseWrapper;
-import com.jamesd.passwordmanager.Wrappers.CreditDebitCardEntryWrapper;
-import com.jamesd.passwordmanager.Wrappers.DatabasePasswordEntryWrapper;
-import com.jamesd.passwordmanager.Wrappers.WebsitePasswordEntryWrapper;
+import com.jamesd.passwordmanager.Wrappers.*;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXTextField;
 import de.jensd.fx.glyphs.GlyphsDude;
@@ -274,6 +273,11 @@ public abstract class BasePasswordDetailsController<T extends BaseWrapper> exten
             CreditDebitCardEntry entry = creditDebitCardEntryWrapper.getCreditDebitCardEntry();
             deleteCreditDebitCardEntry(entry);
         }
+        if(getEntryWrapper() instanceof DocumentWrapper) {
+            DocumentWrapper documentWrapper = (DocumentWrapper) getEntryWrapper();
+            DocumentEntry entry = documentWrapper.getDocumentEntry();
+            deleteDocumentEntry(entry);
+        }
     }
 
     /**
@@ -319,6 +323,22 @@ public abstract class BasePasswordDetailsController<T extends BaseWrapper> exten
         PasswordManagerApp.getPasswordDetailsController().setNoDetailsLoaded();
         // List of database password entries in the parent folder is repopulated once the password is deleted
         PasswordManagerApp.getPasswordHomeController().populateCreditDebitCardEntryPasswords(getParentFolder());
+    }
+
+    /**
+     * Deletes a DocumentEntry from its parent folder in the password database
+     * @param entry The selected DocumentEntry to be deleted
+     * @throws ClassNotFoundException
+     */
+    private void deleteDocumentEntry(DocumentEntry entry) throws ClassNotFoundException {
+        StorageAccountManager.deleteBlob(getParentFolder().getPasswordFolder() + "/" + entry.getPasswordName());
+        DeletePasswordController deletePasswordController = new DeletePasswordController();
+        deletePasswordController.deleteSingleEntry(entry, getParentFolder());
+
+        // Details screen is cleared once the password is deleted
+        PasswordManagerApp.getPasswordDetailsController().setNoDetailsLoaded();
+        // List of database password entries in the parent folder is repopulated once the password is deleted
+        PasswordManagerApp.getPasswordHomeController().populateDocumentEntryPasswords(getParentFolder());
     }
 
     /**
