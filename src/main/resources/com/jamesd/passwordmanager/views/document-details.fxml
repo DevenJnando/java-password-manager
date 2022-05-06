@@ -57,7 +57,7 @@
                             </children></HBox>
                         <HBox prefHeight="80.0" prefWidth="825.0">
                             <children>
-                                <VBox fx:id="passwordVbox" prefHeight="80.0" prefWidth="655.0">
+                                <VBox fx:id="passwordVbox" prefHeight="50.0" prefWidth="284.0">
                                     <children>
                                         <JFXButton fx:id="downloadBlobButton" mnemonicParsing="false" onAction="#downloadBlob" ripplerFill="#00d5ff" text="Download file">
                                             <VBox.margin>
@@ -66,9 +66,14 @@
                                         </JFXButton>
                                     </children>
                                     <HBox.margin>
-                                        <Insets top="10.0" bottom="20.0" />
+                                        <Insets bottom="20.0" top="10.0" />
                                     </HBox.margin>
                                 </VBox>
+                        <Label fx:id="downloadedLabel">
+                           <HBox.margin>
+                              <Insets top="20.0" />
+                           </HBox.margin>
+                        </Label>
                             </children>
                         </HBox>
                         <HBox prefHeight="30.0" prefWidth="200.0">

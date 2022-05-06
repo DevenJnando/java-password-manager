@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.azure.storage.common.StorageSharedKeyCredential;
 
+import java.awt.*;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.File;
@@ -33,6 +34,7 @@ public class StorageAccountManager {
 
     private final static Logger logger = LoggerFactory.getLogger(StorageAccountManager.class);
     private final static String accountName = PropertiesUtil.getProperties().getProperty("storageAccountName");
+    private final static String SCRIPTS_DIR = System.getProperty("user.dir") + "/src/main/resources/com/jamesd/passwordmanager/scripts/";
     private static BlobContainerClient containerClient;
 
     /**
@@ -92,6 +94,7 @@ public class StorageAccountManager {
         String downloadedBlobName = blobName.split("/")[1];
         String filePath = getDownloadLocation() + "/" + downloadedBlobName;
         executeDownload(blobClient, filePath, 0);
+        openDownloadLocation(getDownloadLocation());
     }
 
     /**
@@ -126,13 +129,12 @@ public class StorageAccountManager {
      * @return Full download directory String
      * @throws IOException Throws IOException if a shell command cannot be executed by the Process object
      */
-    private static String getDownloadLocation() throws IOException {
+    public static String getDownloadLocation() throws IOException {
         if(Platform.getCurrent() == Platform.WINDOWS) {
             return System.getProperty("user.home")+"/Downloads";
         } else if(Platform.getCurrent() == Platform.UNIX) {
-            String[] command = {System.getProperty("user.dir") + "/src/main/resources/com/jamesd/passwordmanager/scripts/get_download_location.sh"};
-            Runtime.getRuntime().exec("chmod +x " + System.getProperty("user.dir") +
-                    "/src/main/resources/com/jamesd/passwordmanager/scripts/get_download_location.sh");
+            String[] command = {SCRIPTS_DIR + "get_download_location.sh"};
+            Runtime.getRuntime().exec("chmod +x " + SCRIPTS_DIR + "get_download_location.sh");
             Process process = Runtime.getRuntime().exec(command);
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String s;
@@ -143,6 +145,16 @@ public class StorageAccountManager {
             }
         } else {
             return null;
+        }
+    }
+
+    public static void openDownloadLocation(String downloadLocation) throws IOException {
+        if(Platform.getCurrent() == Platform.WINDOWS) {
+            Desktop.getDesktop().open(new File(downloadLocation));
+        } else if(Platform.getCurrent() == Platform.UNIX
+        || Platform.getCurrent() == Platform.OSX) {
+            Runtime.getRuntime().exec("chmod +x " + SCRIPTS_DIR + "open_download_location.sh");
+            new ProcessBuilder(SCRIPTS_DIR + "open_download_location.sh", downloadLocation).start();
         }
     }
 

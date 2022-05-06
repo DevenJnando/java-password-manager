@@ -89,7 +89,7 @@ public class DeletePasswordController {
                 PasswordManagerApp.getPasswordHomeController().populateCreditDebitCardEntryPasswords(selectedFolder);
             } if(documentEntryWrapperClass.isInstance(o)) {
                 DocumentWrapper wrapper = (DocumentWrapper) o;
-                StorageAccountManager.deleteBlob(selectedFolder + "/" + wrapper.getDocumentEntry().getPasswordName());
+                StorageAccountManager.deleteBlob(selectedFolder.getPasswordFolder() + "/" + wrapper.getDocumentEntry().getPasswordName());
                 StoredPassSQLQueries.deletePasswordInDb(wrapper.getDocumentEntry(), selectedFolder);
                 PasswordManagerApp.getPasswordHomeController().populateDocumentEntryPasswords(selectedFolder);
             }

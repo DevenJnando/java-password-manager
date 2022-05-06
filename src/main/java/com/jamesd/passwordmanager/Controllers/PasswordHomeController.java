@@ -469,14 +469,15 @@ public class PasswordHomeController implements Initializable {
                     .collect(Collectors.toList());
             if(navViews.isEmpty()) {
                 sidebar.getChildren().add(navView);
-                setSidebar(sidebar);
             } else {
+                sidebar.getChildren().set(7, navView);
                 FXMLLoader sideBarLoader = new FXMLLoader(PasswordHomeController.class
                         .getResource("/com/jamesd/passwordmanager/views/sidebar-menu.fxml"));
                 BorderPane homePane = (BorderPane) PasswordManagerApp.getRootLayout().getCenter();
                 homePane.setLeft(sideBarLoader.load());
                 PasswordManagerApp.setRootLayout(homePane);
             }
+            setSidebar(sidebar);
 
         } else {
             throw new LoginException("User is not logged in. Aborting process.");
@@ -824,7 +825,6 @@ public class PasswordHomeController implements Initializable {
                 TreeItem<String> childNode = new TreeItem<>();
                 while(treeViewIteratorUtil.hasNext()) {
                     TreeItem<String> currentNode = treeViewIteratorUtil.next();
-                    System.out.println(currentNode.getValue());
                     if(currentNode.getValue().equals(selectedFolder.getPasswordFolder())) {
                         childNode = currentNode;
                         break;

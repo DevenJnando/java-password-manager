@@ -1,27 +1,29 @@
 package com.jamesd.passwordmanager.Controllers;
 
 import com.jamesd.passwordmanager.DAO.StorageAccountManager;
-import com.jamesd.passwordmanager.DAO.StoredPassSQLQueries;
-import com.jamesd.passwordmanager.Models.HierarchyModels.PasswordEntryFolder;
-import com.jamesd.passwordmanager.Models.Passwords.DocumentEntry;
 import com.jamesd.passwordmanager.PasswordManagerApp;
-import com.jamesd.passwordmanager.Utils.EncryptDecryptPasswordsUtil;
 import com.jamesd.passwordmanager.Utils.PasswordCreateUtil;
+import com.jamesd.passwordmanager.Utils.TransitionUtil;
 import com.jamesd.passwordmanager.Wrappers.DocumentWrapper;
-import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXTextArea;
+import de.jensd.fx.glyphs.GlyphsDude;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
+import javafx.animation.FadeTransition;
+import javafx.animation.SequentialTransition;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Node;
+import javafx.scene.Cursor;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextFormatter;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import org.controlsfx.control.textfield.CustomPasswordField;
-import org.controlsfx.control.textfield.CustomTextField;
 
 import javax.security.auth.login.LoginException;
 import java.io.IOException;
@@ -40,9 +42,9 @@ public class DocumentDetailsController extends BasePasswordDetailsController<Doc
     @FXML
     private JFXTextArea documentDescription = new JFXTextArea();
     @FXML
-    private JFXButton downloadBlobButton = new JFXButton();
+    private Button downloadBlobButton = new Button();
     @FXML
-    private JFXButton uploadBlobButton = new JFXButton();
+    private Label downloadedLabel = new Label();
 
     /**
      * Validation flag
@@ -86,6 +88,14 @@ public class DocumentDetailsController extends BasePasswordDetailsController<Doc
         logoHbox.getChildren().clear();
         passwordNameField.clear();
         documentDescription.clear();
+    }
+
+    private void showDownloadedLabel() {
+        FadeTransition fader = TransitionUtil.createFader(downloadedLabel);
+        SequentialTransition fade = new SequentialTransition(downloadedLabel, fader);
+        downloadedLabel.setText("Downloaded!");
+        downloadedLabel.setTextFill(Color.GREEN);
+        fade.play();
     }
 
     /**
@@ -132,7 +142,9 @@ public class DocumentDetailsController extends BasePasswordDetailsController<Doc
 
     @Override
     protected void setIcons() {
-        logger.error("No icons to be set in this controller.");
+        Text downloadIcon = GlyphsDude.createIcon(FontAwesomeIcon.DOWNLOAD, "1.5em");
+        downloadBlobButton.setGraphic(downloadIcon);
+        downloadBlobButton.setCursor(Cursor.HAND);
     }
 
     /**
@@ -142,56 +154,7 @@ public class DocumentDetailsController extends BasePasswordDetailsController<Doc
     @FXML
     public void downloadBlob() throws IOException {
         StorageAccountManager.downloadBlob(getParentFolder().getPasswordFolder() + "/" + passwordNameField.getText());
-    }
-
-    /**
-     * Calls the updatePassword method with the DatabasePasswordEntry details to be updated in the database and displays
-     * a success message to the user on completion
-     * @throws GeneralSecurityException Throws a GeneralSecurityException if the plaintext password cannot be encrypted
-     * @throws IOException Throws an IOException if the plaintext password cannot be read
-     * @throws ClassNotFoundException Throws a ClassNotFoundException if the CustomTextField or CustomPasswordField
-     * classes cannot be found
-     */
-    @FXML
-    public void updatePassword() throws GeneralSecurityException, IOException, ClassNotFoundException {
-        if(PasswordManagerApp.getLoggedInUser() != null) {
-            checkAndResetLabels();
-            if (hasErroneousFields()) {
-                logger.info("Erroneous fields are present. Fix them!");
-            } else {
-                Node password = passwordVbox.getChildren().get(1);
-                updatePassword(password);
-                showSavedLabel();
-            }
-        } else {
-            logger.error("User is not logged in. Aborting process.");
-        }
-    }
-
-    /**
-     * Updates the selected DatabasePasswordEntry password in its parent folder in the database
-     * @param password The displayed password field
-     * @param <T> The class of the displayed password field (Should only ever be CustomTextField or CustomPasswordField)
-     * @throws GeneralSecurityException
-     * @throws IOException
-     * @throws ClassNotFoundException
-     */
-    public <T> void updatePassword(T password) throws GeneralSecurityException, IOException, ClassNotFoundException {
-        PasswordEntryFolder parentFolder = getParentFolder();
-        DocumentEntry entry = getEntryWrapper().getDocumentEntry();
-        if(password instanceof CustomTextField) {
-            entry.setEncryptedPassword(EncryptDecryptPasswordsUtil.encryptPassword(((CustomTextField) password).getText()));
-        } else if(password instanceof CustomPasswordField) {
-            entry.setEncryptedPassword(EncryptDecryptPasswordsUtil.encryptPassword(((CustomPasswordField) password).getText()));
-        } else {
-            throw new ClassNotFoundException("Cannot cast password to type " + password.getClass());
-        }
-        entry.setPasswordName(passwordNameField.getText());
-        entry.setMasterUsername(PasswordManagerApp.getLoggedInUser().getUsername());
-        entry.setDocumentDescription(documentDescription.getText());
-        entry.setDocumentStorageReference(parentFolder.getPasswordFolder() + "/" + entry.getPasswordName());
-        StoredPassSQLQueries.updateDocumentInDb(entry, parentFolder);
-        PasswordManagerApp.getPasswordHomeController().populateDatabaseEntryPasswords(parentFolder);
+        showDownloadedLabel();
     }
 
     @Override

@@ -139,10 +139,7 @@ public abstract class BasePasswordDetailsController<T extends BaseWrapper> exten
      */
     protected void showSavedLabel() {
         FadeTransition fader = TransitionUtil.createFader(savedLabel);
-        SequentialTransition fade = new SequentialTransition(
-                savedLabel,
-                fader
-        );
+        SequentialTransition fade = new SequentialTransition(savedLabel, fader);
         savedLabel.setText("Saved!");
         savedLabel.setTextFill(Color.GREEN);
         fade.play();
