@@ -1,5 +1,6 @@
 package com.jamesd.passwordmanager.Controllers;
 
+import com.jamesd.passwordmanager.DAO.MasterSQLQueries;
 import com.jamesd.passwordmanager.DAO.StoredPassSQLQueries;
 import com.jamesd.passwordmanager.PasswordManagerApp;
 
@@ -17,6 +18,7 @@ public class LogoutController {
     public void logout() throws IOException {
         PasswordManagerApp.setLoggedInUser(null);
         StoredPassSQLQueries.close();
+        MasterSQLQueries.close();
         PasswordHomeController.getStage().close();
         PasswordManagerApp.initRootLayout();
     }

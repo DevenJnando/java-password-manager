@@ -106,6 +106,7 @@ public abstract class BasePasswordTable<T extends BaseWrapper, K extends Passwor
     protected Boolean passwordNeedsUpdated(String passwordEntryDateSet) {
         Boolean needsUpdated = false;
         long daysSinceLastUpdate = daysSinceLastUpdate(passwordEntryDateSet);
+        //TODO: Make this update dynamically based on user preferences
         if(daysSinceLastUpdate > 182) {
             needsUpdated = true;
         }

@@ -1,5 +1,8 @@
 package com.jamesd.passwordmanager.Models.Users;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -10,8 +13,11 @@ public class User {
     private String id;
     private String username;
     private String email;
+    private String phoneNumber;
     private String encryptedPass;
     private String reminderTimePeriod;
+    private boolean twoFactorEnabled;
+    private List<HashMap<String, String>> recognisedDevices;
 
     /**
      * Default constructor
@@ -20,8 +26,11 @@ public class User {
         this.id = UUID.randomUUID().toString();
         this.username = "DemoUser";
         this.email = "totally@notreal.net";
+        this.phoneNumber = "07123456789";
         this.encryptedPass = "encrypted_password";
         this.reminderTimePeriod = "1 month";
+        this.twoFactorEnabled = false;
+        this.recognisedDevices = new ArrayList<>();
     }
 
     /**
@@ -29,13 +38,17 @@ public class User {
      * @param username Username String
      * @param email Email String
      * @param encryptedPass Encrypted password String
+     * @param recognisedDevices List of recognisedDevices unique to this user
      */
-    public User(String username, String email, String encryptedPass) {
+    public User(String username, String email, String phoneNumber, String encryptedPass, List<HashMap<String, String>> recognisedDevices) {
         this.id = UUID.randomUUID().toString();
         this.username = username;
         this.email = email;
+        this.phoneNumber = phoneNumber;
         this.encryptedPass = encryptedPass;
         this.reminderTimePeriod = "6 months";
+        this.twoFactorEnabled = false;
+        this.recognisedDevices = recognisedDevices;
     }
 
     /**
@@ -46,13 +59,18 @@ public class User {
      * @param email Email String
      * @param encryptedPass Encrypted password String
      * @param reminderTimePeriod Time between reminders String
+     * @param recognisedDevices List of recognisedDevices unique to this user
      */
-    public User(String id, String username, String email, String encryptedPass, String reminderTimePeriod) {
+    public User(String id, String username, String email, String phoneNumber, String encryptedPass, String reminderTimePeriod,
+                List<HashMap<String, String>> recognisedDevices) {
         this.id = id;
         this.username = username;
         this.email = email;
+        this.phoneNumber = phoneNumber;
         this.encryptedPass = encryptedPass;
         this.reminderTimePeriod = reminderTimePeriod;
+        this.twoFactorEnabled = false;
+        this.recognisedDevices = recognisedDevices;
     }
 
     /**
@@ -129,5 +147,53 @@ public class User {
      */
     public void setReminderTimePeriod(String reminderTimePeriod) {
         this.reminderTimePeriod = reminderTimePeriod;
+    }
+
+    /**
+     * Retrieves the list of all recognised devices unique to this user
+     * @return List of recognised devices
+     */
+    public List<HashMap<String, String>> getRecognisedDevices() {
+        return recognisedDevices;
+    }
+
+    /**
+     * Sets the list of recognised devices unique to this user
+     * @param recognisedDevices List of recognised devices
+     */
+    public void setRecognisedDevices(List<HashMap<String, String>> recognisedDevices) {
+        this.recognisedDevices = recognisedDevices;
+    }
+
+    /**
+     * Gets the flag which shows if a user's two-factor authentication is enabled or not
+     * @return True if enabled, else false
+     */
+    public boolean isTwoFactorEnabled() {
+        return twoFactorEnabled;
+    }
+
+    /**
+     * Sets the flag which shows if a user's two-factor authentication is enabled or not
+     * @param twoFactorEnabled True if enabled, else false
+     */
+    public void setTwoFactorEnabled(boolean twoFactorEnabled) {
+        this.twoFactorEnabled = twoFactorEnabled;
+    }
+
+    /**
+     * Retrieves the user's phone number
+     * @return Phone number String
+     */
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    /**
+     * Sets the user's phone number
+     * @param phoneNumber Sets the phone number
+     */
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
     }
 }

@@ -40,7 +40,7 @@ public class PasswordManagerApp extends Application {
     // Check for insecurities or breaches
     // Consider having a more organised hierarchy e.g. users > root password folder > work passwords > Google - DONE!!!!!!!
     // Consider allowing storage of other kinds of credential e.g. database passwords, credit cards,
-    // sensitive documents etc. - IN PROGRESS...
+    // sensitive documents etc. - DONE!!!!!
     // Implement query timeouts
     // Allow dynamic login for either email or username
 

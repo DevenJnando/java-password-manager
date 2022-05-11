@@ -33,7 +33,6 @@ import java.util.List;
 public class LoginAuthentication extends Authenticator{
 
     protected static Logger logger = LoggerFactory.getLogger(LoginAuthentication.class);
-    private StoredPassDbKey storedPassDbKey;
 
     /**
      * Constructor which sets the LoginController field.
@@ -41,15 +40,6 @@ public class LoginAuthentication extends Authenticator{
      */
     public LoginAuthentication(LoginController loginController) {
         super(loginController);
-    }
-
-    /**
-     * Returns the StoredPassDbKey object which contains the encrypted key for the stored passwords database as well
-     * as the encrypted key to the application's storage account.
-     * @return StoredPassDbKey object
-     */
-    public StoredPassDbKey getStoredPassDbKey() {
-        return storedPassDbKey;
     }
 
     /**
@@ -66,11 +56,12 @@ public class LoginAuthentication extends Authenticator{
             SQLException {
         String loginId = getLoginController().getUsernameEmailLoginField().getText();
         String password = getLoginController().getPasswordLoginField().getText();
+        getLoginController().getLoginStatusLabel().setText("Logging in...");
         if(loginMethod.equals("username")) {
-            return validateUsernameAndPassword(loginId, password, loginMethod);
+            return validateUsernameAndPassword(loginId, password);
         }
         else if(loginMethod.equals("email")) {
-            return validateEmailAndPassword(loginId, password, loginMethod);
+            return validateEmailAndPassword(loginId, password);
         }
         else {
             logger.error("Login method not known. Cannot proceed.");
@@ -79,54 +70,15 @@ public class LoginAuthentication extends Authenticator{
     }
 
     /**
-     * Method which obtains the key to unlock the database containing user passwords. Only called if the user's login
-     * attempt is successful.
-     * @param storedPassKeys List of keys for the user's password database (should only ever contain one key)
-     * @param loginId Either the User's username or email address
-     * @param loginMethod The method which the user has chosen to login using (username, or email address)
-     * @throws GeneralSecurityException Throws a GeneralSecurityException if the decryption key is incorrect, or if
-     * the master password decryption process fails
-     * @throws IOException Throws an IO exception if the response from CosmosDB cannot be read
-     * @throws SQLException Throws an SQLException if the CosmosDB query has an incorrect formatting/syntax
-     */
-    private void unlockStoredPassDb(List<StoredPassDbKey> storedPassKeys, String loginId, String loginMethod)
-            throws GeneralSecurityException,
-            IOException,
-            SQLException {
-        for(StoredPassDbKey entry : storedPassKeys) {
-            EncryptDecryptPasswordsUtil.initialise(entry.getDecryptionKey());
-            entry.decryptMasterPassword();
-            storedPassDbKey = entry;
-            if(loginMethod.equals("username")) {
-                StoredPassSQLQueries.initialiseWithUsername(entry.getDecryptedPassword(), loginId);
-            }
-            else if(loginMethod.equals("email")) {
-                StoredPassSQLQueries.initialiseWithEmail(entry.getDecryptedPassword(), loginId);
-            }
-            else {
-                throw new LoginException("Login method " + loginMethod + " not known. Could not initialise password database.");
-            }
-        }
-    }
-
-    /**
      * Method which attempts to retrieve a list of User objects (should only ever be one User object retrieved)
      * which match the given username, and then attempts to validate the User object's credentials
      * @param loginId User-input username
      * @param password User-input password
-     * @param loginMethod The method to login, in this case it should be the username
      * @return Returns a boolean - true if validation is successful, false if unsuccessful
-     * @throws GeneralSecurityException Throws a GeneralSecurityException if the decryption key is incorrect, or if
-     * the master password decryption process fails
-     * @throws IOException Throws an IO exception if the response from CosmosDB cannot be read
-     * @throws SQLException Throws an SQLException if the CosmosDB query has an incorrect formatting/syntax
      */
-    private Boolean validateUsernameAndPassword(String loginId, String password, String loginMethod)
-            throws GeneralSecurityException,
-            IOException,
-            SQLException {
+    private Boolean validateUsernameAndPassword(String loginId, String password) {
         List<User> users = MasterSQLQueries.queryUsersByUsername(loginId);
-        return authenticate(users, loginId, loginMethod, password);
+        return authenticate(users, password);
     }
 
     /**
@@ -134,19 +86,11 @@ public class LoginAuthentication extends Authenticator{
      * which match the given email address, and then attempts to validate the User object's credentials
      * @param loginId User-input email address
      * @param password User-input password
-     * @param loginMethod The method to login, in this case it should be the email address
      * @return Returns a boolean - true if validation is successful, false if unsuccessful
-     * @throws GeneralSecurityException Throws a GeneralSecurityException if the decryption key is incorrect, or if
-     * the master password decryption process fails
-     * @throws IOException Throws an IO exception if the response from CosmosDB cannot be read
-     * @throws SQLException Throws an SQLException if the CosmosDB query has an incorrect formatting/syntax
      */
-    private Boolean validateEmailAndPassword(String loginId, String password, String loginMethod)
-            throws GeneralSecurityException,
-            IOException,
-            SQLException {
+    private Boolean validateEmailAndPassword(String loginId, String password) {
         List<User> users = MasterSQLQueries.queryUsersByEmail(loginId);
-        return authenticate(users, loginId, loginMethod, password);
+        return authenticate(users, password);
     }
 
     /**
@@ -168,22 +112,11 @@ public class LoginAuthentication extends Authenticator{
      * Method which initialises and unlocks the password database upon a successful authentication and returns an
      * unsuccessful login message upon an unsuccessful authentication
      * @param users List of User objects retrieved matching the given username/email address (should always be one User)
-     * @param loginId Username/email address
-     * @param loginMethod Method used to log in - using a username or email address
      * @param password User-input password
      * @return Returns a boolean - true if login is successful, false if unsuccessful
-     * @throws GeneralSecurityException Throws a GeneralSecurityException if the decryption key is incorrect, or if
-     * the master password decryption process fails
-     * @throws IOException Throws an IO exception if the response from CosmosDB cannot be read
-     * @throws SQLException Throws an SQLException if the CosmosDB query has an incorrect formatting/syntax
      */
-    private Boolean authenticate(List<User> users, String loginId, String loginMethod, String password)
-            throws GeneralSecurityException, IOException, SQLException {
+    private Boolean authenticate(List<User> users, String password) {
         if(validate(users, password)) {
-            getLoginController().getLoginStatusLabel().setText("Login Successful, welcome back " + loginId + "!");
-            MasterSQLQueries.initialiseStoredPassKey();
-            List<StoredPassDbKey> keys = MasterSQLQueries.queryEncryptedStoredPassKey();
-            unlockStoredPassDb(keys, loginId, loginMethod);
             return true;
         } else {
             getLoginController().getLoginStatusLabel().setText("Login credentials incorrect. Please try again.");

@@ -196,9 +196,10 @@ public class MasterSQLQueries extends SQLQueries {
      * @param email Email of the user to be added
      * @param encryptedPassword Encrypted master password of the user to be added
      */
-    public static void addUserToDb(String username, String email, String encryptedPassword) {
+    public static void addUserToDb(String username, String email, String phoneNumber, String encryptedPassword,
+                                   List<HashMap<String, String>> recognisedDevices) {
         logger.info("Adding new User to the database...");
-        User user = new User(username, email, encryptedPassword);
+        User user = new User(username, email, phoneNumber, encryptedPassword, recognisedDevices);
         getUsersContainer().createItem(user);
         logger.info("Successfully added new user " + user.getUsername() + " to the database.");
     }

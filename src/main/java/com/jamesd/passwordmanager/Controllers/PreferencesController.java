@@ -12,8 +12,10 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Scene;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Modality;
@@ -43,7 +45,13 @@ public class PreferencesController implements Initializable {
     @FXML
     Label saveUpdatePasswordLabel = new Label();
     @FXML
-    private JFXDrawer menuDrawer = new JFXDrawer();
+    Label phoneNumberLabel = new Label();
+    @FXML
+    Label twoFactorErrorLabel = new Label();
+    @FXML
+    TextField phoneNumberField = new TextField();
+    @FXML
+    CheckBox twoFactorEnabled = new CheckBox();
 
     /**
      * Stage for modals
@@ -60,13 +68,16 @@ public class PreferencesController implements Initializable {
     }
 
     /**
-     * Initialize method which populates the update reminder ChoiceBox
+     * Initialize method which populates the update reminder ChoiceBox, and sets the two-factor authentication data
      * @param url
      * @param resourceBundle
      */
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         initializeChoiceBox();
+        checkBoxListener();
+        twoFactorEnabled.setSelected(PasswordManagerApp.getLoggedInUser().isTwoFactorEnabled());
+        phoneNumberField.setText(PasswordManagerApp.getLoggedInUser().getPhoneNumber());
     }
 
     /**
@@ -116,6 +127,40 @@ public class PreferencesController implements Initializable {
             });
         } else {
             logger.error("User is not logged in. Aborting operation.");
+        }
+    }
+
+    /**
+     * Listener which disables/enables the phone number input depending on if the user wants two-factor authentication
+     * enabled or not
+     */
+    private void checkBoxListener() {
+        twoFactorEnabled.selectedProperty().addListener((obj, oldValue, newValue) -> {
+            phoneNumberField.setDisable(!newValue);
+        });
+    }
+
+    /**
+     * Saves the two-factor authentication settings for the currently logged-in user
+     */
+    @FXML
+    public void saveTwoFactorSettings() {
+        if(twoFactorEnabled.isSelected()) {
+            if(phoneNumberField.getText() != null && !phoneNumberField.getText().isEmpty()) {
+                PasswordManagerApp.getLoggedInUser().setTwoFactorEnabled(true);
+                PasswordManagerApp.getLoggedInUser().setPhoneNumber(phoneNumberField.getText());
+                MasterSQLQueries.updateUserInDb(PasswordManagerApp.getLoggedInUser());
+                twoFactorErrorLabel.setText("");
+                showSavedLabel(saveTwoFactorLabel);
+            } else {
+                twoFactorErrorLabel.setText("When enabling two-factor authentication, your phone Number cannot be empty.");
+                twoFactorErrorLabel.setTextFill(Color.RED);
+            }
+        } else {
+            PasswordManagerApp.getLoggedInUser().setTwoFactorEnabled(false);
+            MasterSQLQueries.updateUserInDb(PasswordManagerApp.getLoggedInUser());
+            twoFactorErrorLabel.setText("");
+            showSavedLabel(saveTwoFactorLabel);
         }
     }
 
