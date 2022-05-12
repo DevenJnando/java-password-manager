@@ -3,6 +3,7 @@ package com.jamesd.passwordmanager.Authentication;
 import com.jamesd.passwordmanager.Controllers.LoginController;
 import com.jamesd.passwordmanager.DAO.MasterSQLQueries;
 import com.jamesd.passwordmanager.Models.Users.User;
+import com.jamesd.passwordmanager.Utils.PhoneNumberLocaleUtil;
 import javafx.scene.paint.Color;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,6 +56,14 @@ public class RegisterUser extends Authenticator {
             loginController.getEmailRegisterError().setTextFill(Color.RED);
             loginController.getEmailRegisterError().setText("Email is empty.");
             validated = false;
+        }
+        if(!loginController.phoneRegisterIsEmpty()) {
+            if(!PhoneNumberLocaleUtil.checkValidity
+                    (loginController.getSelectedCountryCode(), loginController.getRegisterPhoneNumber())) {
+                loginController.getPhoneRegisterError().setTextFill(Color.RED);
+                loginController.getPhoneRegisterError().setText("Not a valid phone number.");
+                validated = false;
+            }
         }
         if(loginController.passwordRegisterIsEmpty()) {
             loginController.getPasswordRegisterError().setTextFill(Color.RED);
