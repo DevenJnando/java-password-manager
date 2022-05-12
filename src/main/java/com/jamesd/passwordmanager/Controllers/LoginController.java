@@ -5,6 +5,7 @@ import com.jamesd.passwordmanager.Authentication.RegisterUser;
 import com.jamesd.passwordmanager.DAO.MasterSQLQueries;
 import com.jamesd.passwordmanager.DAO.StorageAccountManager;
 import com.jamesd.passwordmanager.DAO.StoredPassSQLQueries;
+import com.jamesd.passwordmanager.Models.HierarchyModels.CountryCode;
 import com.jamesd.passwordmanager.Models.Passwords.StoredPassDbKey;
 import com.jamesd.passwordmanager.Models.Users.RecognisedUserDevice;
 import com.jamesd.passwordmanager.PasswordManagerApp;
@@ -13,12 +14,12 @@ import com.jfoenix.controls.JFXPasswordField;
 import com.jfoenix.controls.JFXTextField;
 import de.jensd.fx.glyphs.GlyphsDude;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.Text;
 import javafx.stage.Modality;
@@ -28,7 +29,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.security.auth.login.LoginException;
 import java.io.IOException;
-import java.net.SocketException;
 import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.sql.SQLException;
@@ -37,7 +37,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ResourceBundle;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Controller responsible for performing login functions
@@ -76,6 +75,8 @@ public class LoginController implements Initializable {
     @FXML
     private Label emailRegisterError;
     @FXML
+    private Label phoneRegisterError;
+    @FXML
     private Label passwordRegisterError;
     @FXML
     private Label confirmPasswordRegisterError;
@@ -86,10 +87,11 @@ public class LoginController implements Initializable {
     @FXML
     private Label loginStatusLabel;
     @FXML
-    private ImageView loginLogo;
+    private ComboBox<CountryCode> countryCodeComboBox = new ComboBox<>();
 
     private TwoFactorAuthenticationController twoFactorAuthenticationController;
     private StoredPassDbKey storedPassDbKey;
+    private String selectedCountryCode;
 
     private static Stage stage;
     protected static Logger logger = LoggerFactory.getLogger(LoginController.class);
@@ -110,6 +112,16 @@ public class LoginController implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         setIcons();
         setTextFormatters();
+        populateCountryCodeComboBox();
+    }
+
+    /**
+     * Populates country code ComboBox object and adds a listener to set the country code for a user's phone number
+     */
+    public void populateCountryCodeComboBox() {
+        countryCodeComboBox.setItems(FXCollections.observableList(PhoneNumberLocaleUtil.getPhoneNumberList()));
+        countryCodeComboBox.getSelectionModel().selectedItemProperty().addListener((obj, oldVal, newVal)
+                -> selectedCountryCode = newVal.getCountryCode());
     }
 
     /**
@@ -141,7 +153,8 @@ public class LoginController implements Initializable {
             String encryptedMasterPass = HashMasterPasswordUtil.hashPassword(passwordRegisterField.getText());
             List<HashMap<String, String>> recognisedDevices = DeviceIdentifierUtil.addDeviceToRecognisedList();
             MasterSQLQueries.addUserToDb(usernameRegisterField.getText(), emailRegisterField.getText(),
-                    phoneNumberRegisterField.getText(), encryptedMasterPass, recognisedDevices);
+                    selectedCountryCode + phoneNumberRegisterField.getText(),
+                    encryptedMasterPass, recognisedDevices);
             logger.info("User " + usernameRegisterField.getText() + " successfully added to database.");
             loadUserAddedModal();
         }
@@ -261,6 +274,14 @@ public class LoginController implements Initializable {
         return updatedRecognisedDevices;
     }
 
+    /**
+     * Method which is called when a login has been fully verified. The stored pass key is retrieved and used to unlock
+     * the stored password database. The user's storage account is also connected to and the user is redirected to the
+     * home screen.
+     * @throws SQLException Throws SQLException if the stored pass key cannot be retrieved
+     * @throws GeneralSecurityException Throws GeneralSecurityException if the user's storage account cannot be accessed
+     * @throws IOException Throws IOException if the home screen cannot be loaded
+     */
     private void completeLogin() throws SQLException, GeneralSecurityException, IOException {
         MasterSQLQueries.initialiseStoredPassKey();
         List<StoredPassDbKey> keys = MasterSQLQueries.queryEncryptedStoredPassKey();
@@ -362,6 +383,12 @@ public class LoginController implements Initializable {
         PasswordManagerApp.loadPasswordHomeView();
     }
 
+    /**
+     * Loads the modal for two-factor authentication and passes control to the TwoFactorAuthenticationController.
+     * Control is returned to this controller once all two-factor authentication operations are complete, or if the
+     * user cancels
+     * @throws IOException Throws IOException if the modal cannot be loaded
+     */
     public void loadTwoFactorModal() throws IOException {
         Stage twoFactorAuthStage = new Stage();
         FXMLLoader twoFactorAuthLoader = new FXMLLoader(TwoFactorAuthenticationController.class
@@ -436,6 +463,14 @@ public class LoginController implements Initializable {
     }
 
     /**
+     * Retrieves the flag which states if the phone number field is empty in the register tab
+     * @return Boolean true if phone number is empty, else false
+     */
+    public Boolean phoneRegisterIsEmpty() {
+        return phoneNumberRegisterField.getText().isEmpty();
+    }
+
+    /**
      * Retrieves the flag which states if the password field is empty in the register tab
      * @return Boolean true if password is empty, else false
      */
@@ -466,12 +501,21 @@ public class LoginController implements Initializable {
     public void setUsernameRegisterError(Label usernameRegisterError) {
         this.usernameRegisterError = usernameRegisterError;
     }
+
     /**
      * Retrieves the Label which displays a missing email error message
      * @return Label displaying email empty
      */
     public Label getEmailRegisterError() {
         return emailRegisterError;
+    }
+
+    /**
+     * Retrieves the Label which displays a missing phone number error message
+     * @return Label displaying phone number empty
+     */
+    public Label getPhoneRegisterError() {
+        return phoneRegisterError;
     }
 
     /**
@@ -592,5 +636,21 @@ public class LoginController implements Initializable {
      */
     public void setLoginRegisterTabPane(TabPane loginRegisterTabPane) {
         this.loginRegisterTabPane = loginRegisterTabPane;
+    }
+
+    /**
+     * Getter for the selected country code
+     * @return Country code
+     */
+    public String getSelectedCountryCode() {
+        return this.selectedCountryCode;
+    }
+
+    /**
+     * Getter for the input phone number
+     * @return Phone number
+     */
+    public String getRegisterPhoneNumber() {
+        return this.phoneNumberRegisterField.getText();
     }
 }
