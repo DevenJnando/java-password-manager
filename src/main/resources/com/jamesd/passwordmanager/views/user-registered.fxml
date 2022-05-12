@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane prefHeight="208.0" prefWidth="319.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jamesd.passwordmanager.Controllers.LoginController">
+   <children>
+      <VBox layoutX="36.0" layoutY="71.0" prefHeight="161.0" prefWidth="283.0">
+         <children>
+            <Label alignment="CENTER" contentDisplay="CENTER" text="User successfully registered!">
+               <VBox.margin>
+                  <Insets left="40.0" />
+               </VBox.margin></Label>
+            <Button fx:id="okButton" mnemonicParsing="false" onAction="#closeRegisteredMessage" text="Ok">
+               <VBox.margin>
+                  <Insets left="110.0" top="50.0" />
+               </VBox.margin>
+            </Button>
+         </children>
+      </VBox>
+   </children>
+</AnchorPane>

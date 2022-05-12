@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane fx:id="loginBorderPane" minHeight="875" minWidth="1085" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jamesd.passwordmanager.Controllers.LoginController">
+    <top>
+        <ImageView fx:id="loginLogo" fitHeight="182.0" fitWidth="220.0" layoutX="409.0" layoutY="14.0" pickOnBounds="true" preserveRatio="true" BorderPane.alignment="CENTER">
+            <image>
+                <Image url="@../icons/1password-logo-round.png" />
+            </image>
+        </ImageView>
+    </top>
+    <center>
+        <TabPane fx:id="loginRegisterTabPane" prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
+            <tabs>
+                <Tab fx:id="loginTab" text="Login">
+                    <content>
+                        <StackPane fx:id="loginStackPane" prefHeight="151.0">
+                            <children>
+                                <VBox fx:id="loginVbox" maxHeight="-Infinity" maxWidth="-Infinity">
+                                <children>
+                                    <Label fx:id="loginTabUsernameEmail" layoutX="380.0" layoutY="217.0" text="Username/E-mail" />
+                                    <JFXTextField fx:id="usernameEmailLoginField" layoutX="380.0" layoutY="253.0" prefHeight="24.0" prefWidth="480.0" />
+                                    <Separator fx:id="loginUsernameSeparator" prefHeight="21.0" prefWidth="200.0" />
+                                    <Label fx:id="loginTabPassword" layoutX="380.0" layoutY="293.0" text="Password" />
+                                    <JFXPasswordField fx:id="passwordLoginField" layoutX="380.0" layoutY="326.0" prefHeight="24.0" prefWidth="250.0" />
+                                    <Separator fx:id="loginPasswordSeparator" prefHeight="23.0" prefWidth="480.0" />
+                                    <Button fx:id="loginButton" layoutX="382.0" layoutY="379.0" mnemonicParsing="false" onAction="#onLoginButtonClick" text="Login" />
+                                    <Label fx:id="loginStatusLabel" layoutX="382.0" layoutY="430.0"
+                                           prefHeight="16.0" prefWidth="484.0" text=" " />
+                                </children>
+                                </VBox>
+                            </children>
+                        </StackPane>
+                    </content>
+                </Tab>
+                <Tab fx:id="registerTab" text="Register">
+                    <content>
+                        <StackPane fx:id="registerStackPane" minHeight="0.0" minWidth="0.0" prefHeight="429.0" prefWidth="600.0">
+                            <children>
+                                <VBox fx:id="registerVbox" maxHeight="-Infinity" maxWidth="-Infinity">
+                                    <children>
+                                        <Label fx:id="registerUsername" layoutX="170.0" layoutY="52.0" prefHeight="16.0" prefWidth="82.0" text="Username *" />
+                                        <JFXTextField fx:id="usernameRegisterField" layoutX="170.0" layoutY="88.0" prefHeight="24.0" prefWidth="500.0" />
+                              <Separator fx:id="registerUsernameSeparator" prefHeight="21.0" prefWidth="200.0" />
+                                        <Label fx:id="registerEmail" layoutX="170.0" layoutY="130.0" prefHeight="16.0" prefWidth="64.0" text="E-mail *" />
+                                        <JFXTextField fx:id="emailRegisterField" layoutX="170.0" layoutY="161.0" prefHeight="24.0" prefWidth="250.0" />
+                              <Separator fx:id="registerEmailSeparator" prefHeight="21.0" prefWidth="500.0" />
+                                        <Label fx:id="registerPhoneNumber" layoutX="170.0" layoutY="130.0" prefHeight="16.0" prefWidth="115.0" text="Phone Number" />
+                                        <JFXTextField fx:id="phoneNumberRegisterField" layoutX="170.0" layoutY="161.0" prefHeight="24.0" prefWidth="250.0" />
+                              <Separator fx:id="registerPhoneNumberSeparator" prefHeight="21.0" prefWidth="500.0" />
+                                        <Label fx:id="registerPassword" layoutX="170.0" layoutY="201.0" text="Password *" />
+                                        <JFXPasswordField fx:id="passwordRegisterField" layoutX="170.0" layoutY="233.0" prefHeight="24.0" prefWidth="250.0" />
+                              <Separator fx:id="registerPasswordSeparator" prefHeight="21.0" prefWidth="500.0" />
+                                        <Label fx:id="registerConfirmPassword" layoutX="170.0" layoutY="276.0" text="Confirm Password *" />
+                                        <JFXPasswordField fx:id="confirmPasswordRegisterField" layoutX="170.0" layoutY="314.0" prefHeight="24.0" prefWidth="250.0" />
+                              <Separator fx:id="registerConfirmPasswordSeparator" prefHeight="24.0" prefWidth="500.0" />
+                                        <Button fx:id="registerButton" layoutX="170.0" layoutY="375.0" mnemonicParsing="false" onAction="#onRegisterClick" prefHeight="24.0" prefWidth="135.0" text="Register" />
+                              <Label fx:id="usernameRegisterError" prefHeight="16.0" prefWidth="534.0" />
+                              <Label fx:id="emailRegisterError" prefHeight="16.0" prefWidth="558.0" />
+                              <Label fx:id="passwordRegisterError" prefHeight="16.0" prefWidth="573.0" />
+                              <Label fx:id="confirmPasswordRegisterError" prefHeight="16.0" prefWidth="580.0" />
+                                    </children>
+                                </VBox>
+                            </children>
+                        </StackPane>
+                    </content>
+                </Tab>
+            </tabs>
+        </TabPane>
+    </center>
+</BorderPane>

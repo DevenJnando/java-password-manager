@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+
+<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jamesd.passwordmanager.Controllers.LogoutController">
+    <children>
+        <VBox layoutX="107.0" layoutY="89.0" prefHeight="225.0" prefWidth="385.0">
+            <children>
+                <Label text="Are you sure you want to log out?" textAlignment="CENTER">
+                    <VBox.margin>
+                        <Insets left="75.0" top="50.0" />
+                    </VBox.margin>
+                </Label>
+                <Button fx:id="logoutButton" mnemonicParsing="false" onAction="#logout" text="Log out">
+                    <VBox.margin>
+                        <Insets left="150.0" top="50.0" />
+                    </VBox.margin>
+                </Button>
+                <Button fx:id="cancelButton" mnemonicParsing="false" onAction="#cancel" prefHeight="24.0" prefWidth="67.0" text="Cancel">
+                    <VBox.margin>
+                        <Insets left="150.0" top="10.0" />
+                    </VBox.margin>
+                </Button>
+            </children>
+        </VBox>
+    </children>
+</AnchorPane>
