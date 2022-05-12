@@ -1,7 +1,9 @@
 package com.jamesd.passwordmanager.Controllers;
 
 import com.jamesd.passwordmanager.DAO.MasterSQLQueries;
+import com.jamesd.passwordmanager.Models.HierarchyModels.CountryCode;
 import com.jamesd.passwordmanager.PasswordManagerApp;
+import com.jamesd.passwordmanager.Utils.PhoneNumberLocaleUtil;
 import com.jamesd.passwordmanager.Utils.TransitionUtil;
 import com.jfoenix.controls.JFXDrawer;
 import javafx.animation.FadeTransition;
@@ -12,10 +14,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Scene;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Modality;
@@ -39,6 +38,8 @@ public class PreferencesController implements Initializable {
     @FXML
     ChoiceBox<String> reminderChoiceBox = new ChoiceBox<>();
     @FXML
+    ComboBox<CountryCode> countryCodeComboBox = new ComboBox<>();
+    @FXML
     Label saveReminderLabel = new Label();
     @FXML
     Label saveTwoFactorLabel = new Label();
@@ -52,6 +53,8 @@ public class PreferencesController implements Initializable {
     TextField phoneNumberField = new TextField();
     @FXML
     CheckBox twoFactorEnabled = new CheckBox();
+
+    private String selectedCountryCode;
 
     /**
      * Stage for modals
@@ -75,6 +78,7 @@ public class PreferencesController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         initializeChoiceBox();
+        populateCountryCodeComboBox();
         checkBoxListener();
         twoFactorEnabled.setSelected(PasswordManagerApp.getLoggedInUser().isTwoFactorEnabled());
         phoneNumberField.setText(PasswordManagerApp.getLoggedInUser().getPhoneNumber());
@@ -131,6 +135,15 @@ public class PreferencesController implements Initializable {
     }
 
     /**
+     * Populates country code ComboBox object and adds a listener to set the country code for a user's phone number
+     */
+    public void populateCountryCodeComboBox() {
+        countryCodeComboBox.setItems(FXCollections.observableList(PhoneNumberLocaleUtil.getPhoneNumberList()));
+        countryCodeComboBox.getSelectionModel().selectedItemProperty().addListener((obj, oldVal, newVal)
+                -> selectedCountryCode = newVal.getCountryCode());
+    }
+
+    /**
      * Listener which disables/enables the phone number input depending on if the user wants two-factor authentication
      * enabled or not
      */
@@ -146,14 +159,14 @@ public class PreferencesController implements Initializable {
     @FXML
     public void saveTwoFactorSettings() {
         if(twoFactorEnabled.isSelected()) {
-            if(phoneNumberField.getText() != null && !phoneNumberField.getText().isEmpty()) {
+            if(PhoneNumberLocaleUtil.checkValidity(selectedCountryCode, phoneNumberField.getText())) {
                 PasswordManagerApp.getLoggedInUser().setTwoFactorEnabled(true);
-                PasswordManagerApp.getLoggedInUser().setPhoneNumber(phoneNumberField.getText());
+                PasswordManagerApp.getLoggedInUser().setPhoneNumber(selectedCountryCode + phoneNumberField.getText());
                 MasterSQLQueries.updateUserInDb(PasswordManagerApp.getLoggedInUser());
                 twoFactorErrorLabel.setText("");
                 showSavedLabel(saveTwoFactorLabel);
             } else {
-                twoFactorErrorLabel.setText("When enabling two-factor authentication, your phone Number cannot be empty.");
+                twoFactorErrorLabel.setText("When enabling two-factor authentication, you must enter a valid phone number.");
                 twoFactorErrorLabel.setTextFill(Color.RED);
             }
         } else {

@@ -19,6 +19,7 @@ module com.jamesd.passwordmanager {
     requires java.desktop;
     requires jbcrypt;
     requires twilio;
+    requires libphonenumber;
 
     opens com.jamesd.passwordmanager to javafx.fxml;
     opens com.jamesd.passwordmanager.Controllers to javafx.fxml;
