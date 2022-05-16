@@ -71,6 +71,8 @@ public class PasswordHomeController implements Initializable {
     @FXML
     private Button addPasswordButton = new Button();
     @FXML
+    private Button breachCheckerButton = new Button();
+    @FXML
     private Button userPreferencesButton = new Button();
     @FXML
     private Button logoutButton = new Button();
@@ -113,8 +115,8 @@ public class PasswordHomeController implements Initializable {
         sidebar.getChildren().add(logo);
         sidebar.getChildren().add(homeButton);
         sidebar.getChildren().add(folderMenuTitledPane);
-
         sidebar.getChildren().add(addPasswordButton);
+        sidebar.getChildren().add(breachCheckerButton);
         sidebar.getChildren().add(userPreferencesButton);
         sidebar.getChildren().add(logoutButton);
 
@@ -214,6 +216,7 @@ public class PasswordHomeController implements Initializable {
         // Buttons created
         Button homeButton = new Button("Home");
         Button addPasswordButton = new Button("Add New Entry");
+        Button breachCheckerButton = new Button("Breach Checker");
         Button userPreferencesButton = new Button("User Preferences");
         Button logoutButton = new Button("Logout");
 
@@ -224,6 +227,9 @@ public class PasswordHomeController implements Initializable {
         addPasswordButton.setId("addPasswordButton");
         addPasswordButton.setPrefHeight(35);
         addPasswordButton.setPrefWidth(215);
+        breachCheckerButton.setId("breachCheckerButton");
+        breachCheckerButton.setPrefHeight(35);
+        breachCheckerButton.setPrefWidth(215);
         userPreferencesButton.setId("userPreferencesButton");
         userPreferencesButton.setPrefHeight(35);
         userPreferencesButton.setPrefWidth(215);
@@ -235,28 +241,35 @@ public class PasswordHomeController implements Initializable {
         homeButton.setOnAction(e -> {
             try {
                 backToHome();
-            } catch (LoginException | IOException ex) {
+            } catch(LoginException | IOException ex) {
                 ex.printStackTrace();
             }
         });
         addPasswordButton.setOnAction(e -> {
             try {
                 addPassword();
-            } catch (LoginException | IOException ex) {
+            } catch(LoginException | IOException ex) {
+                ex.printStackTrace();
+            }
+        });
+        breachCheckerButton.setOnAction(e -> {
+            try {
+                breachChecker();
+            } catch(LoginException | IOException ex) {
                 ex.printStackTrace();
             }
         });
         userPreferencesButton.setOnAction(e -> {
             try {
                 preferences();
-            } catch (LoginException | IOException ex) {
+            } catch(LoginException | IOException ex) {
                 ex.printStackTrace();
             }
         });
         logoutButton.setOnAction(e -> {
             try {
                 logout();
-            } catch (LoginException | IOException ex) {
+            } catch(LoginException | IOException ex) {
                 ex.printStackTrace();
             }
         });
@@ -264,6 +277,7 @@ public class PasswordHomeController implements Initializable {
         // Button objects assigned to button fields
         this.homeButton = homeButton;
         this.addPasswordButton = addPasswordButton;
+        this.breachCheckerButton = breachCheckerButton;
         this.userPreferencesButton = userPreferencesButton;
         this.logoutButton = logoutButton;
     }
@@ -655,6 +669,22 @@ public class PasswordHomeController implements Initializable {
         if(PasswordManagerApp.getLoggedInUser() != null) {
             PasswordManagerApp.loadPreferencesView();
             logger.info("Switched context to PreferencesController.");
+        } else {
+            throw new LoginException("User is not logged in. Aborting process");
+        }
+    }
+
+    /**
+     * Triggered by the "Breach Checker" button. Calls the method to load the "check for breaches" view and switch
+     * context to the BreachCheckController
+     * @throws LoginException Throws LoginException if this method is called whilst the user is not logged in
+     * @throws IOException Throws IOException if the "breach checker" view cannot be loaded
+     */
+    @FXML
+    private void breachChecker() throws LoginException, IOException {
+        if(PasswordManagerApp.getLoggedInUser() != null) {
+            PasswordManagerApp.loadBreachCheckerView();
+            logger.info("Switched context to BreachCheckController");
         } else {
             throw new LoginException("User is not logged in. Aborting process");
         }

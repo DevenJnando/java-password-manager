@@ -57,4 +57,16 @@ public class CountryCode {
     public void setCountryCode(String countryCode) {
         this.countryCode = countryCode;
     }
+
+    /**
+     * Necessary to override the toString method since this is how a ChoiceBox determines what value to display
+     * in the list of selections
+     * @return
+     */
+    @Override
+    public String toString() {
+        return countryName + " (" + countryCode + ")";
+    }
+
+
 }

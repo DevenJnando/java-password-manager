@@ -539,15 +539,15 @@ public class StoredPassSQLQueries extends SQLQueries {
 
     /**
      * Queries the logged-in user's container in the password database by checking for PasswordEntryFolder objects which
-     * match specified folder name and folder type
-     * @param folderName Name of the folder
+     * match specified master username and folder type
+     * @param masterUsername Name of the master username
      * @param type Type of folder the PasswordEntryFolder object is
-     * @return List of PasswordEntryFolder objects which contain the folderName and type parameters
+     * @return List of PasswordEntryFolder objects which contain the masterUsername and type parameters
      */
-    public static List<PasswordEntryFolder> queryPasswordFolderContainerByNameAndType(String folderName, String type) {
+    public static List<PasswordEntryFolder> queryPasswordFolderContainerByUsernameAndType(String masterUsername, String type) {
         logger.info("Querying " + getUserPasswordsContainer().getId() + " container in " + getStoredPassDb().getId() + " database...");
-        logger.info("Obtaining password folders named " + folderName + " with type " + type + "...");
-        String sql = "SELECT * FROM c WHERE c.passwordFolder = '" + folderName + "' AND c.passwordType = '" + type + "'";
+        logger.info("Obtaining password folders from " + masterUsername + " with type " + type + "...");
+        String sql = "SELECT * FROM c WHERE c.masterUsername = '" + masterUsername + "' AND c.passwordType = '" + type + "'";
         return queryPasswordFolderContainer(sql);
     }
 

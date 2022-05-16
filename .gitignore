@@ -1,2 +1,3 @@
 /target/
 /src/main/resources/com/jamesd/passwordmanager/properties/twilio.properties
+/src/main/resources/com/jamesd/passwordmanager/properties/breachdirectory.properties

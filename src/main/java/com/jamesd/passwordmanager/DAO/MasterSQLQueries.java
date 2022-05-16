@@ -138,7 +138,7 @@ public class MasterSQLQueries extends SQLQueries {
      * @return String object of the response
      * @throws IOException Throws IOException if the body of the HttpResponse cannot be read
      */
-    private static String readResponse(HttpResponse response) throws IOException {
+    public static String readResponse(HttpResponse response) throws IOException {
         String result;
         BufferedInputStream bis = new BufferedInputStream(response.getEntity().getContent());
         ByteArrayOutputStream buf = new ByteArrayOutputStream();

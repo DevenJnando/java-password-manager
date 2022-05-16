@@ -1,6 +1,7 @@
 package com.jamesd.passwordmanager;
 
 import com.jamesd.passwordmanager.Controllers.BaseDetailsController;
+import com.jamesd.passwordmanager.Controllers.BreachCheckController;
 import com.jamesd.passwordmanager.Controllers.PasswordHomeController;
 import com.jamesd.passwordmanager.Controllers.PreferencesController;
 import com.jamesd.passwordmanager.DAO.MasterSQLQueries;
@@ -33,11 +34,15 @@ public class PasswordManagerApp extends Application {
     // Get logos added - DONE!!!!!!
     // Logout functionality - DONE!!!!!!
     // Delete Passwords - DONE!!!!!
+    // #################################################################################################################
     // Improve frontend:
     //  Merge home and details screens into a single screen - DONE!!!!!!
+    //  Fix that damn sidebar!!!!
+    //  The sidebar should really have its own controller instead of being nastily coupled to the PasswordHomeController
+    // #################################################################################################################
     // Abstract add/modification/deletion of passwords for more generic code - DONE!!!!!!
     // User preferences - reminder timings, change master password, two-factor settings - DONE!!!!!!
-    // Check for insecurities or breaches
+    // Check for insecurities or breaches - In progress...
     // Consider having a more organised hierarchy e.g. users > root password folder > work passwords > Google - DONE!!!!!!!
     // Consider allowing storage of other kinds of credential e.g. database passwords, credit cards,
     // sensitive documents etc. - DONE!!!!!
@@ -60,6 +65,7 @@ public class PasswordManagerApp extends Application {
     private static PasswordHomeController passwordHomeController;
     private static BaseDetailsController passwordDetailsController;
     private static PreferencesController preferencesController;
+    private static BreachCheckController breachCheckController;
 
     private static Logger logger = LoggerFactory.getLogger(PasswordManagerApp.class);
 
@@ -74,6 +80,7 @@ public class PasswordManagerApp extends Application {
         passwordHomeController = new PasswordHomeController();
         passwordDetailsController = new BaseDetailsController();
         preferencesController = new PreferencesController();
+        breachCheckController = new BreachCheckController();
         stage.setTitle("DevenJnando Password Manager");
         mainStage = stage;
 
@@ -156,7 +163,7 @@ public class PasswordManagerApp extends Application {
      * Loads the "user preferences" view and switches context to the PreferencesController
      * @throws IOException Throws IOException if the "user preferences" view cannot be loaded
      */
-    public static void loadPreferencesView() throws IOException{
+    public static void loadPreferencesView() throws IOException {
         FXMLLoader preferencesLoader = new FXMLLoader(PreferencesController.class
                 .getResource("/com/jamesd/passwordmanager/views/preferences.fxml"));
         FXMLLoader sideBarLoader = new FXMLLoader(PasswordHomeController.class
@@ -166,6 +173,22 @@ public class PasswordManagerApp extends Application {
         preferencesPane.setLeft(sideBarLoader.load());
         rootLayout.setTop(null);
         rootLayout.setCenter(preferencesPane);
+    }
+
+    /**
+     * Loads the "breach checker" view and switches context to the BreachCheckController
+     * @throws IOException Throws IOException if the "breach checker" view cannot be loaded
+     */
+    public static void loadBreachCheckerView() throws IOException {
+        FXMLLoader breachCheckerLoader = new FXMLLoader(BreachCheckController.class
+                .getResource("/com/jamesd/passwordmanager/views/check-for-breaches.fxml"));
+        FXMLLoader sideBarLoader = new FXMLLoader(PasswordHomeController.class
+                .getResource("/com/jamesd/passwordmanager/views/sidebar-menu.fxml"));
+        BorderPane breachCheckerPane = breachCheckerLoader.load();
+        breachCheckController = breachCheckerLoader.getController();
+        breachCheckerPane.setLeft(sideBarLoader.load());
+        rootLayout.setTop(null);
+        rootLayout.setCenter(breachCheckerPane);
     }
 
     /**

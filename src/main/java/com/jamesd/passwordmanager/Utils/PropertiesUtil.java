@@ -17,8 +17,11 @@ public abstract class PropertiesUtil {
             +"/src/main/resources/com/jamesd/passwordmanager/properties/database.properties";
     private final static String twilioPropertiesLocation = System.getProperty("user.dir")
             +"/src/main/resources/com/jamesd/passwordmanager/properties/twilio.properties";
+    private final static String breachDirectoryPropertiesLocation = System.getProperty("user.dir")
+            +"/src/main/resources/com/jamesd/passwordmanager/properties/breachdirectory.properties";
     private static Properties props;
     private static Properties twilioProps;
+    private static Properties breachDirectoryProps;
 
     protected static Logger logger = LoggerFactory.getLogger(PropertiesUtil.class);
 
@@ -37,15 +40,21 @@ public abstract class PropertiesUtil {
     public static void initialise() throws FileNotFoundException {
         FileInputStream propsInputStream = new FileInputStream(propertiesLocation);
         FileInputStream twilioInputStream = new FileInputStream(twilioPropertiesLocation);
+        FileInputStream breachDirectoryInputStream = new FileInputStream(breachDirectoryPropertiesLocation);
         props = new Properties();
         twilioProps = new Properties();
+        breachDirectoryProps = new Properties();
         try {
             props.load(propsInputStream);
             twilioProps.load(twilioInputStream);
+            breachDirectoryProps.load(breachDirectoryInputStream);
             logger.info("Successfully initialised properties from path: " + propertiesLocation);
             logger.info("Successfully initialised properties from path: " + twilioPropertiesLocation);
+            logger.info("Successfully initialised properties from path: " + breachDirectoryPropertiesLocation);
         } catch(IOException e) {
             e.printStackTrace();
+            logger.error("Properties could not be initialised. Make sure you have all .properties files" +
+                    " in your properties directory.");
         }
     }
 
@@ -62,4 +71,12 @@ public abstract class PropertiesUtil {
      * @return Properties object
      */
     public static Properties getTwilioProperties() { return twilioProps; }
+
+    /**
+     * Retrieves the breach directory properties object
+     * @return Properties object
+     */
+    public static Properties getBreachDirectoryProps() {
+        return breachDirectoryProps;
+    }
 }
