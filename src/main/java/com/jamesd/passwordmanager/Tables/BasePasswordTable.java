@@ -3,6 +3,7 @@ package com.jamesd.passwordmanager.Tables;
 import com.jamesd.passwordmanager.Models.HierarchyModels.PasswordEntryFolder;
 import com.jamesd.passwordmanager.Models.Passwords.CreditDebitCardEntry;
 import com.jamesd.passwordmanager.Models.Passwords.PasswordEntry;
+import com.jamesd.passwordmanager.PasswordManagerApp;
 import com.jamesd.passwordmanager.Wrappers.BaseWrapper;
 import javafx.scene.control.TableView;
 
@@ -67,7 +68,7 @@ public abstract class BasePasswordTable<T extends BaseWrapper, K extends Passwor
                     }
                 }
             } else {
-                if (passwordNeedsUpdated(entry.getDateSet())) {
+                if (passwordNeedsUpdated(entry.getDateSet(), PasswordManagerApp.getLoggedInUser().getReminderTimePeriod())) {
                     long daysOutOfDate = daysSinceLastUpdate(entry.getDateSet());
                     String outOfDateMessage = daysOutOfDate > 1
                             ? "Password is " + daysOutOfDate + " days out of date!"
@@ -103,12 +104,25 @@ public abstract class BasePasswordTable<T extends BaseWrapper, K extends Passwor
      * @param passwordEntryDateSet Last updated date of a PasswordEntry subclass object
      * @return Boolean true if needs a reminder set, else false
      */
-    protected Boolean passwordNeedsUpdated(String passwordEntryDateSet) {
+    protected Boolean passwordNeedsUpdated(String passwordEntryDateSet, String reminderTimePeriod) {
         Boolean needsUpdated = false;
         long daysSinceLastUpdate = daysSinceLastUpdate(passwordEntryDateSet);
-        //TODO: Make this update dynamically based on user preferences
-        if(daysSinceLastUpdate > 182) {
-            needsUpdated = true;
+        switch(reminderTimePeriod) {
+            case "1 month":
+                if(daysSinceLastUpdate > 30) {
+                    needsUpdated = true;
+                }
+                break;
+            case "6 months":
+                if(daysSinceLastUpdate > 182) {
+                    needsUpdated = true;
+                }
+                break;
+            case "1 year":
+                if(daysSinceLastUpdate > 365) {
+                    needsUpdated = true;
+                }
+                break;
         }
         return needsUpdated;
     }

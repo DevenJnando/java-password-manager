@@ -35,8 +35,8 @@ public class PasswordManagerApp extends Application {
     // Delete Passwords - DONE!!!!!
     // Improve frontend:
     //  Merge home and details screens into a single screen - DONE!!!!!!
-    // Abstract add/modification/deletion of passwords for more generic code - IN PROGRESS...
-    // User preferences - reminder timings, change master password, two-factor settings - IN PROGRESS...
+    // Abstract add/modification/deletion of passwords for more generic code - DONE!!!!!!
+    // User preferences - reminder timings, change master password, two-factor settings - DONE!!!!!!
     // Check for insecurities or breaches
     // Consider having a more organised hierarchy e.g. users > root password folder > work passwords > Google - DONE!!!!!!!
     // Consider allowing storage of other kinds of credential e.g. database passwords, credit cards,
