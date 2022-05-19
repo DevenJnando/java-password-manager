@@ -46,6 +46,9 @@ public class BreachCheckController implements Initializable {
         }
     }
 
+    /**
+     * Displays a message to the user that no breaches had been found from the scan.
+     */
     public void showNoBreachesFound() {
         Label noBreachesFoundLabel = new Label("No breaches found, you're good!");
         noBreachesFoundLabel.setPrefSize(700, 50);
@@ -54,6 +57,11 @@ public class BreachCheckController implements Initializable {
         breachesVbox.getChildren().add(noBreachesFoundLabel);
     }
 
+    /**
+     * Creates a TableView of a HashMap containing the results of the scan (username and website which was breached).
+     * This is then added to the breachesVbox object and displayed to the user.
+     * @param breaches HashMap of all found breaches
+     */
     public void showBreachesFound(HashMap<String, String> breaches) {
         Label breachesFoundLabel = new Label("Breaches found! Change your password on these sites as soon as possible!");
         breachesFoundLabel.setPrefSize(700, 50);
@@ -65,6 +73,9 @@ public class BreachCheckController implements Initializable {
         breachesVbox.getChildren().add(breachTableView);
     }
 
+    /**
+     * Method which scans for breaches and displays the results to the user. Triggered by the "check for breaches" button
+     */
     @FXML
     public void checkForBreaches() {
         HashMap<String, String> breaches = BreachChecker.checkForBreaches(sitesAndUsernames);
@@ -75,6 +86,13 @@ public class BreachCheckController implements Initializable {
         }
     }
 
+    /**
+     * Method which generates a HashMap object of all website password usernames (key) and all sites they are associated
+     * with (value). This sitesAndUsernames HashMap object is then scanned for breaches. If an email is used in place of
+     * a username, the associated website is ignored since email addresses span multiple sites.
+     * @return
+     * @throws ClassNotFoundException
+     */
     public HashMap<String, String> getAllWebsitePasswords() throws ClassNotFoundException {
         HashMap<String, String> sitesAndUsernames = new HashMap<>();
         List<PasswordEntryFolder> webFolders = StoredPassSQLQueries

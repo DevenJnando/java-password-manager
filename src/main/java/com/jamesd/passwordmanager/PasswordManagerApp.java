@@ -42,11 +42,11 @@ public class PasswordManagerApp extends Application {
     // #################################################################################################################
     // Abstract add/modification/deletion of passwords for more generic code - DONE!!!!!!
     // User preferences - reminder timings, change master password, two-factor settings - DONE!!!!!!
-    // Check for insecurities or breaches - In progress...
+    // Check for insecurities or breaches - DONE!!!!!!!
     // Consider having a more organised hierarchy e.g. users > root password folder > work passwords > Google - DONE!!!!!!!
     // Consider allowing storage of other kinds of credential e.g. database passwords, credit cards,
     // sensitive documents etc. - DONE!!!!!
-    // Implement query timeouts
+    // Implement query timeouts - In progress...
     // Allow dynamic login for either email or username
 
     /**
