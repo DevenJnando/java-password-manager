@@ -47,7 +47,7 @@ public class PasswordManagerApp extends Application {
     // Consider allowing storage of other kinds of credential e.g. database passwords, credit cards,
     // sensitive documents etc. - DONE!!!!!
     // Implement query timeouts - In progress...
-    // Allow dynamic login for either email or username
+    // Allow dynamic login for either email or username - DONE!!!!!!
 
     /**
      * Main Stage object

@@ -171,24 +171,43 @@ public class LoginController implements Initializable {
     @FXML
     public void onLoginButtonClick() throws GeneralSecurityException, IOException, SQLException {
         LoginAuthentication authentication = new LoginAuthentication(this);
-
-        //TODO: Make this dynamically detect whether user is using E-mail or Username for login.
-        if(authentication.login("username")) {
-            PasswordManagerApp.setLoggedInUser(authentication.getUser());
-            logger.info("User " + authentication.getUser().getUsername() + " set as current logged in user.");
-            if(PasswordManagerApp.getLoggedInUser().isTwoFactorEnabled()) {
-                String deviceMacAddress = DeviceIdentifierUtil.getMacAddress();
-                List<HashMap<String, String>> recognisedDeviceData = PasswordManagerApp.getLoggedInUser().getRecognisedDevices();
-                List<RecognisedUserDevice> recognisedUserDevices = getRecognisedDevicesList(recognisedDeviceData);
-                if(recognisedUserDevices.size() < recognisedDeviceData.size()) {
-                    List<HashMap<String, String>> updatedRecognisedDevices = updatedRecognisedDevices(recognisedUserDevices);
-                    PasswordManagerApp.getLoggedInUser().setRecognisedDevices(updatedRecognisedDevices);
-                    MasterSQLQueries.updateUserInDb(PasswordManagerApp.getLoggedInUser());
+        if(ValidateEmailUtil.isValidEmail(usernameEmailLoginField.getText())) {
+            if(authentication.login("email")) {
+                PasswordManagerApp.setLoggedInUser(authentication.getUser());
+                logger.info("User " + authentication.getUser().getUsername() + " set as current logged in user.");
+                if (PasswordManagerApp.getLoggedInUser().isTwoFactorEnabled()) {
+                    String deviceMacAddress = DeviceIdentifierUtil.getMacAddress();
+                    List<HashMap<String, String>> recognisedDeviceData = PasswordManagerApp.getLoggedInUser().getRecognisedDevices();
+                    List<RecognisedUserDevice> recognisedUserDevices = getRecognisedDevicesList(recognisedDeviceData);
+                    if (recognisedUserDevices.size() < recognisedDeviceData.size()) {
+                        List<HashMap<String, String>> updatedRecognisedDevices = updatedRecognisedDevices(recognisedUserDevices);
+                        PasswordManagerApp.getLoggedInUser().setRecognisedDevices(updatedRecognisedDevices);
+                        MasterSQLQueries.updateUserInDb(PasswordManagerApp.getLoggedInUser());
+                    }
+                    handleTwoFactorAuthentication(currentDeviceIsRecognised(recognisedUserDevices, deviceMacAddress),
+                            recognisedUserDevices, deviceMacAddress, "email");
+                } else {
+                    completeLogin("email");
                 }
-                handleTwoFactorAuthentication(currentDeviceIsRecognised(recognisedUserDevices, deviceMacAddress),
-                        recognisedUserDevices, deviceMacAddress);
-            } else {
-                completeLogin();
+            }
+        } else {
+            if(authentication.login("username")) {
+                PasswordManagerApp.setLoggedInUser(authentication.getUser());
+                logger.info("User " + authentication.getUser().getUsername() + " set as current logged in user.");
+                if (PasswordManagerApp.getLoggedInUser().isTwoFactorEnabled()) {
+                    String deviceMacAddress = DeviceIdentifierUtil.getMacAddress();
+                    List<HashMap<String, String>> recognisedDeviceData = PasswordManagerApp.getLoggedInUser().getRecognisedDevices();
+                    List<RecognisedUserDevice> recognisedUserDevices = getRecognisedDevicesList(recognisedDeviceData);
+                    if (recognisedUserDevices.size() < recognisedDeviceData.size()) {
+                        List<HashMap<String, String>> updatedRecognisedDevices = updatedRecognisedDevices(recognisedUserDevices);
+                        PasswordManagerApp.getLoggedInUser().setRecognisedDevices(updatedRecognisedDevices);
+                        MasterSQLQueries.updateUserInDb(PasswordManagerApp.getLoggedInUser());
+                    }
+                    handleTwoFactorAuthentication(currentDeviceIsRecognised(recognisedUserDevices, deviceMacAddress),
+                            recognisedUserDevices, deviceMacAddress, "username");
+                } else {
+                    completeLogin("username");
+                }
             }
         }
     }
@@ -282,10 +301,10 @@ public class LoginController implements Initializable {
      * @throws GeneralSecurityException Throws GeneralSecurityException if the user's storage account cannot be accessed
      * @throws IOException Throws IOException if the home screen cannot be loaded
      */
-    private void completeLogin() throws SQLException, GeneralSecurityException, IOException {
+    private void completeLogin(String loginMethod) throws SQLException, GeneralSecurityException, IOException {
         MasterSQLQueries.initialiseStoredPassKey();
         List<StoredPassDbKey> keys = MasterSQLQueries.queryEncryptedStoredPassKey();
-        unlockStoredPassDb(keys, getUsernameEmailLoginField().getText(),"username");
+        unlockStoredPassDb(keys, getUsernameEmailLoginField().getText(),loginMethod);
         StorageAccountManager.connect(EncryptDecryptPasswordsUtil.decryptPassword(storedPassDbKey.getEncryptedStorage()));
         redirectToPasswordsHome();
         logger.info("Switched context to PasswordHomeController.");
@@ -300,9 +319,9 @@ public class LoginController implements Initializable {
      * cannot be loaded.
      */
     private void handleTwoFactorAuthentication(boolean deviceIsRecognised, List<RecognisedUserDevice> recognisedUserDevices,
-                                                String deviceMacAddress) throws IOException, SQLException, GeneralSecurityException {
+                                                String deviceMacAddress, String loginMethod) throws IOException, SQLException, GeneralSecurityException {
         if(deviceIsRecognised) {
-            completeLogin();
+            completeLogin(loginMethod);
         } else {
             loadTwoFactorModal();
             if(this.twoFactorAuthenticationController.isVerified()) {
@@ -311,7 +330,7 @@ public class LoginController implements Initializable {
                 List<HashMap<String, String>> updatedRecognisedDevices = updatedRecognisedDevices(recognisedUserDevices);
                 PasswordManagerApp.getLoggedInUser().setRecognisedDevices(updatedRecognisedDevices);
                 MasterSQLQueries.updateUserInDb(PasswordManagerApp.getLoggedInUser());
-                completeLogin();
+                completeLogin(loginMethod);
             } else {
                 PasswordManagerApp.setLoggedInUser(null);
                 getLoginStatusLabel().setText("Two factor authentication failed...please try again.");

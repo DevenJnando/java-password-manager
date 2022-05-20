@@ -66,7 +66,7 @@ public abstract class BreachChecker {
                             JSONObject resultObject = resultsArray.getJSONObject(i);
                             JSONArray sourcesArray = resultObject.getJSONArray("sources");
                             String source = sourcesArray.getString(0);
-                            if(!isValidEmail(v)) {
+                            if(!ValidateEmailUtil.isValidEmail(v)) {
                                 if (source.contains(k)) {
                                     breaches.put(v, source);
                                 }
@@ -99,15 +99,5 @@ public abstract class BreachChecker {
         getRequest.setHeader("X-RapidAPI-Host", PropertiesUtil.getBreachDirectoryProps().getProperty("api-host"));
         getRequest.setHeader("X-RapidAPI-Key", PropertiesUtil.getBreachDirectoryProps().getProperty("api-key"));
         return client.execute(getRequest);
-    }
-
-    /**
-     * Checks if an entry is an email address. Returns true if it is
-     * @param email Potential email string
-     * @return True if the string is an email address, else false
-     */
-    public static boolean isValidEmail(String email) {
-        String regex = "^[\\w-_\\.+]*[\\w-_\\.]\\@([\\w]+\\.)+[\\w]+[\\w]$";
-        return email.matches(regex);
     }
 }
