@@ -125,6 +125,9 @@ public class WebsitePasswordTable extends BasePasswordTable<WebsitePasswordEntry
                     TableColumn selectedColumn = position.getTableColumn();
                     if (!selectedColumn.getText().equals("Checkbox")) {
                         try {
+                            if(PasswordManagerApp.getCenterSet() != 1) {
+                                PasswordManagerApp.setDetailsAsCenter();
+                            }
                             BaseDetailsController controller = PasswordManagerApp.getPasswordDetailsController();
                             controller.setWebDetailsBorderPane(t1, folder);
                         } catch (GeneralSecurityException | IOException e) {
@@ -134,6 +137,7 @@ public class WebsitePasswordTable extends BasePasswordTable<WebsitePasswordEntry
                 } catch (IndexOutOfBoundsException e) {
                     logger.error("Password table not loaded. Cannot create listener.");
                 }
+                passwordTableView.getSelectionModel().clearSelection();
             });
             logger.info("Successfully populated password list.");
             return this.passwordTableView;

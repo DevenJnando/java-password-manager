@@ -399,7 +399,7 @@ public class LoginController implements Initializable {
      * @throws IOException Throws IOException if the password home view cannot be loaded
      */
     public void redirectToPasswordsHome() throws IOException {
-        PasswordManagerApp.loadPasswordHomeView();
+        PasswordManagerApp.loadSuccessfulLoginView();
     }
 
     /**

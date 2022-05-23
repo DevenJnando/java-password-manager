@@ -86,7 +86,7 @@ public class AddDatabasePasswordController extends NewPasswordController impleme
     @Override
     protected Boolean hasErroneousFields() {
         boolean erroneousFields = false;
-        if(PasswordManagerApp.getPasswordHomeController().getBaseAddPasswordController().getSelectedFolder() == null) {
+        if(PasswordManagerApp.getSidebarController().getBaseAddPasswordController().getSelectedFolder() == null) {
             setErrorLabel(PASSWORD_FOLDER_NOT_SELECTED_ID, PASSWORD_FOLDER_NOT_SELECTED_ERROR_MSG, passwordVbox);
             setFolderNotSelectedFlag(true);
             erroneousFields = true;
@@ -129,7 +129,7 @@ public class AddDatabasePasswordController extends NewPasswordController impleme
         } else {
             hashedPassword = EncryptDecryptPasswordsUtil.encryptPassword(hiddenConfirmPasswordField.getText());
         }
-        StoredPassSQLQueries.addNewDatabasePasswordToDb(PasswordManagerApp.getPasswordHomeController()
+        StoredPassSQLQueries.addNewDatabasePasswordToDb(PasswordManagerApp.getSidebarController()
                         .getBaseAddPasswordController().getSelectedFolder(),
                 passwordName.getText(),
                 hostnameField.getText(),
@@ -140,7 +140,7 @@ public class AddDatabasePasswordController extends NewPasswordController impleme
                 hashedPassword);
         setMissingDatabaseUsernameFlag(false);
         setMismatchedPasswordsFlag(false);
-        PasswordHomeController.getStage().close();
+        SidebarController.getStage().close();
         PasswordManagerApp.getPasswordHomeController().viewNewlyAddedPassword();
     }
 
@@ -152,7 +152,7 @@ public class AddDatabasePasswordController extends NewPasswordController impleme
             if (hasErroneousFields()) {
                 logger.info("Erroneous fields are present. Fix them!");
             }
-            else if(PasswordManagerApp.getPasswordHomeController().getBaseAddPasswordController().getSelectedFolder() != null
+            else if(PasswordManagerApp.getSidebarController().getBaseAddPasswordController().getSelectedFolder() != null
                     && !passwordName.getText().isEmpty()
                     && !hostnameField.getText().isEmpty()
                     && !databaseName.getText().isEmpty()

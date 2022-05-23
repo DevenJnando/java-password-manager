@@ -211,7 +211,7 @@ public class AddCreditDebitCardController extends NewPasswordController implemen
     @Override
     protected Boolean hasErroneousFields() {
         boolean erroneousFields = false;
-        if(PasswordManagerApp.getPasswordHomeController().getBaseAddPasswordController().getSelectedFolder() == null) {
+        if(PasswordManagerApp.getSidebarController().getBaseAddPasswordController().getSelectedFolder() == null) {
             setErrorLabel(PASSWORD_FOLDER_NOT_SELECTED_ID, PASSWORD_FOLDER_NOT_SELECTED_ERROR_MSG, passwordVbox);
             setFolderNotSelectedFlag(true);
             erroneousFields = true;
@@ -285,7 +285,7 @@ public class AddCreditDebitCardController extends NewPasswordController implemen
                 hashedSortCode;
 
         StoredPassSQLQueries.addNewCreditDebitCardToDb(PasswordManagerApp
-                        .getPasswordHomeController()
+                        .getSidebarController()
                         .getBaseAddPasswordController()
                         .getSelectedFolder(),
                 passwordName.getText(),
@@ -299,7 +299,7 @@ public class AddCreditDebitCardController extends NewPasswordController implemen
                 currentDate);
 
         setMissingCreditDebitCardNoFlag(false);
-        PasswordHomeController.getStage().close();
+        SidebarController.getStage().close();
         PasswordManagerApp.getPasswordHomeController().viewNewlyAddedPassword();
     }
 
@@ -310,7 +310,7 @@ public class AddCreditDebitCardController extends NewPasswordController implemen
             if(hasErroneousFields()) {
                 logger.info("Erroneous fields are present. Fix them!");
             }
-            else if(PasswordManagerApp.getPasswordHomeController().getBaseAddPasswordController().getSelectedFolder() != null
+            else if(PasswordManagerApp.getSidebarController().getBaseAddPasswordController().getSelectedFolder() != null
                     && !passwordName.getText().isEmpty()
                     && (!visibleCreditDebitCardNoField.getText().isEmpty()
                     || !hiddenCreditDebitCardNoField.getText().isEmpty())){

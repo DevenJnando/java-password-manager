@@ -114,7 +114,7 @@ public class StoredPassSQLQueries extends SQLQueries {
      * @param folder PasswordEntryFolder object which is to be updated in memory
      */
     private static void updateInMemoryPasswordFolderData(PasswordEntryFolder folder) {
-        List<PasswordEntryFolder> loadedFolders = PasswordManagerApp.getPasswordHomeController().getPasswordEntryFolders();
+        List<PasswordEntryFolder> loadedFolders = PasswordManagerApp.getSidebarController().getPasswordEntryFolders();
         for(PasswordEntryFolder currentFolder : loadedFolders) {
             if(folder.getPasswordFolder().contentEquals(currentFolder.getPasswordFolder())) {
                 currentFolder.setData(folder.getData());

@@ -94,7 +94,7 @@ public class DeletePasswordController {
                 PasswordManagerApp.getPasswordHomeController().populateDocumentEntryPasswords(selectedFolder);
             }
         }
-        if(PasswordManagerApp.getPasswordHomeController().getSelectedFolder().equals(selectedFolder)) {
+        if(PasswordManagerApp.getSidebarController().getSelectedFolder().equals(selectedFolder)) {
             PasswordManagerApp.getPasswordDetailsController().setNoDetailsLoaded();
         }
         PasswordHomeController.getStage().close();

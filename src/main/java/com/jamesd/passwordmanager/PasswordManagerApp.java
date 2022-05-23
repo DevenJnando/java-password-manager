@@ -1,9 +1,6 @@
 package com.jamesd.passwordmanager;
 
-import com.jamesd.passwordmanager.Controllers.BaseDetailsController;
-import com.jamesd.passwordmanager.Controllers.BreachCheckController;
-import com.jamesd.passwordmanager.Controllers.PasswordHomeController;
-import com.jamesd.passwordmanager.Controllers.PreferencesController;
+import com.jamesd.passwordmanager.Controllers.*;
 import com.jamesd.passwordmanager.DAO.MasterSQLQueries;
 import com.jamesd.passwordmanager.Utils.PropertiesUtil;
 import com.jamesd.passwordmanager.DAO.StoredPassSQLQueries;
@@ -37,8 +34,8 @@ public class PasswordManagerApp extends Application {
     // #################################################################################################################
     // Improve frontend:
     //  Merge home and details screens into a single screen - DONE!!!!!!
-    //  Fix that damn sidebar!!!!
-    //  The sidebar should really have its own controller instead of being nastily coupled to the PasswordHomeController
+    //  Fix that damn sidebar!!!! - In progress...
+    //  The sidebar should really have its own controller instead of being nastily coupled to the PasswordHomeController - DONE!!!!!!
     // #################################################################################################################
     // Abstract add/modification/deletion of passwords for more generic code - DONE!!!!!!
     // User preferences - reminder timings, change master password, two-factor settings - DONE!!!!!!
@@ -46,7 +43,6 @@ public class PasswordManagerApp extends Application {
     // Consider having a more organised hierarchy e.g. users > root password folder > work passwords > Google - DONE!!!!!!!
     // Consider allowing storage of other kinds of credential e.g. database passwords, credit cards,
     // sensitive documents etc. - DONE!!!!!
-    // Implement query timeouts - In progress...
     // Allow dynamic login for either email or username - DONE!!!!!!
 
     /**
@@ -63,9 +59,11 @@ public class PasswordManagerApp extends Application {
     private static User loggedInUser;
 
     private static PasswordHomeController passwordHomeController;
+    private static SidebarController sidebarController;
     private static BaseDetailsController passwordDetailsController;
     private static PreferencesController preferencesController;
     private static BreachCheckController breachCheckController;
+    private static int centerSet;
 
     private static Logger logger = LoggerFactory.getLogger(PasswordManagerApp.class);
 
@@ -78,9 +76,11 @@ public class PasswordManagerApp extends Application {
     public void start(Stage stage) throws IOException {
         PropertiesUtil.initialise();
         passwordHomeController = new PasswordHomeController();
+        sidebarController = new SidebarController();
         passwordDetailsController = new BaseDetailsController();
         preferencesController = new PreferencesController();
         breachCheckController = new BreachCheckController();
+        centerSet = 0;
         stage.setTitle("DevenJnando Password Manager");
         mainStage = stage;
 
@@ -142,21 +142,54 @@ public class PasswordManagerApp extends Application {
      * Loads the "Password home" view and switches context to the PasswordHomeController
      * @throws IOException Throws IOException if the "Password home" cannot be loaded
      */
-    public static void loadPasswordHomeView() throws IOException {
+    public static void loadSuccessfulLoginView() throws IOException {
+        rootLayout.setTop(null);
+        setTableAsBottom();
+        setSidebarAsLeft();
+        setDetailsAsCenter();
+    }
+
+    public static void setTableAsBottom() throws IOException {
         FXMLLoader passwordHomeLoader = new FXMLLoader(PasswordHomeController.class
                 .getResource("/com/jamesd/passwordmanager/views/users-passwords.fxml"));
+        VBox bottomPane = passwordHomeLoader.load();
+        passwordHomeController = passwordHomeLoader.getController();
+        rootLayout.setBottom(bottomPane);
+    }
+
+    public static void setSidebarAsLeft() throws IOException {
+        FXMLLoader sidebarLoader = new FXMLLoader(SidebarController.class
+                .getResource("/com/jamesd/passwordmanager/views/sidebar-menu.fxml"));
+        VBox leftPane = sidebarLoader.load();
+        sidebarController = sidebarLoader.getController();
+        rootLayout.setLeft(leftPane);
+    }
+
+    public static void setDetailsAsCenter() throws IOException {
         FXMLLoader passwordDetailsLoader = new FXMLLoader(BaseDetailsController.class
                 .getResource("/com/jamesd/passwordmanager/views/base-details-view.fxml"));
-        FXMLLoader sideBarLoader = new FXMLLoader(PasswordHomeController.class
-                .getResource("/com/jamesd/passwordmanager/views/sidebar-menu.fxml"));
-        BorderPane homePane = passwordHomeLoader.load();
         VBox detailsVbox = passwordDetailsLoader.load();
-        passwordHomeController = passwordHomeLoader.getController();
         passwordDetailsController = passwordDetailsLoader.getController();
-        homePane.setLeft(sideBarLoader.load());
-        homePane.setCenter(detailsVbox);
-        rootLayout.setTop(null);
-        rootLayout.setCenter(homePane);
+        centerSet = 1;
+        rootLayout.setCenter(detailsVbox);
+    }
+
+    public static void setPreferencesAsCenter() throws IOException {
+        FXMLLoader preferencesLoader = new FXMLLoader(PreferencesController.class
+                .getResource("/com/jamesd/passwordmanager/views/preferences.fxml"));
+        VBox preferencesVbox = preferencesLoader.load();
+        preferencesController = preferencesLoader.getController();
+        centerSet = 2;
+        rootLayout.setCenter(preferencesVbox);
+    }
+
+    public static void setBreachCheckerAsCenter() throws IOException {
+        FXMLLoader breachCheckerLoader = new FXMLLoader(BreachCheckController.class
+                .getResource("/com/jamesd/passwordmanager/views/check-for-breaches.fxml"));
+        VBox breachCheckerVbox = breachCheckerLoader.load();
+        breachCheckController = breachCheckerLoader.getController();
+        centerSet = 3;
+        rootLayout.setCenter(breachCheckerVbox);
     }
 
     /**
@@ -187,7 +220,6 @@ public class PasswordManagerApp extends Application {
         BorderPane breachCheckerPane = breachCheckerLoader.load();
         breachCheckController = breachCheckerLoader.getController();
         breachCheckerPane.setLeft(sideBarLoader.load());
-        rootLayout.setTop(null);
         rootLayout.setCenter(breachCheckerPane);
     }
 
@@ -232,10 +264,24 @@ public class PasswordManagerApp extends Application {
     }
 
     /**
+     * Returns an integer which corresponds with the current view set to the center
+     * @return 0 if unset, 1 if details view, 2 if preferences view and 3 if breach checker view
+     */
+    public static int getCenterSet() {
+        return centerSet;
+    }
+
+    /**
      * Retrieves the PasswordHomeController
      * @return PasswordHomeController object
      */
     public static PasswordHomeController getPasswordHomeController() { return passwordHomeController; }
+
+    /**
+     * Retrieves the SidebarController
+     * @return SidebarController object
+     */
+    public static SidebarController getSidebarController() { return sidebarController; }
 
     /**
      * Retrieves the BaseDetailsController object
@@ -252,6 +298,12 @@ public class PasswordManagerApp extends Application {
     public static PreferencesController getPreferencesController() {
         return preferencesController;
     }
+
+    /**
+     * Retrieves the BreachCheckController object
+     * @return BreachCheckController object
+     */
+    public static BreachCheckController getBreachCheckController() { return breachCheckController; }
 
     /**
      * Entry point to the application

@@ -128,6 +128,9 @@ public class DatabasePasswordTable extends BasePasswordTable<DatabasePasswordEnt
                     TableColumn selectedColumn = position.getTableColumn();
                     if (!selectedColumn.getText().equals("Checkbox")) {
                         try {
+                            if(PasswordManagerApp.getCenterSet() != 1) {
+                                PasswordManagerApp.setDetailsAsCenter();
+                            }
                             BaseDetailsController controller = PasswordManagerApp.getPasswordDetailsController();
                             controller.setDatabaseDetailsBorderPane(t1, folder);
                         } catch (IOException | GeneralSecurityException e) {
@@ -137,6 +140,7 @@ public class DatabasePasswordTable extends BasePasswordTable<DatabasePasswordEnt
                 } catch (IndexOutOfBoundsException e) {
                     logger.error("Password table not loaded. Cannot create listener.");
                 }
+                passwordTableView.getSelectionModel().clearSelection();
             });
             logger.info("Successfully populated password list.");
             return this.passwordTableView;

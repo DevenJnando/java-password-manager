@@ -210,10 +210,10 @@ public class AddFolderController extends ErrorChecker implements Initializable {
         PasswordEntryFolder newFolder = new PasswordEntryFolder(folderTypeComboBox.getSelectionModel().getSelectedItem(),
                 folderNameTextField.getText());
         StoredPassSQLQueries.addNewPasswordFolderToDb(newFolder);
-        PasswordManagerApp.getPasswordHomeController().populatePasswordFolders();
+        PasswordManagerApp.getSidebarController().populatePasswordFolders();
         setFolderTypeEmptyFlag(false);
         setFolderNameEmptyFlag(false);
-        PasswordHomeController.getStage().close();
+        SidebarController.getStage().close();
     }
 
     /**

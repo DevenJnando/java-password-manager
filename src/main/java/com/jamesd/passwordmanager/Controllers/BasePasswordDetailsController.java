@@ -373,7 +373,7 @@ public abstract class BasePasswordDetailsController<T extends BaseWrapper> exten
      * Sets the parent folder where password entries will be loaded from
      * @param folder selected PasswordEntryFolder object
      */
-    protected void setParentFolder(PasswordEntryFolder folder) {
+    public void setParentFolder(PasswordEntryFolder folder) {
         parentFolder = folder;
     }
 
@@ -381,7 +381,7 @@ public abstract class BasePasswordDetailsController<T extends BaseWrapper> exten
      * Retrieves the parent folder where password entries will be laoded from
      * @return selected PasswordEntryFolder object
      */
-    protected PasswordEntryFolder getParentFolder() {
+    public PasswordEntryFolder getParentFolder() {
         return parentFolder;
     }
 }

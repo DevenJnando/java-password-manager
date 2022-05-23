@@ -105,7 +105,7 @@ public class DeleteFolderController implements Initializable {
      * to call the setSelectedFolder method once the user has made a selection
      */
     private void populateFolderChoiceBox() {
-        List<PasswordEntryFolder> folders = PasswordManagerApp.getPasswordHomeController().getPasswordEntryFolders();
+        List<PasswordEntryFolder> folders = PasswordManagerApp.getSidebarController().getPasswordEntryFolders();
         List<String> folderNames = new ArrayList<>();
         folders.forEach(o -> {
             folderNames.add(o.getPasswordFolder());
@@ -149,7 +149,7 @@ public class DeleteFolderController implements Initializable {
             try {
                 confirmAndDeleteFolder();
                 confirmationStage.close();
-                PasswordHomeController.getStage().close();
+                SidebarController.getStage().close();
             } catch (LoginException | ClassNotFoundException | IOException ex) {
                 ex.printStackTrace();
             }
@@ -175,11 +175,24 @@ public class DeleteFolderController implements Initializable {
         if(PasswordManagerApp.getLoggedInUser() != null) {
             StoredPassSQLQueries.deletePasswordFolderInDb(getSelectedFolder());
             logger.info("Folder " + getSelectedFolder().getPasswordFolder() + " deleted successfully");
-            PasswordManagerApp.getPasswordHomeController().populatePasswordFolders();
-            if(PasswordManagerApp.getPasswordHomeController().getSelectedFolder().equals(getSelectedFolder())) {
-                PasswordEntryFolder firstFolderInList = PasswordManagerApp.getPasswordHomeController().getPasswordEntryFolders().get(0);
-                PasswordManagerApp.getPasswordHomeController().populateWebsiteEntryPasswords(firstFolderInList);
-            }
+                if (PasswordManagerApp.getSidebarController().getSelectedFolder().equals(getSelectedFolder())) {
+                    PasswordEntryFolder firstFolderInList = PasswordManagerApp.getSidebarController().getPasswordEntryFolders().get(0);
+                    switch (firstFolderInList.getPasswordType()) {
+                        case "WebPassword":
+                            PasswordManagerApp.getPasswordHomeController().populateWebsiteEntryPasswords(firstFolderInList);
+                            break;
+                        case "DatabasePassword":
+                            PasswordManagerApp.getPasswordHomeController().populateDatabaseEntryPasswords(firstFolderInList);
+                            break;
+                        case "CreditCard":
+                            PasswordManagerApp.getPasswordHomeController().populateCreditDebitCardEntryPasswords(firstFolderInList);
+                            break;
+                        case "Document":
+                            PasswordManagerApp.getPasswordHomeController().populateDocumentEntryPasswords(firstFolderInList);
+                            break;
+                    }
+                }
+            PasswordManagerApp.getSidebarController().populatePasswordFolders();
             PasswordManagerApp.getPasswordDetailsController().setNoDetailsLoaded();
         } else {
             throw new LoginException("User is not logged in. Aborting process");

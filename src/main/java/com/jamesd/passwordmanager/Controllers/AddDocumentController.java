@@ -92,7 +92,7 @@ public class AddDocumentController extends NewPasswordController implements Init
     @Override
     protected Boolean hasErroneousFields() {
         boolean erroneousFields = false;
-        if(PasswordManagerApp.getPasswordHomeController().getBaseAddPasswordController().getSelectedFolder() == null) {
+        if(PasswordManagerApp.getSidebarController().getBaseAddPasswordController().getSelectedFolder() == null) {
             setErrorLabel(PASSWORD_FOLDER_NOT_SELECTED_ID, PASSWORD_FOLDER_NOT_SELECTED_ERROR_MSG, passwordVbox);
             setFolderNotSelectedFlag(true);
             erroneousFields = true;
@@ -108,18 +108,18 @@ public class AddDocumentController extends NewPasswordController implements Init
     @Override
     public void addNewPassword() throws ClassNotFoundException {
         String currentDate = LocalDate.now().toString();
-        StorageAccountManager.uploadBlob(selectedFile, PasswordManagerApp.getPasswordHomeController().getSelectedFolder().getPasswordFolder(), documentName);
-        StoredPassSQLQueries.addNewDocumentToDb(PasswordManagerApp.getPasswordHomeController()
+        StorageAccountManager.uploadBlob(selectedFile, PasswordManagerApp.getSidebarController().getSelectedFolder().getPasswordFolder(), documentName);
+        StoredPassSQLQueries.addNewDocumentToDb(PasswordManagerApp.getSidebarController()
                         .getBaseAddPasswordController().getSelectedFolder(),
                 documentName,
                 documentDescription.getText(),
                 PasswordManagerApp.getLoggedInUser().getUsername(),
-                PasswordManagerApp.getPasswordHomeController().getBaseAddPasswordController()
+                PasswordManagerApp.getSidebarController().getBaseAddPasswordController()
                         .getSelectedFolder()
                         .getPasswordFolder()
                 + "/" + documentName,
                 currentDate);
-        PasswordHomeController.getStage().close();
+        SidebarController.getStage().close();
         PasswordManagerApp.getPasswordHomeController().viewNewlyAddedPassword();
     }
 
@@ -130,7 +130,7 @@ public class AddDocumentController extends NewPasswordController implements Init
             if (hasErroneousFields()) {
                 logger.info("Erroneous fields are present. Fix them!");
             }
-            else if(PasswordManagerApp.getPasswordHomeController().getBaseAddPasswordController().getSelectedFolder() != null
+            else if(PasswordManagerApp.getSidebarController().getBaseAddPasswordController().getSelectedFolder() != null
                     && !documentName.isEmpty()){
                 addNewPassword();
             }

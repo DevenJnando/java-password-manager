@@ -120,6 +120,9 @@ public class DocumentTable extends BasePasswordTable<DocumentWrapper, DocumentEn
                     TableColumn selectedColumn = position.getTableColumn();
                     if (!selectedColumn.getText().equals("Checkbox")) {
                         try {
+                            if(PasswordManagerApp.getCenterSet() != 1) {
+                                PasswordManagerApp.setDetailsAsCenter();
+                            }
                             BaseDetailsController controller = PasswordManagerApp.getPasswordDetailsController();
                             controller.setDocumentDetailsBorderPane(t1, folder);
                         } catch (GeneralSecurityException | IOException e) {
@@ -129,6 +132,7 @@ public class DocumentTable extends BasePasswordTable<DocumentWrapper, DocumentEn
                 } catch (IndexOutOfBoundsException e) {
                     logger.error("Password table not loaded. Cannot create listener.");
                 }
+                documentTableView.getSelectionModel().clearSelection();
             });
             logger.info("Successfully populated document list.");
             return this.documentTableView;

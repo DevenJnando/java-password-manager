@@ -112,7 +112,7 @@ public class BaseAddPasswordController implements Initializable {
     private void populateFolderChoiceBox(String passwordType) {
 
         // Consolidates all in-memory folders and sorts them by password type
-        List<PasswordEntryFolder> folders = PasswordManagerApp.getPasswordHomeController().getPasswordEntryFolders();
+        List<PasswordEntryFolder> folders = PasswordManagerApp.getSidebarController().getPasswordEntryFolders();
         List<String> relevantFolderNames = new ArrayList<>();
         folders.forEach(o -> {
                     if(o.getPasswordType().equals(typeFinder(passwordType))) {
@@ -126,18 +126,18 @@ public class BaseAddPasswordController implements Initializable {
         folderChoiceBox.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             for(PasswordEntryFolder folder : folders) {
                 if(folder.getPasswordFolder().equals(newVal)) {
-                    PasswordManagerApp.getPasswordHomeController().getBaseAddPasswordController().setSelectedFolder(folder);
+                    PasswordManagerApp.getSidebarController().getBaseAddPasswordController().setSelectedFolder(folder);
                 }
             }
         });
 
-        PasswordManagerApp.getPasswordHomeController().getBaseAddPasswordController().setFolderChoiceBox(folderChoiceBox);
+        PasswordManagerApp.getSidebarController().getBaseAddPasswordController().setFolderChoiceBox(folderChoiceBox);
 
         if(this.folderChoiceBox.isDisabled()) {
             this.folderChoiceBox.setDisable(false);
         }
 
-        baseAddPasswordVbox.getChildren().set(3, PasswordManagerApp.getPasswordHomeController()
+        baseAddPasswordVbox.getChildren().set(3, PasswordManagerApp.getSidebarController()
                 .getBaseAddPasswordController().getFolderChoiceBox());
     }
 
@@ -170,9 +170,9 @@ public class BaseAddPasswordController implements Initializable {
         if(controllerClass != null) {
             FXMLLoader viewLoader = new FXMLLoader(controllerClass.getResource(viewToLoad));
             AnchorPane addPasswordAnchorPane = viewLoader.load();
-            PasswordManagerApp.getPasswordHomeController()
+            PasswordManagerApp.getSidebarController()
                     .getBaseAddPasswordController().setAddPasswordAnchorPane(addPasswordAnchorPane);
-            baseAddPasswordVbox.getChildren().set(4, PasswordManagerApp.getPasswordHomeController()
+            baseAddPasswordVbox.getChildren().set(4, PasswordManagerApp.getSidebarController()
                     .getBaseAddPasswordController().getAddPasswordAnchorPane());
         }
     }
