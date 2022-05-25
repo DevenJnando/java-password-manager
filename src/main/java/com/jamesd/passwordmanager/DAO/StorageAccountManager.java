@@ -33,7 +33,7 @@ import java.util.Locale;
 public class StorageAccountManager {
 
     private final static Logger logger = LoggerFactory.getLogger(StorageAccountManager.class);
-    private final static String accountName = PropertiesUtil.getProperties().getProperty("storageAccountName");
+    private final static String accountName = PropertiesUtil.getDatabaseProperties().getProperty("storageAccountName");
     private final static String SCRIPTS_DIR = System.getProperty("user.dir") + "/src/main/resources/com/jamesd/passwordmanager/scripts/";
     private static BlobContainerClient containerClient;
 

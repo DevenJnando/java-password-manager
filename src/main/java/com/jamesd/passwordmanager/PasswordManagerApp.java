@@ -125,6 +125,7 @@ public class PasswordManagerApp extends Application {
 
         // Show the scene containing the root layout.
         Scene scene = new Scene(rootLayout);
+        scene.getStylesheets().add(PasswordManagerApp.class.getResource("/com/jamesd/passwordmanager/css/light_mode.css").toExternalForm());
 
         mainStage.setScene(scene);
         mainStage.widthProperty().addListener((obj, oldValue, newValue) -> {
@@ -136,6 +137,16 @@ public class PasswordManagerApp extends Application {
         mainStage.setMinHeight(875);
         mainStage.setMinWidth(1085);
         mainStage.show();
+    }
+
+    public static void setLightMode() {
+        mainStage.getScene().getStylesheets().set(0, PasswordManagerApp.class.getResource
+                        ("/com/jamesd/passwordmanager/css/light_mode.css").toExternalForm());
+    }
+
+    public static void setDarkMode() {
+        mainStage.getScene().getStylesheets().set(0, PasswordManagerApp.class.getResource
+                        ("/com/jamesd/passwordmanager/css/dark_mode.css").toExternalForm());
     }
 
     /**

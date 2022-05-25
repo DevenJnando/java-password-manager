@@ -84,8 +84,8 @@ public class StoredPassSQLQueries extends SQLQueries {
      * @return CosmosClient object connected to the password database server
      */
     private static CosmosClient connectToStoredPassServer(String key) {
-        logger.info("Using Azure Cosmos DB endpoint: " + PropertiesUtil.getProperties().getProperty("storedPassDb"));
-        CosmosClient client = connect(PropertiesUtil.getProperties().getProperty("storedPassDb"), key);
+        logger.info("Using Azure Cosmos DB endpoint: " + PropertiesUtil.getDatabaseProperties().getProperty("storedPassDb"));
+        CosmosClient client = connect(PropertiesUtil.getDatabaseProperties().getProperty("storedPassDb"), key);
         return client;
     }
 
@@ -94,7 +94,7 @@ public class StoredPassSQLQueries extends SQLQueries {
      * @return CosmosDatabase object containing the password database
      */
     private static CosmosDatabase createIfNotExistsStoredPasswordsDb() {
-        String dbId = PropertiesUtil.getProperties().getProperty("storedPassDbName");
+        String dbId = PropertiesUtil.getDatabaseProperties().getProperty("storedPassDbName");
         return createIfNotExistsDb(getStoredPassClient(), dbId);
     }
 

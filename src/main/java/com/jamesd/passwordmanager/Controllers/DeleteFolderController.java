@@ -3,6 +3,7 @@ package com.jamesd.passwordmanager.Controllers;
 import com.jamesd.passwordmanager.DAO.StoredPassSQLQueries;
 import com.jamesd.passwordmanager.Models.HierarchyModels.PasswordEntryFolder;
 import com.jamesd.passwordmanager.PasswordManagerApp;
+import com.jamesd.passwordmanager.Utils.ThemeSetterUtil;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -161,7 +162,9 @@ public class DeleteFolderController implements Initializable {
                 new Label("Are you sure you want to delete " + getSelectedFolder().getPasswordFolder() + "?"),
                 confirmButton,
                 cancelButton);
-        confirmationStage.setScene(new Scene(confirmationVbox));
+        Scene confirmationScene = new Scene(confirmationVbox);
+        ThemeSetterUtil.setTheme(confirmationScene);
+        confirmationStage.setScene(confirmationScene);
         confirmationStage.showAndWait();
     }
 

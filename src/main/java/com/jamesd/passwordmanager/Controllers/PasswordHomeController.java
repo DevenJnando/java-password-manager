@@ -6,6 +6,7 @@ import com.jamesd.passwordmanager.Tables.CreditDebitCardTable;
 import com.jamesd.passwordmanager.Tables.DatabasePasswordTable;
 import com.jamesd.passwordmanager.Tables.DocumentTable;
 import com.jamesd.passwordmanager.Tables.WebsitePasswordTable;
+import com.jamesd.passwordmanager.Utils.ThemeSetterUtil;
 import com.jamesd.passwordmanager.Utils.TreeViewIteratorUtil;
 import com.jamesd.passwordmanager.Wrappers.CreditDebitCardEntryWrapper;
 import com.jamesd.passwordmanager.Wrappers.DatabasePasswordEntryWrapper;
@@ -105,6 +106,7 @@ public class PasswordHomeController implements Initializable {
                 .getResource("/com/jamesd/passwordmanager/views/delete-multiple-passwords-modal.fxml"));
         AnchorPane deletePasswordPane = deletePasswordLoader.load();
         Scene deletePasswordScene = new Scene(deletePasswordPane);
+        ThemeSetterUtil.setTheme(deletePasswordScene);
         deletePasswordStage.setScene(deletePasswordScene);
         deletePasswordStage.setTitle("Delete Passwords");
         deletePasswordStage.initOwner(PasswordManagerApp.getMainStage());

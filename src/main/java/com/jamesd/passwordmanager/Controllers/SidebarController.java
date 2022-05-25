@@ -1,14 +1,18 @@
 package com.jamesd.passwordmanager.Controllers;
 
 import com.jamesd.passwordmanager.DAO.StoredPassSQLQueries;
+import com.jamesd.passwordmanager.Models.CustomControls.SwitchButton;
 import com.jamesd.passwordmanager.Models.HierarchyModels.PasswordEntryFolder;
 import com.jamesd.passwordmanager.PasswordManagerApp;
+import com.jamesd.passwordmanager.Utils.PropertiesUtil;
+import com.jamesd.passwordmanager.Utils.ThemeSetterUtil;
 import com.jfoenix.controls.JFXButton;
 import de.jensd.fx.glyphs.GlyphsDude;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -44,6 +48,8 @@ public class SidebarController implements Initializable {
     private ImageView logo = new ImageView();
     @FXML
     private TitledPane folderMenuTitledPane = new TitledPane();
+    @FXML
+    private SwitchButton lightDarkMode = new SwitchButton();
     @FXML
     private Button homeButton = new Button();
     @FXML
@@ -81,8 +87,10 @@ public class SidebarController implements Initializable {
             e.printStackTrace();
         }
         setButtons();
+        ThemeSetterUtil.setThemeSwitch(lightDarkMode);
         setTitledPane();
         sidebar.getChildren().add(logo);
+        sidebar.getChildren().add(lightDarkMode);
         sidebar.getChildren().add(homeButton);
         sidebar.getChildren().add(folderMenuTitledPane);
         sidebar.getChildren().add(addPasswordButton);
@@ -142,7 +150,7 @@ public class SidebarController implements Initializable {
         passwordFolderSettingsVbox.getChildren().add(removePasswordFolderButton);
 
         // TitledPane created, ID set and passwordFolderSettingsVbox object added to it
-        TitledPane passwordFolderSettingsTitledPane = new TitledPane("Password Folder Settings", passwordFolderSettingsVbox);
+        TitledPane passwordFolderSettingsTitledPane = new TitledPane("Folder Settings", passwordFolderSettingsVbox);
         passwordFolderSettingsTitledPane.setId("folderSettingsTitlePane");
         passwordFolderSettingsTitledPane.setExpanded(false);
 
@@ -155,7 +163,7 @@ public class SidebarController implements Initializable {
      * @throws FileNotFoundException Throws FileNotFoundException if the logo cannot be located
      */
     public void setImageView() throws FileNotFoundException {
-        Image image = new Image(new FileInputStream("src/main/resources/com/jamesd/passwordmanager/icons/1password-logo-round.png"));
+        Image image = new Image(new FileInputStream("src/main/resources/com/jamesd/passwordmanager/icons/CrenandoPass.png"));
         ImageView logo = new ImageView(image);
         logo.setId("sidebarLogo");
         logo.setFitHeight(119);
@@ -176,6 +184,7 @@ public class SidebarController implements Initializable {
     public void setButtons() {
 
         // Buttons created
+        SwitchButton lightDarkMode = new SwitchButton();
         Button homeButton = new Button("Home");
         Button addPasswordButton = new Button("Add New Entry");
         Button breachCheckerButton = new Button("Breach Checker");
@@ -183,6 +192,10 @@ public class SidebarController implements Initializable {
         Button logoutButton = new Button("Logout");
 
         // ID, height and width set for each button
+        lightDarkMode.setId("lightDarkModeButton");
+        lightDarkMode.setPrefHeight(15);
+        lightDarkMode.setPrefWidth(215);
+        lightDarkMode.setPadding(new Insets(0,0,0,25));
         homeButton.setId("homeButton");
         homeButton.setPrefHeight(35);
         homeButton.setPrefWidth(215);
@@ -200,6 +213,25 @@ public class SidebarController implements Initializable {
         logoutButton.setPrefWidth(215);
 
         // Listeners added which call each button's relevant methods
+        lightDarkMode.switchOnProperty().addListener((obs, oldVal, newVal) -> {
+            if(!newVal) {
+                PropertiesUtil.getThemeProperties().setProperty("current_theme", "light");
+                try {
+                    PropertiesUtil.updateThemeProperties();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                PasswordManagerApp.setLightMode();
+            } else {
+                PropertiesUtil.getThemeProperties().setProperty("current_theme", "dark");
+                try {
+                    PropertiesUtil.updateThemeProperties();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                PasswordManagerApp.setDarkMode();
+            }
+        });
         homeButton.setOnAction(e -> {
             try {
                 backToHome();
@@ -237,6 +269,7 @@ public class SidebarController implements Initializable {
         });
 
         // Button objects assigned to button fields
+        this.lightDarkMode = lightDarkMode;
         this.homeButton = homeButton;
         this.addPasswordButton = addPasswordButton;
         this.breachCheckerButton = breachCheckerButton;
@@ -254,6 +287,7 @@ public class SidebarController implements Initializable {
                 .getResource("/com/jamesd/passwordmanager/views/add-folder-modal.fxml"));
         AnchorPane addPasswordFolderPane = addPasswordFolderLoader.load();
         Scene addPasswordFolderScene = new Scene(addPasswordFolderPane);
+        ThemeSetterUtil.setTheme(addPasswordFolderScene);
         addPasswordFolderStage.setScene(addPasswordFolderScene);
         addPasswordFolderStage.setTitle("Add New Folder");
         addPasswordFolderStage.initOwner(PasswordManagerApp.getMainStage());
@@ -272,6 +306,7 @@ public class SidebarController implements Initializable {
                 .getResource("/com/jamesd/passwordmanager/views/delete-folder-modal.fxml"));
         AnchorPane deletePasswordFolderPane = deletePasswordFolderLoader.load();
         Scene deletePasswordFolderScene = new Scene(deletePasswordFolderPane);
+        ThemeSetterUtil.setTheme(deletePasswordFolderScene);
         deletePasswordFolderStage.setScene(deletePasswordFolderScene);
         deletePasswordFolderStage.setTitle("Delete Folder");
         deletePasswordFolderStage.initOwner(PasswordManagerApp.getMainStage());
@@ -291,6 +326,7 @@ public class SidebarController implements Initializable {
         AnchorPane addPasswordPane = addPasswordLoader.load();
         PasswordManagerApp.getSidebarController().setBaseAddPasswordController(addPasswordLoader.getController());
         Scene addPasswordScene = new Scene(addPasswordPane);
+        ThemeSetterUtil.setTheme(addPasswordScene);
         addPasswordStage.setScene(addPasswordScene);
         addPasswordStage.setTitle("Add New Password");
         addPasswordStage.initOwner(PasswordManagerApp.getMainStage());
@@ -309,6 +345,7 @@ public class SidebarController implements Initializable {
                 .getResource("/com/jamesd/passwordmanager/views/logout.fxml"));
         AnchorPane logoutPane = logoutLoader.load();
         Scene logoutScene = new Scene(logoutPane);
+        ThemeSetterUtil.setTheme(logoutScene);
         logoutStage.setScene(logoutScene);
         logoutStage.setTitle("Logout");
         logoutStage.initOwner(PasswordManagerApp.getMainStage());
@@ -380,6 +417,7 @@ public class SidebarController implements Initializable {
                 }
             }
 
+            folderNavigationRoot.setExpanded(true);
             TreeView<String> navView = new TreeView<>(folderNavigationRoot);
 
             // Adds a listener to the TreeView object which triggers when a node in the TreeView is selected by the user

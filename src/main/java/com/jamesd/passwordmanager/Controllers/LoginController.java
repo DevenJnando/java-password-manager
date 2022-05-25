@@ -67,6 +67,8 @@ public class LoginController implements Initializable {
     @FXML
     private Label registerEmail = new Label();
     @FXML
+    private Label registerPhoneNumber = new Label();
+    @FXML
     private Label registerPassword = new Label();
     @FXML
     private Label registerConfirmPassword = new Label();
@@ -363,6 +365,7 @@ public class LoginController implements Initializable {
         Text user1 = GlyphsDude.createIcon(FontAwesomeIcon.USER, "1.5em");
         Text user2 = GlyphsDude.createIcon(FontAwesomeIcon.USER, "1.5em");
         Text email = GlyphsDude.createIcon(FontAwesomeIcon.ENVELOPE, "1.5em");
+        Text phone = GlyphsDude.createIcon(FontAwesomeIcon.PHONE, "1.5em");
         Text lock1 = GlyphsDude.createIcon(FontAwesomeIcon.LOCK, "1.5em");
         Text lock2 = GlyphsDude.createIcon(FontAwesomeIcon.LOCK, "1.5em");
         Text lock3 = GlyphsDude.createIcon(FontAwesomeIcon.LOCK, "1.5em");
@@ -371,6 +374,7 @@ public class LoginController implements Initializable {
         loginTabPassword.setGraphic(lock1);
         registerUsername.setGraphic(user2);
         registerEmail.setGraphic(email);
+        registerPhoneNumber.setGraphic(phone);
         registerPassword.setGraphic(lock2);
         registerConfirmPassword.setGraphic(lock3);
     }

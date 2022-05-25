@@ -51,7 +51,7 @@ public class MasterSQLQueries extends SQLQueries {
         masterClient = connectToMasterServer();
         masterDb = createIfNotExistsMasterDb();
         usersContainer = createIfNotExistUsersContainer
-                (PropertiesUtil.getProperties().getProperty("masterUserContainer"), "/email");
+                (PropertiesUtil.getDatabaseProperties().getProperty("masterUserContainer"), "/email");
     }
 
     /**
@@ -59,7 +59,7 @@ public class MasterSQLQueries extends SQLQueries {
      */
     public static void initialiseStoredPassKey() {
         storedPassKeyContainer = createIfNotExistUsersContainer
-                (PropertiesUtil.getProperties().getProperty("masterStoredPassKeyContainer"), "/key");
+                (PropertiesUtil.getDatabaseProperties().getProperty("masterStoredPassKeyContainer"), "/key");
     }
 
     /**
@@ -101,10 +101,10 @@ public class MasterSQLQueries extends SQLQueries {
      */
     private static HashMap<String, String> getParams() {
         HashMap<String, String> paramMap = new HashMap<>();
-        paramMap.put("subscriptionId", PropertiesUtil.getProperties().getProperty("subscriptionId").replaceAll("\"", ""));
-        paramMap.put("tenantId", PropertiesUtil.getProperties().getProperty("tenantId").replaceAll("\"", ""));
-        paramMap.put("resourceGroup", PropertiesUtil.getProperties().getProperty("resourceGroup").replaceAll("\"", ""));
-        paramMap.put("accountName", PropertiesUtil.getProperties().getProperty("accountName").replaceAll("\"", ""));
+        paramMap.put("subscriptionId", PropertiesUtil.getDatabaseProperties().getProperty("subscriptionId").replaceAll("\"", ""));
+        paramMap.put("tenantId", PropertiesUtil.getDatabaseProperties().getProperty("tenantId").replaceAll("\"", ""));
+        paramMap.put("resourceGroup", PropertiesUtil.getDatabaseProperties().getProperty("resourceGroup").replaceAll("\"", ""));
+        paramMap.put("accountName", PropertiesUtil.getDatabaseProperties().getProperty("accountName").replaceAll("\"", ""));
         return paramMap;
     }
 
@@ -158,17 +158,17 @@ public class MasterSQLQueries extends SQLQueries {
      * @throws IOException Throws IOException if the HttpResponse body from the azure function cannot be read
      */
     private static CosmosClient connectToMasterServer() throws IOException {
-        logger.info("Using Azure Cosmos DB endpoint: " + PropertiesUtil.getProperties().getProperty("masterPassDb"));
+        logger.info("Using Azure Cosmos DB endpoint: " + PropertiesUtil.getDatabaseProperties().getProperty("masterPassDb"));
         logger.info("Unlocking...");
         String body = getParamsString(getParams());
         StringEntity entity = new StringEntity(body, ContentType.APPLICATION_FORM_URLENCODED);
         HttpClient client = HttpClientBuilder.create().build();
-        HttpPost postRequest = new HttpPost(PropertiesUtil.getProperties().getProperty("dbFunctionUrl").replaceAll("\"", ""));
+        HttpPost postRequest = new HttpPost(PropertiesUtil.getDatabaseProperties().getProperty("dbFunctionUrl").replaceAll("\"", ""));
         postRequest.setEntity(entity);
         HttpResponse response = client.execute(postRequest);
         String key = readResponse(response).split(":")[1];
         logger.info("Successfully retrieved master key.");
-        return connect(PropertiesUtil.getProperties().getProperty("masterPassDb"), key);
+        return connect(PropertiesUtil.getDatabaseProperties().getProperty("masterPassDb"), key);
     }
 
     /**
@@ -176,7 +176,7 @@ public class MasterSQLQueries extends SQLQueries {
      * @return CosmosDatabase object of the master database
      */
     private static CosmosDatabase createIfNotExistsMasterDb() {
-        String dbId = PropertiesUtil.getProperties().getProperty("masterPassDbName");
+        String dbId = PropertiesUtil.getDatabaseProperties().getProperty("masterPassDbName");
         return createIfNotExistsDb(getMasterClient(), dbId);
     }
 
