@@ -37,33 +37,29 @@ For presentation and processing of business logic and MVC architecture has been 
 <br/>
 *Add/remove/view/edit database passwords
 <br/>
-*Update a user's master password
-<br/>
-*Change timescale before a password reminder is given
-<br/>
-
-## Features to come
-
-<br/>
-*Unit tests need written for controller methods (Shame on me! Should have written those much sooner!) - dev benefit
-<br/>
 *Add/remove/view/edit credit/debit card entries
 <br/>
 *Add/remove/view/edit passport entries
 <br/>
 *Add/remove/view/edit documents and files
 <br/>
+*Update a user's master password
+<br/>
+*Change timescale before a password reminder is given
+<br/>
 *Dynamically log in with either email or username
-<br/>
-*Allow user to enter notes on their passwords/sensitive data
-<br/>
-*Improvements to UI for ease of use, aesthetics + more user feedback
 <br/>
 *Replace placeholder 1password logo with a logo of my own
 <br/>
-*Billing system needs implemented (even if I never get this in a sellable state, it's still a cloud based app!)
-<br/>
 *Vulnerability/password breach scans
+<br/>
+
+## Features to come
+
+<br/>
+*Allow user to enter notes on their passwords/sensitive data
+<br/>
+*Billing system needs implemented (even if I never get this in a sellable state, it's still a cloud based app!)
 <br/>
 *Implement geo-redundancy in the form of geography selection
 <br/>
